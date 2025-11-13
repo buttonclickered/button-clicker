@@ -1,38 +1,18 @@
-
-<html><head>
-   <meta name="description" content="This is a simple online game where you can click a button to get a form of currency. With the currency, you can buy upgrades like: "+1 click per click" or "+2 click per second" which can automate or help you on your journey to get as many clicks as possible! One of the newest feature is that there is a "Double or nothing" where you can enter a amount of clicks and there is a 50/50 to get twice the amount of clicks or to lose them! Now that you know how to play, it's time to start clicking! Good luck on your journey!">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google-site-verification" content="google078312ee2d77f1e8.html" />
-  <link rel="stylesheet" href="style.css">
-  <title>Button Clicker</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-</head>
-<body>
-  <div id="header">0</div>
-  <br> <br>
-  <button id="clickme" onclick="Add()">Click me</button>
-  <div id="upgrade-container">
-    <button class="upgrade-btn" id="onepsec" onclick="addsec(1,10)">+1 Per Second $10</button>
-    <button class="upgrade-btn" id="oneclick" onclick="addclick(1,25)">+1 Per Click $25</button>
-    <button class="upgrade-btn" id="twoclick" onclick="addclick(2,45)">+2 Per Click $45</button>
-    <button class="upgrade-btn" id="twopsec" onclick="addsec(2,50)"> +2 Per Second $50</button>
-    <button class="upgrade-btn" id="threeclick" onclick="addclick(3,120)"> +3 Per Click $120</button>
-    <button class="upgrade-btn" id="fiveppsec" onclick="addsec(5,500)"> +5 Per Second $500</button>
-    <button class="upgrade-btn" id="tenpsec" onclick="addsec(10,2000)"> +10 Per Second $2000</button>
-        <button class="upgrade-btn" id="fiveclick" onclick="addclick(5,1500)"> +5 Per Click $1500</button>
-        <button class="upgrade-btn" id="twentypsec" onclick="addsec(20,5000)"> +20 Per Second $5000</button>
-    
-  </div>
-<div id="APS">Money Per Second: 0</div>
-<div id="CPS">Money Per Click: 1</div>
-<div id="upgrades">Upgrades:</div>
-<button id="rollbutton" onclick="roll()">Double Or Nothing</button>
-<div  placeholder="Enter bet amount..." contenteditable="true" id="amount"></div>
-<div id="buttonclickertitle">ButtonClickered.io</div>
-<button id="circle" onclick="info()"> i </button>
-<button id="infobox" onclick="closeinfo()"></button>
-  <div id="notification" style="display:none;"></div>
-  <script src="script.js"></script>
-
-
-</body></html>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Button Clicker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <h1 style="font-size: 75px; text-align: center;">Button Clicker</h1>
+    <h2 style="text-align: center;">This is a website with all of my projects I made for fun, so choose one and start playing I guess...</h2>
+    <a href="Buttonclickered/button.html">  
+    <img src="buttonclickerthumb.png" alt="Button Clicker" class="thumb">
+    </a>
+    <h1 style="bottom: 600px;"> ButtonClickered</h1>
+  </body>
+</html>
