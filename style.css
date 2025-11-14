@@ -2,14 +2,13 @@ body {
 background-color: #fffc4f;
 }
 
-/* Thumbnail image styling */
+
 .thumb {
-	display: block;
-	margin: 0 auto;
-	transform: scale(0.3);
-	position: relative;
-	top: -200px; /* moves image up 100px */
-    right: 450px;
-	max-width: 100%;
-	height: auto;
+  display: block;
+  margin: 0 auto;
+  width: 40%;           /* scales to 20% of original width */
+  height: auto;         /* maintains aspect ratio */
+  position: relative;
+  top: 0px;
+  max-width: 100%;
 }
