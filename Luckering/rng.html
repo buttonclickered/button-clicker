@@ -28,9 +28,23 @@
   <p class="rolls">Epic - 4% (4 points)</p>
   <p class="rolls">Legendary - 1% (5 points)hj</p>
 
+  <h1 id="amountrolleds" > All Time Rolled: </h1>
+  <h2 class="amountrolled" id="commonrolled">Common: 0</h2>
+  <h2 class="amountrolled" id="uncommonrolled">Uncommon: 0</h2>
+  <h2 class="amountrolled" id="rarerolled">Rare: 0</h2>
+  <h2 class="amountrolled" id="epicrolled">Epic: 0</h2>
+  <h2 class="amountrolled" id="legendaryrolled">Legendary: 0</h2>
   <button class="upgrade" id="as1" onclick="addauto(1, 45)">1 CPS Autoclicker (45 points)</button>
 
     <script src="rng.js" defer></script>
+    <script>
+      // Check if script loaded and functions are available
+      window.addEventListener('load', function() {
+        if (typeof roll !== 'function') {
+          document.body.innerHTML += '<div style="color: red; font-size: 20px; margin: 20px; padding: 20px; background: #ffcccc; border: 2px solid red;">ERROR: roll() function not found. Script may not have loaded.</div>';
+        }
+      });
+    </script>
 </body>
 
 </html>

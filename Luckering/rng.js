@@ -1,3 +1,4 @@
+console.log("Script loaded");
 
 const result = document.getElementById('result');
 const rolledsEl = document.getElementById('rolleds');
@@ -6,6 +7,18 @@ const cps = document.getElementById('CPS');
 let points = 0;
 
 let autoclick = 0; 
+
+let commonRolled = 0;
+let uncommonRolled = 0;
+let rareRolled = 0;
+let epicRolled = 0;
+let legendaryRolled = 0;
+
+const commonRolledEl = document.getElementById('commonrolled');
+const uncommonRolledEl = document.getElementById('uncommonrolled');
+const rareRolledEl = document.getElementById('rarerolled');
+const epicRolledEl = document.getElementById('epicrolled');
+const legendaryRolledEl = document.getElementById('legendaryrolled');
 
 let common = 1;
 let uncommon = 2;
@@ -65,18 +78,28 @@ function roll() {
 if (randomNumber <= 50) {
     result.innerHTML = 'You got: ' + "Common";
     points += common;
+    commonRolled += 1;
+    commonRolledEl.innerHTML = 'Common: ' + commonRolled;
 } else if (randomNumber > 50 && randomNumber <= 75) {
     result.innerHTML = 'You got: ' + "Uncommon";
     points += uncommon;
+    uncommonRolled += 1;
+    uncommonRolledEl.innerHTML = 'Uncommon: ' + uncommonRolled;
 } else if (randomNumber > 75 && randomNumber <= 90) {
     result.innerHTML = 'You got: ' + "‌​‌​‌​‌​‌​Rare";
     points += rare;
+    rareRolled += 1;
+    rareRolledEl.innerHTML = 'Rare: ' + rareRolled;
 } else if (randomNumber > 90 && randomNumber <= 99) {
     result.innerHTML = 'You got: ' + "Epic";
     points += epic;
+    epicRolled += 1;
+    epicRolledEl.innerHTML = 'Epic: ' + epicRolled;
 } else if (randomNumber === 100) {
     result.innerHTML = 'You got: ' + "Legendary";
     points += legendary;
+    legendaryRolled += 1;
+    legendaryRolledEl.innerHTML = 'Legendary: ' + legendaryRolled;
 }
     document.getElementById('money').innerHTML = 'Points: ' + points;
     // persist immediately after each roll
@@ -88,6 +111,11 @@ function saveState() {
         localStorage.setItem('points', String(points));
         localStorage.setItem('rollCount', String(rollCount));
         localStorage.setItem('autoclick', String(autoclick));
+        localStorage.setItem('commonRolled', String(commonRolled));
+        localStorage.setItem('uncommonRolled', String(uncommonRolled));
+        localStorage.setItem('rareRolled', String(rareRolled));
+        localStorage.setItem('epicRolled', String(epicRolled));
+        localStorage.setItem('legendaryRolled', String(legendaryRolled));
     } catch (e) {
         console.warn('Could not save state to localStorage', e);
     }
@@ -98,6 +126,17 @@ function loadState() {
         const p = localStorage.getItem('points');
         const r = localStorage.getItem('rollCount');
         const a = localStorage.getItem('autoclick');
+        commonRolled = Number(localStorage.getItem('commonRolled')) || 0;
+        uncommonRolled = Number(localStorage.getItem('uncommonRolled')) || 0;
+        rareRolled = Number(localStorage.getItem('rareRolled')) || 0;
+        epicRolled = Number(localStorage.getItem('epicRolled')) || 0;
+        legendaryRolled = Number(localStorage.getItem('legendaryRolled')) || 0;
+
+        commonRolledEl.innerHTML = 'Common: ' + commonRolled;
+        uncommonRolledEl.innerHTML = 'Uncommon: ' + uncommonRolled;
+        rareRolledEl.innerHTML = 'Rare: ' + rareRolled;
+        epicRolledEl.innerHTML = 'Epic: ' + epicRolled;
+        legendaryRolledEl.innerHTML = 'Legendary: ' + legendaryRolled;
         if (a !== null) autoclick = Number(a) || 0;
         if (p !== null) points = Number(p) || 0;
         if (r !== null) rollCount = Number(r) || 0;
