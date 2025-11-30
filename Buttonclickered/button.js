@@ -38,12 +38,6 @@ function startPerSecond() {
   }, 1000);
 }
 
-// Update APS and CPS display every 100ms for faster feedback
-setInterval(() => {
-  APS.textContent = 'Money Per Second: ' + persec;
-  CPS.textContent = 'Money Per Click: ' + perclick;
-}, 100);
-
 function showNotification(message) {
   const notification = document.getElementById('notification');
   notification.textContent = message;
