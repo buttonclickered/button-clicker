@@ -66,11 +66,21 @@ function secureRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 function roll() {
+    // enforce cooldown: disable button for `cooldown` seconds to prevent spamming
+    const rngButton = document.getElementById('roll');
+    if (!rngButton) return;
+    if (rngButton.disabled) return; // still cooling down
+    rngButton.disabled = true;
+    rngButton.style.opacity = '0.6';
+    setTimeout(() => {
+        rngButton.disabled = false;
+        rngButton.style.opacity = '1';
+    }, cooldown * 1000);
+
     // increment persisted roll count and update UI
     rollCount += 1;
     if (rolledsEl) rolledsEl.innerHTML = 'Rolls: ' + rollCount;
 
-    const rngButton = document.getElementById('roll');
     console.log("Rolled!");
 
     show(result);
