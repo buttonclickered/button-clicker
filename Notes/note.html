@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../style.css">
+        <title>Notes</title>
+    </head>
+    <body>
+        <h1>Notes</h1>
+        <input type="text" id="note-title" placeholder="Note Title">
+        <br>
+        <br>
+        <textarea id="note-content" placeholder="Write your note here..." rows="10"></textarea>
+        <br>
+        <button id="load-note" onclick="loadNote()">Load Note</button>
+        <button id="save-note" onclick="saveNote()">Save Note</button>
+        <br>
+        <input type="text" id="load-title" placeholder="Title of Note to Load">
+<br>
+<br>
+
+<h2> About</h2>
+
+<h5> This is a simple, useful notes taking website that allows you to save and load your notes easily.</h3>
+<h5> Since it's using <i>localStorage</i>, your notes are kept completely private and stored on your browser, so nobody can see your notes. Not me, not Chrome, nobody</h3>
+
+<h2> Instructions: </h2>
+
+<h5> First, name your note in the "Note Title" field. </h3>
+<h5> Write your note in the text area provided. </h3>
+<h5> To save your note, click the "Save Note" button. </h3>
+<h5> To load a previously saved note, enter the title of the note in the "Title of Note to Load" field and click the "Load Note" button. </h3>
+
+    </body>
+
+    <script src="note.js"></script>
+
+</html>
