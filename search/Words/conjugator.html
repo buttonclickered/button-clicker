@@ -244,18 +244,88 @@ for (const key of Object.keys(irregulars)) {
   strippedMap[stripAccents(key)] = key;
 }
 
+// Build reverse map: conjugated form (stripped) -> infinitive
+const reverseMap = {};
+for (const [infinitive, verbData] of Object.entries(irregulars)) {
+  for (const form of [...Object.values(verbData.présent), ...Object.values(verbData.pc)]) {
+    const key = stripAccents(form.toLowerCase());
+    if (!reverseMap[key]) reverseMap[key] = [];
+    if (!reverseMap[key].includes(infinitive)) reverseMap[key].push(infinitive);
+    // Also index just the first word (auxiliary) of multi-word forms
+    const first = key.split(" ")[0];
+    if (first !== key) {
+      if (!reverseMap[first]) reverseMap[first] = [];
+      if (!reverseMap[first].includes(infinitive)) reverseMap[first].push(infinitive);
+    }
+  }
+}
+
+// Try to find the infinitive of a regular conjugated form
+function deconjugateRegular(input) {
+  // Ordered: longer endings first to avoid greedy mismatches
+  const erTry = ["aient","aient","issent","erent","ates","ames","ions","iez","ons","ais","ait","ez","es","ai","as","a","e",""];
+  // Try -er verb
+  for (const end of ["aient","erent","ates","ames","ions","iez","ons","ais","ait","ez","es","ai","as","a","e"]) {
+    if (input.endsWith(end)) {
+      const stem = input.slice(0, input.length - end.length);
+      if (stem.length >= 2) {
+        const cand = stem + "er";
+        if (regularConj(cand)) return cand;
+      }
+    }
+  }
+  // Try -ir verb (finir-type)
+  for (const end of ["issaient","issions","issiez","issons","issez","issent","issais","issait","is","it","i"]) {
+    if (input.endsWith(end)) {
+      const stem = input.slice(0, input.length - end.length);
+      if (stem.length >= 2) {
+        const cand = stem + "ir";
+        if (regularConj(cand)) return cand;
+      }
+    }
+  }
+  // Try -re verb
+  for (const end of ["aient","itions","itiez","ons","ais","ait","ez","is","it","s"]) {
+    if (input.endsWith(end)) {
+      const stem = input.slice(0, input.length - end.length);
+      if (stem.length >= 2) {
+        const cand = stem + "re";
+        if (regularConj(cand)) return cand;
+      }
+    }
+  }
+  return null;
+}
+
 function resolveVerb(input) {
-  // Exact match first
-  if (irregulars[input]) return { canonical: input, data: irregulars[input] };
-  // Try stripped match against irregulars
   const stripped = stripAccents(input);
+
+  // 1. Exact match against known infinitives
+  if (irregulars[input]) return { canonical: input, data: irregulars[input], foundAs: null };
   if (strippedMap[stripped]) {
     const canonical = strippedMap[stripped];
-    return { canonical, data: irregulars[canonical] };
+    return { canonical, data: irregulars[canonical], foundAs: null };
   }
-  // Fall back to regular conjugation using the input as-is
-  const data = regularConj(input);
-  return data ? { canonical: input, data } : null;
+
+  // 2. Direct regular infinitive
+  const directRegular = regularConj(input);
+  if (directRegular) return { canonical: input, data: directRegular, foundAs: null };
+
+  // 3. Reverse lookup — is the input a known conjugated form of an irregular?
+  const hits = reverseMap[stripped];
+  if (hits && hits.length > 0) {
+    const canonical = hits[0];
+    return { canonical, data: irregulars[canonical], foundAs: input };
+  }
+
+  // 4. Try to deconjugate as a regular verb
+  const regInfinitive = deconjugateRegular(stripped);
+  if (regInfinitive) {
+    const data = regularConj(regInfinitive);
+    return { canonical: regInfinitive, data, foundAs: input };
+  }
+
+  return null;
 }
 
 function conjugate() {
@@ -268,10 +338,12 @@ function conjugate() {
   if (!resolved) { err.style.display="block"; out.style.display="none"; return; }
   err.style.display = "none";
 
-  const { canonical, data } = resolved;
+  const { canonical, data, foundAs } = resolved;
 
   document.getElementById("resultVerb").textContent = canonical;
-  const note = [data.meaning, data.type + (data.type.includes("regular") && !irregulars[canonical] ? " (verify irregular forms)" : "")].filter(Boolean).join(" · ");
+  const typeNote = data.type + (data.type.includes("regular") && !irregulars[canonical] ? " · verify irregular forms" : "");
+  const foundNote = foundAs ? `recognized from "${foundAs}"` : "";
+  const note = [data.meaning, typeNote, foundNote].filter(Boolean).join(" · ");
   document.getElementById("resultNote").textContent = note;
 
   const fp = Object.fromEntries(Object.entries(allerP).map(([p,a])=>[p,`${a} ${canonical}`]));
