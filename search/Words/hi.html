@@ -12,67 +12,11 @@
         .verb-form { color: #007bff; font-weight: bold; }
         #status { font-size: 12px; color: orange; margin-bottom: 10px; text-align: center; font-weight: bold; }
     </style>
-
-    <script>
-        // 1. Move functions to the top so the browser knows they exist early
-        function initApp() {
-            const status = document.getElementById('status');
-            const input = document.getElementById('verbInput');
-            
-            if (window.Lefff) {
-                status.textContent = "✅ Ready! 9,000+ verbs loaded.";
-                status.style.color = "green";
-                input.disabled = false;
-                input.placeholder = "Ex: être, manger, finir, aller...";
-                updateConjugation(); // Initial run
-            } else {
-                handleError();
-            }
-        }
-
-        function handleError() {
-            const status = document.getElementById('status');
-            status.textContent = "❌ Error: Dictionary failed to load.";
-            status.style.color = "red";
-        }
-
-        function updateConjugation() {
-            if (!window.Lefff || !window.FrenchVerbs) return;
-            
-            const input = document.getElementById('verbInput');
-            const select = document.getElementById('tenseSelect');
-            const resultsDiv = document.getElementById('results');
-
-            const raw = input.value.trim().toLowerCase() || "manger";
-            const cleanStr = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-            const userInput = cleanStr(raw);
-
-            // Fuzzy match: find the real verb key (with accents)
-            const realVerb = Object.keys(window.Lefff).find(v => cleanStr(v) === userInput) || raw;
-            
-            const tense = select.value;
-            const pronouns = ['Je', 'Tu', 'Il', 'Nous', 'Vous', 'Ils'];
-            
-            let html = "";
-            try {
-                for (let i = 0; i < 6; i++) {
-                    const form = FrenchVerbs.getConjugation(window.Lefff, realVerb, tense, i);
-                    html += `<div class="row">
-                        <span class="pronoun">${pronouns[i]}</span>
-                        <span class="verb-form">${form}</span>
-                    </div>`;
-                }
-                resultsDiv.innerHTML = html;
-            } catch (e) {
-                resultsDiv.innerHTML = "<p style='color:red; text-align:center;'>Verb not found.</p>";
-            }
-        }
-    </script>
 </head>
 <body>
 
 <div class="card">
-    <div id="status">⏳ Downloading Dictionary (9,000+ verbs)...</div>
+    <div id="status">⏳ Loading Dictionary...</div>
     <input type="text" id="verbInput" placeholder="Loading..." disabled oninput="updateConjugation()">
     
     <select id="tenseSelect" onchange="updateConjugation()">
@@ -85,14 +29,75 @@
     <div id="results"></div>
 </div>
 
-<!-- Load the Logic Engine first -->
+<!-- 1. Load the Logic Engine (Standard Script) -->
 <script src="https://cdn.jsdelivr.net"></script>
 
-<!-- Load the Data last (this calls initApp once finished) -->
-<script 
-    src="https://cdn.jsdelivr.net" 
-    onload="initApp()" 
-    onerror="handleError()">
+<script>
+    // 2. Logic to manually load the Dictionary since the .js tag failed
+    let Lefff = null;
+
+    async function loadDictionary() {
+        const status = document.getElementById('status');
+        const input = document.getElementById('verbInput');
+        
+        // Try to fetch the JSON data directly
+        const url = 'https://cdn.jsdelivr.net';
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Network error");
+            
+            Lefff = await response.json();
+            window.Lefff = Lefff; // Assign to global for the engine
+
+            status.textContent = "✅ Ready! 9,000+ verbs loaded.";
+            status.style.color = "green";
+            input.disabled = false;
+            input.placeholder = "Ex: être, manger, finir...";
+            updateConjugation(); 
+        } catch (e) {
+            status.textContent = "❌ Error: Dictionary blocked. Use 'Go Live'.";
+            status.style.color = "red";
+            console.error("Dictionary Load Failed:", e);
+        }
+    }
+
+    function updateConjugation() {
+        if (!window.Lefff || !window.FrenchVerbs) return;
+        
+        const input = document.getElementById('verbInput');
+        const select = document.getElementById('tenseSelect');
+        const resultsDiv = document.getElementById('results');
+
+        const raw = input.value.trim().toLowerCase() || "manger";
+        
+        // Strip accents for fuzzy matching (etre -> être)
+        const cleanStr = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const userInput = cleanStr(raw);
+
+        // Find matching verb key in database
+        const realVerb = Object.keys(window.Lefff).find(v => cleanStr(v) === userInput) || raw;
+        
+        const tense = select.value;
+        const pronouns = ['Je', 'Tu', 'Il', 'Nous', 'Vous', 'Ils'];
+        
+        let html = "";
+        try {
+            for (let i = 0; i < 6; i++) {
+                const form = FrenchVerbs.getConjugation(window.Lefff, realVerb, tense, i);
+                html += `<div class="row">
+                    <span class="pronoun">${pronouns[i]}</span>
+                    <span class="verb-form">${form}</span>
+                </div>`;
+            }
+            resultsDiv.innerHTML = html;
+        } catch (e) {
+            resultsDiv.innerHTML = "<p style='color:red; text-align:center;'>Verb not found.</p>";
+        }
+    }
+
+    // Start loading immediately
+    loadDictionary();
 </script>
 
 </body>
