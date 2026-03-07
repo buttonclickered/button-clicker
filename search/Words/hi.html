@@ -3,59 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <title>Conjugueur Français</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        #status { font-size: 12px; color: orange; margin-bottom: 10px; text-align: center; font-weight: bold; }
-        .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .verb-form { color: #007bff; font-weight: bold; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink: #1a1a2e;
+            --cream: #faf8f3;
+            --gold: #c9a84c;
+            --gold-light: #f0e4be;
+            --muted: #7a7a8a;
+            --border: #e0dbd0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+            background-image: radial-gradient(circle at 20% 20%, #f5efe0 0%, transparent 50%),
+                              radial-gradient(circle at 80% 80%, #ede8f5 0%, transparent 50%);
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 2px 40px rgba(0,0,0,0.06), 0 0 0 1px rgba(201,168,76,0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--ink);
+            padding: 24px 28px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::after {
+            content: '◆';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gold);
+            font-size: 28px;
+            opacity: 0.4;
+        }
+
+        .card-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 400;
+            color: white;
+            letter-spacing: 0.02em;
+        }
+
+        .card-header p {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .card-body { padding: 24px 28px; }
+
+        .field { margin-bottom: 16px; }
+
+        label {
+            display: block;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            font-size: 15px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink);
+            background: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: none;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-light);
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7a8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+            cursor: pointer;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0;
+        }
+
+        #results { min-height: 60px; }
+
+        .status {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 13px;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .status.loading { color: var(--gold); }
+        .status.error { color: #c0392b; font-style: normal; }
+
+        .conjugation-table { width: 100%; }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0ede6;
+        }
+
+        .row:last-child { border-bottom: none; }
+
+        .pronoun {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            width: 70px;
+            flex-shrink: 0;
+        }
+
+        .verb-form {
+            font-family: 'Playfair Display', serif;
+            font-size: 17px;
+            color: var(--ink);
+            text-align: right;
+        }
+
+        .tense-label {
+            font-family: 'Playfair Display', serif;
+            font-size: 11px;
+            font-style: italic;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 14px;
+            letter-spacing: 0.04em;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--gold-light);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
+
 <div class="card">
-    <div id="status">⏳ Chargement...</div>
-    <input type="text" id="verbInput" placeholder="Ex: manger, être..." value="manger" disabled>
-    <select id="tenseSelect">
-        <option value="PRESENT">Présent</option>
-        <option value="FUTUR">Futur</option>
-        <option value="IMPARFAIT">Imparfait</option>
-        <option value="CONDITIONNEL_PRESENT">Conditionnel</option>
-        <option value="SUBJONCTIF_PRESENT">Subjonctif</option>
-    </select>
-    <div id="results"></div>
+    <div class="card-header">
+        <h1>Conjugueur</h1>
+        <p>Verbes français</p>
+    </div>
+    <div class="card-body">
+        <div class="field">
+            <label>Infinitif</label>
+            <input type="text" id="verbInput" placeholder="manger, être, aller…" value="manger">
+        </div>
+        <div class="field">
+            <label>Temps</label>
+            <select id="tenseSelect">
+                <option value="présent de l'indicatif">Présent</option>
+                <option value="imparfait de l'indicatif">Imparfait</option>
+                <option value="futur simple">Futur simple</option>
+                <option value="passé composé">Passé composé</option>
+                <option value="conditionnel présent">Conditionnel présent</option>
+                <option value="subjonctif présent">Subjonctif présent</option>
+                <option value="impératif présent">Impératif présent</option>
+            </select>
+        </div>
+        <div class="divider"></div>
+        <div id="results">
+            <div class="status">Entrez un verbe pour commencer.</div>
+        </div>
+    </div>
 </div>
 
-<script type="module">
-    import { getConjugation } from 'https://cdn.jsdelivr.net/npm/french-verbs@latest/dist/index.mjs';
-    import Lefff from 'https://cdn.jsdelivr.net/npm/french-verbs-lefff@latest/dist/conjugations.mjs';
+<script>
+    let debounceTimer;
+    let currentRequest = null;
 
-    const status = document.getElementById('status');
     const input = document.getElementById('verbInput');
+    const tenseSelect = document.getElementById('tenseSelect');
+    const results = document.getElementById('results');
 
-    status.textContent = '✅ Prêt !';
-    status.style.color = 'green';
-    input.disabled = false;
-
-    function update() {
-        const verb = input.value.trim().toLowerCase() || 'manger';
-        const tense = document.getElementById('tenseSelect').value;
-        const pronouns = ['Je', 'Tu', 'Il/Elle', 'Nous', 'Vous', 'Ils/Elles'];
-        let html = '';
-        try {
-            for (let i = 0; i < 6; i++) {
-                const form = getConjugation(Lefff, verb, tense, i);
-                html += `<div class="row"><span>${pronouns[i]}</span><span class="verb-form">${form}</span></div>`;
-            }
-        } catch (e) {
-            html = '<div style="color:red;text-align:center;padding:10px">Verbe non trouvé.</div>';
-        }
-        document.getElementById('results').innerHTML = html;
+    function setLoading() {
+        results.innerHTML = `<div class="status loading"><span class="spinner"></span>Conjugaison en cours…</div>`;
     }
 
-    input.addEventListener('input', update);
-    document.getElementById('tenseSelect').addEventListener('change', update);
-    update();
+    function setError(msg) {
+        results.innerHTML = `<div class="status error">⚠ ${msg}</div>`;
+    }
+
+    async function conjugate() {
+        const verb = input.value.trim();
+        const tense = tenseSelect.value;
+
+        if (!verb) {
+            results.innerHTML = `<div class="status">Entrez un verbe pour commencer.</div>`;
+            return;
+        }
+
+        setLoading();
+
+        const prompt = `Conjuguez le verbe français "${verb}" au ${tense}.
+Répondez UNIQUEMENT avec un objet JSON valide, sans texte avant ou après, sans balises markdown.
+Format exact:
+{"pronoms":["Je","Tu","Il/Elle","Nous","Vous","Ils/Elles"],"formes":["forme1","forme2","forme3","forme4","forme5","forme6"]}
+Si le verbe n'existe pas, répondez: {"erreur":"Verbe inconnu"}`;
+
+        try {
+            const response = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "claude-sonnet-4-20250514",
+                    max_tokens: 1000,
+                    messages: [{ role: "user", content: prompt }]
+                })
+            });
+
+            const data = await response.json();
+            const text = data.content?.map(b => b.text || '').join('') || '';
+            const clean = text.replace(/```json|```/g, '').trim();
+            const parsed = JSON.parse(clean);
+
+            if (parsed.erreur) {
+                setError(parsed.erreur);
+                return;
+            }
+
+            const tenseName = tenseSelect.options[tenseSelect.selectedIndex].text;
+            let html = `<div class="tense-label fade-in">${tenseName}</div><div class="conjugation-table fade-in">`;
+            for (let i = 0; i < parsed.formes.length; i++) {
+                html += `<div class="row">
+                    <span class="pronoun">${parsed.pronoms[i]}</span>
+                    <span class="verb-form">${parsed.formes[i]}</span>
+                </div>`;
+            }
+            html += `</div>`;
+            results.innerHTML = html;
+
+        } catch (e) {
+            setError('Erreur de connexion. Réessayez.');
+        }
+    }
+
+    function debouncedConjugate() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(conjugate, 500);
+    }
+
+    input.addEventListener('input', debouncedConjugate);
+    tenseSelect.addEventListener('change', conjugate);
+
+    // Run on load
+    conjugate();
 </script>
 </body>
 </html>
