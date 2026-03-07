@@ -8,7 +8,6 @@
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-        .pronoun { color: #888; font-size: 14px; }
         .verb-form { color: #007bff; font-weight: bold; }
         #status { font-size: 12px; color: orange; margin-bottom: 10px; text-align: center; font-weight: bold; }
     </style>
@@ -16,70 +15,76 @@
 <body>
 
 <div class="card">
-    <div id="status">⏳ Loading Dictionary (CORS-Bypass)...</div>
+    <div id="status">⏳ Initializing Dictionary...</div>
     <input type="text" id="verbInput" placeholder="Loading..." disabled oninput="update()">
-    
     <select id="tenseSelect" onchange="update()">
         <option value="PRESENT">Présent</option>
         <option value="PASSE_COMPOSE">Passé Composé</option>
         <option value="FUTUR">Futur</option>
         <option value="IMPARFAIT">Imparfait</option>
     </select>
-
     <div id="results"></div>
 </div>
 
-<!-- 1. Load the Logic Engine -->
-<script src="https://cdn.jsdelivr.net"></script>
-
-<!-- 2. Load the Data as a SCRIPT (This bypasses all CORS/Redirect errors) -->
+<!-- Load the logic engine -->
 <script src="https://cdn.jsdelivr.net"></script>
 
 <script>
-    // This function checks if the script above created the 'Lefff' variable
-    function checkData() {
+    let Lefff = null;
+
+    async function tryLoad(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function loadDatabase() {
         const status = document.getElementById('status');
         const input = document.getElementById('verbInput');
 
-        if (window.Lefff) {
+        // 1. Try local path (Codespaces)
+        Lefff = await tryLoad('./conjugations.json');
+        
+        // 2. If local fails, try your live site absolute path
+        if (!Lefff) {
+            Lefff = await tryLoad('https://buttonclicker.ca');
+        }
+
+        if (Lefff) {
             status.textContent = "✅ Ready! 9,000+ verbs loaded.";
             status.style.color = "green";
             input.disabled = false;
             input.placeholder = "Ex: etre, manger, finir...";
             update();
         } else {
-            status.textContent = "❌ Error: Dictionary could not load.";
+            status.textContent = "❌ Error: Dictionary still blocked. Try 'Go Live' in VS Code.";
             status.style.color = "red";
         }
     }
 
     function update() {
-        if (!window.Lefff || !window.FrenchVerbs) return;
-        
+        if (!Lefff || !window.FrenchVerbs) return;
         const input = document.getElementById('verbInput');
         const select = document.getElementById('tenseSelect');
         const resultsDiv = document.getElementById('results');
 
         const raw = input.value.trim().toLowerCase() || "manger";
-        
-        // Strip accents so "etre" finds "être"
-        const cleanStr = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-        const userInput = cleanStr(raw);
+        const clean = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const userInput = clean(raw);
 
-        // Find the matching verb in the dictionary
-        const realVerb = Object.keys(window.Lefff).find(v => cleanStr(v) === userInput) || raw;
-        
-        const tense = select.value;
+        // Search keys for fuzzy matching
+        const realVerb = Object.keys(Lefff).find(v => clean(v) === userInput) || raw;
         const pronouns = ['Je', 'Tu', 'Il', 'Nous', 'Vous', 'Ils'];
         
         let html = "";
         try {
             for (let i = 0; i < 6; i++) {
-                const form = FrenchVerbs.getConjugation(window.Lefff, realVerb, tense, i);
-                html += `<div class="row">
-                    <span class="pronoun">${pronouns[i]}</span>
-                    <span class="verb-form">${form}</span>
-                </div>`;
+                const form = FrenchVerbs.getConjugation(Lefff, realVerb, select.value, i);
+                html += `<div class="row"><span>${pronouns[i]}</span><span class="verb-form">${form}</span></div>`;
             }
             resultsDiv.innerHTML = html;
         } catch (e) {
@@ -87,9 +92,7 @@
         }
     }
 
-    // Wait 500ms to let the massive script settle, then enable the app
-    setTimeout(checkData, 500);
+    window.onload = loadDatabase;
 </script>
-
 </body>
 </html>
