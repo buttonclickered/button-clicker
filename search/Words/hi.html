@@ -6,60 +6,56 @@
     <style>
         body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         #status { font-size: 12px; color: orange; margin-bottom: 10px; text-align: center; font-weight: bold; }
         .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
         .verb-form { color: #007bff; font-weight: bold; }
     </style>
 </head>
 <body>
-
 <div class="card">
-    <div id="status">⏳ Chargement du dictionnaire...</div>
-    <input type="text" id="verbInput" placeholder="Ex: manger, etre..." value="manger" disabled>
-    <select id="tenseSelect"><option value="PRESENT">Présent</option><option value="FUTUR">Futur</option></select>
+    <div id="status">⏳ Chargement...</div>
+    <input type="text" id="verbInput" placeholder="Ex: manger, être..." value="manger" disabled>
+    <select id="tenseSelect">
+        <option value="PRESENT">Présent</option>
+        <option value="FUTUR">Futur</option>
+        <option value="IMPARFAIT">Imparfait</option>
+        <option value="CONDITIONNEL_PRESENT">Conditionnel</option>
+        <option value="SUBJONCTIF_PRESENT">Subjonctif</option>
+    </select>
     <div id="results"></div>
 </div>
 
-<!-- 1. Load Logic -->
-<script src="https://cdn.jsdelivr.net"></script>
+<script type="module">
+    import { getConjugation } from 'https://cdn.jsdelivr.net/npm/french-verbs@latest/dist/index.mjs';
+    import Lefff from 'https://cdn.jsdelivr.net/npm/french-verbs-lefff@latest/dist/conjugations.mjs';
 
-<!-- 2. Load Data as a Script (Bypasses the "Missing File" and CORS errors) -->
-<script src="https://cdn.jsdelivr.net"></script>
+    const status = document.getElementById('status');
+    const input = document.getElementById('verbInput');
 
-<script>
-    // This runs once the data script above is finished
-    window.onload = function() {
-        const input = document.getElementById('verbInput');
-        const status = document.getElementById('status');
-        
-        if (window.Lefff) {
-            status.textContent = "✅ Prêt !";
-            status.style.color = "green";
-            input.disabled = false;
-            update();
-        } else {
-            status.textContent = "❌ Erreur de chargement du dictionnaire.";
-        }
-    };
+    status.textContent = '✅ Prêt !';
+    status.style.color = 'green';
+    input.disabled = false;
 
     function update() {
-        if (!window.Lefff || !window.FrenchVerbs) return;
-        const verb = document.getElementById('verbInput').value.trim().toLowerCase() || "manger";
+        const verb = input.value.trim().toLowerCase() || 'manger';
         const tense = document.getElementById('tenseSelect').value;
-        const pronouns = ['Je', 'Tu', 'Il', 'Nous', 'Vous', 'Ils'];
-        let html = "";
+        const pronouns = ['Je', 'Tu', 'Il/Elle', 'Nous', 'Vous', 'Ils/Elles'];
+        let html = '';
         try {
             for (let i = 0; i < 6; i++) {
-                const form = FrenchVerbs.getConjugation(window.Lefff, verb, tense, i);
+                const form = getConjugation(Lefff, verb, tense, i);
                 html += `<div class="row"><span>${pronouns[i]}</span><span class="verb-form">${form}</span></div>`;
             }
-            document.getElementById('results').innerHTML = html;
-        } catch (e) { document.getElementById('results').innerHTML = "Verbe non trouvé."; }
+        } catch (e) {
+            html = '<div style="color:red;text-align:center;padding:10px">Verbe non trouvé.</div>';
+        }
+        document.getElementById('results').innerHTML = html;
     }
 
-    document.getElementById('verbInput').addEventListener('input', update);
+    input.addEventListener('input', update);
     document.getElementById('tenseSelect').addEventListener('change', update);
+    update();
 </script>
 </body>
 </html>
