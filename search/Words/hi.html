@@ -1,92 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Universal Conjugator</title>
+    <title>Conjugueur Français Lefff</title>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-        .pronoun { color: #888; font-size: 14px; }
-        .verb-form { color: #007bff; font-weight: bold; }
-        #status { text-align: center; font-size: 12px; color: orange; margin-bottom: 10px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .pronoun { color: #666; }
+        .verb { color: #007bff; font-weight: bold; }
+        #status { font-size: 12px; color: orange; margin-bottom: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div id="status">Loading Local Dictionary...</div>
-    <input type="text" id="verbInput" placeholder="Type a verb (e.g. etre, finir)" disabled>
+    <div id="status">Chargement du dictionnaire (9 000+ verbes)...</div>
+    <input type="text" id="verbInput" placeholder="Ex: être, finir, aller, vouloir..." value="manger" disabled>
     
     <select id="tenseSelect">
         <option value="PRESENT">Présent</option>
         <option value="PASSE_COMPOSE">Passé Composé</option>
-        <option value="FUTUR">Futur Simple</option>
+        <option value="FUTUR">Futur</option>
         <option value="IMPARFAIT">Imparfait</option>
     </select>
 
     <div id="results"></div>
 </div>
 
-<!-- Load logic from a reliable minified script -->
+<!-- Load the French-Verbs logic (Sets a global 'FrenchVerbs' variable) -->
 <script src="https://cdn.jsdelivr.net"></script>
 
 <script>
     let Lefff = null;
     const input = document.getElementById('verbInput');
     const select = document.getElementById('tenseSelect');
-    const resultsDiv = document.getElementById('results');
     const status = document.getElementById('status');
+    const resultsDiv = document.getElementById('results');
 
+    // Strips accents for "fuzzy" typing: "etre" -> "être"
     function clean(str) {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     }
 
     async function loadDatabase() {
         try {
-            // FIX: Loading from YOUR folder (./) to bypass CORS blocks
-            const response = await fetch('./conjugations.json');
-            if (!response.ok) throw new Error("File not found");
+            // Load the dictionary file you saved in your folder
+            const res = await fetch('./conjugations.json');
+            if (!res.ok) throw new Error("Fichier conjugations.json introuvable.");
+            Lefff = await res.json();
             
-            Lefff = await response.json();
-            
-            status.textContent = "Ready! 9,000+ verbs loaded locally.";
+            status.textContent = "Prêt !";
             status.style.color = "green";
             input.disabled = false;
-            input.value = "manger";
-            conjugate();
+            update();
         } catch (e) {
-            status.textContent = "Error: Check if conjugations.json is in your folder.";
+            status.textContent = "Erreur : " + e.message;
             status.style.color = "red";
         }
     }
 
-    function conjugate() {
+    function update() {
         if (!Lefff) return;
-        const cleanInput = clean(input.value.trim());
+        const userInput = clean(input.value.trim());
         const tense = select.value;
-        const pronouns = ['Je', 'Tu', 'Il/Elle', 'Nous', 'Vous', 'Ils/Elles'];
+        const pronouns = ['Je', 'Tu', 'Il', 'Nous', 'Vous', 'Ils'];
 
-        const realVerb = Object.keys(Lefff).find(v => clean(v) === cleanInput) || input.value;
+        // Find the "real" verb in the dictionary by comparing cleaned versions
+        const realVerb = Object.keys(Lefff).find(v => clean(v) === userInput) || input.value;
 
         let html = "";
         try {
             for (let i = 0; i < 6; i++) {
+                // Parameters: (database, verb, tense, personIndex)
+                // 0=je, 1=tu, 2=il, 3=nous, 4=vous, 5=ils
                 const form = FrenchVerbs.getConjugation(Lefff, realVerb, tense, i);
                 html += `<div class="row">
                     <span class="pronoun">${pronouns[i]}</span>
-                    <span class="verb-form">${form}</span>
+                    <span class="verb">${form}</span>
                 </div>`;
             }
             resultsDiv.innerHTML = html;
         } catch (e) {
-            resultsDiv.innerHTML = "<p style='color:red; text-align:center'>Verb not found.</p>";
+            resultsDiv.innerHTML = "<p style='color:red'>Verbe non trouvé.</p>";
         }
     }
 
-    input.addEventListener('input', conjugate);
-    select.addEventListener('change', conjugate);
+    input.addEventListener('input', update);
+    select.addEventListener('change', update);
     loadDatabase();
 </script>
 
