@@ -1,85 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Universal French Conjugator</title>
+    <title>Conjugueur Français</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-        .verb-form { color: #007bff; font-weight: bold; }
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         #status { font-size: 12px; color: orange; margin-bottom: 10px; text-align: center; font-weight: bold; }
+        .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .verb-form { color: #007bff; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div id="status">⏳ Forcing Load (Security Bypass)...</div>
-    <input type="text" id="verbInput" placeholder="Loading..." disabled oninput="update()">
-    <select id="tenseSelect" onchange="update()">
+    <div id="status">⏳ Chargement local...</div>
+    <input type="text" id="verbInput" placeholder="Ex: manger, etre..." value="manger" disabled>
+    
+    <select id="tenseSelect">
         <option value="PRESENT">Présent</option>
         <option value="PASSE_COMPOSE">Passé Composé</option>
         <option value="FUTUR">Futur</option>
         <option value="IMPARFAIT">Imparfait</option>
     </select>
+
     <div id="results"></div>
 </div>
 
-<!-- 1. Load the Engine Logic -->
-<script src="https://cdn.jsdelivr.net"></script>
-
-<!-- 2. The SECRET WEAPON: Load the dictionary as a SCRIPT variable. 
-     This bypasses fetch/CSP because it's executed, not fetched. -->
+<!-- Logic engine from a reliable CDN -->
 <script src="https://cdn.jsdelivr.net"></script>
 
 <script>
-    // This runs once both scripts above have finished
-    window.onload = function() {
-        const status = document.getElementById('status');
-        const input = document.getElementById('verbInput');
+    let Lefff = null;
+    const input = document.getElementById('verbInput');
+    const status = document.getElementById('status');
 
-        // Check if the script tag above successfully created the window.Lefff variable
-        if (window.Lefff) {
-            status.textContent = "✅ Success! Dictionary injected.";
+    async function init() {
+        try {
+            // FIX: Loading from YOUR folder (Same-Origin) bypasses all security blocks
+            const response = await fetch('./conjugations.json');
+            if (!response.ok) throw new Error("Fichier local introuvable");
+            
+            Lefff = await response.json();
+            status.textContent = "✅ Dictionnaire chargé localement !";
             status.style.color = "green";
             input.disabled = false;
-            input.placeholder = "Ex: etre, manger, finir...";
             update();
-        } else {
-            status.textContent = "❌ Security still blocking. Using local fallback...";
+        } catch (e) {
+            status.textContent = "❌ Erreur: Assurez-vous que conjugations.json est bien dans le dossier.";
             status.style.color = "red";
         }
-    };
+    }
 
     function update() {
-        if (!window.Lefff || !window.FrenchVerbs) return;
-        
-        const input = document.getElementById('verbInput');
-        const select = document.getElementById('tenseSelect');
-        const resultsDiv = document.getElementById('results');
-
-        const raw = input.value.trim().toLowerCase() || "manger";
-        
-        // Strip accents (fuzzy search)
-        const cleanStr = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-        const userInput = cleanStr(raw);
-
-        // Find match in the massive Lefff object
-        const realVerb = Object.keys(window.Lefff).find(v => cleanStr(v) === userInput) || raw;
+        if (!Lefff || !window.FrenchVerbs) return;
+        const verb = input.value.trim().toLowerCase() || "manger";
+        const tense = document.getElementById('tenseSelect').value;
         const pronouns = ['Je', 'Tu', 'Il', 'Nous', 'Vous', 'Ils'];
         
         let html = "";
         try {
             for (let i = 0; i < 6; i++) {
-                const form = FrenchVerbs.getConjugation(window.Lefff, realVerb, select.value, i);
+                const form = FrenchVerbs.getConjugation(Lefff, verb, tense, i);
                 html += `<div class="row"><span>${pronouns[i]}</span><span class="verb-form">${form}</span></div>`;
             }
-            resultsDiv.innerHTML = html;
+            document.getElementById('results').innerHTML = html;
         } catch (e) {
-            resultsDiv.innerHTML = "<p style='color:red; text-align:center;'>Verb not found.</p>";
+            document.getElementById('results').innerHTML = "Verbe non trouvé.";
         }
     }
+
+    input.addEventListener('input', update);
+    document.getElementById('tenseSelect').addEventListener('change', update);
+    init();
 </script>
 </body>
 </html>
