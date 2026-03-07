@@ -4,377 +4,178 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>French Conjugator</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="stylesheet">
 <style>
+  /* 1. Global Reset - REMOVED text-align: center from here */
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    font-family: 'Inter', sans-serif;
-    background: #fff;
-    color: #111;
-    min-height: 100vh;
-    padding: 3rem 1.5rem;
-  }
-
-  h1 {
-    font-size: 1.1rem;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    margin-bottom: 2rem;
-    color: #111;
-  }
-
-  .input-row {
-    display: flex;
-    gap: 0.5rem;
-    max-width: 420px;
+  /* 2. Back Button - Specifically Left Aligned */
+  #back { 
+    border: none; 
+    outline: none; 
+    background: none; 
+    cursor: pointer; 
     margin-bottom: 1rem;
+    align-self: flex-start; /* Forces it to the left in the flex body */
   }
 
-  input[type="text"] {
-    flex: 1;
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    padding: 0.6rem 0.9rem;
-    border: 1.5px solid #ddd;
-    border-radius: 6px;
-    outline: none;
-    transition: border-color 0.15s;
-    background: #fafafa;
-    color: #111;
+  body {
+    background-image: url('/search/Images/background.png');
+    font-family: 'Inter', sans-serif; 
+    color: #111; 
+    min-height: 100vh;
+    padding: 3rem 1.5rem; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; /* Centers everything else horizontally */
   }
 
-  input[type="text"]:focus {
-    border-color: #111;
-    background: #fff;
+  /* 3. Re-applying center alignment to specific text elements */
+  h1, .result-verb, .result-note, .error, .tense-block h2 {
+    text-align: center;
   }
 
-  input[type="text"]::placeholder { color: #aaa; }
+  h1 { font-size: 1.1rem; font-weight: 500; letter-spacing: 0.01em; margin-bottom: 2rem; }
+
+  .input-row { display: flex; gap: 0.5rem; width: 100%; max-width: 420px; margin-bottom: 1rem; }
+
+  input {
+    flex: 1; font-size: 1rem; padding: 0.6rem 0.9rem; border: 1.5px solid #ddd;
+    border-radius: 6px; outline: none; background: #fafafa;
+  }
 
   button.go {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 500;
-    padding: 0.6rem 1.2rem;
-    background: #111;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.15s;
+    font-size: 0.9rem; font-weight: 500; padding: 0.6rem 1.2rem;
+    background: #111; color: #fff; border: none; border-radius: 6px; cursor: pointer;
   }
 
-  button.go:hover { background: #333; }
+  .quick-verbs { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; max-width: 500px; margin-bottom: 2.5rem; }
+  .qv { font-size: 0.78rem; padding: 0.22rem 0.6rem; border: 1px solid #e0e0e0; border-radius: 20px; background: none; cursor: pointer; color: #666; }
+  
+  .error { font-size: 0.82rem; color: #c00; margin-bottom: 1.5rem; display: none; width: 100%; }
 
-  .quick-verbs {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem;
-    max-width: 420px;
-    margin-bottom: 2.5rem;
-  }
-
-  .quick-verbs span {
-    font-size: 0.78rem;
-    color: #aaa;
-  }
-
-  .qv {
-    font-size: 0.78rem;
-    padding: 0.22rem 0.6rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 20px;
-    background: none;
-    cursor: pointer;
-    color: #666;
-    font-family: 'Inter', sans-serif;
-    transition: all 0.12s;
-  }
-
-  .qv:hover { border-color: #111; color: #111; }
-
-  .error {
-    font-size: 0.82rem;
-    color: #c00;
-    margin-bottom: 1.5rem;
-    display: none;
-  }
-
-  .result-verb {
-    font-size: 1.3rem;
-    font-weight: 500;
-    margin-bottom: 0.2rem;
-  }
-
-  .result-note {
-    font-size: 0.78rem;
-    color: #999;
-    margin-bottom: 2rem;
-  }
+  #output { display: none; width: 100%; max-width: 600px; }
+  .result-verb { font-size: 1.3rem; font-weight: 500; margin-bottom: 1.5rem; text-transform: capitalize; }
 
   .tenses {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 2rem;
-    max-width: 640px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;
+    background-color: #f3f3f3; border: 15px solid #f3f3f3; border-radius: 8px;
   }
 
+  .tense-block { text-align: left; padding: 5px; }
   .tense-block h2 {
-    font-size: 0.65rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #bbb;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.6rem; font-weight: 600; text-transform: uppercase; color: #bbb;
+    margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e8e8e8;
   }
 
-  .row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.28rem 0;
-    font-size: 0.88rem;
-    border-bottom: 1px solid #f7f7f7;
-  }
-
-  .row:last-child { border-bottom: none; }
-
-  .pron { color: #bbb; }
+  .row { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 0.85rem; border-bottom: 1px solid #f0f0f0; }
+  .pron { color: #bbb; padding-right: 8px; }
   .form { color: #111; }
 
-  #output { display: none; }
+  @media (max-width: 500px) { .tenses { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
+<button id="back" onclick="history.back()">
+  <img src="/search/Images/back.png" width="35">
+</button>
+
 <h1>French Conjugator</h1>
 
 <div class="input-row">
-  <input type="text" id="verbInput" placeholder="Enter a verb (e.g. parler)" autocomplete="off" />
+  <input type="text" id="verbInput" placeholder="Enter a verb..." autocomplete="off" />
   <button class="go" onclick="conjugate()">Go</button>
 </div>
 
-<div class="quick-verbs">
-  <span>Try:</span>
-  <button class="qv" onclick="tryVerb('être')">être</button>
-  <button class="qv" onclick="tryVerb('avoir')">avoir</button>
-  <button class="qv" onclick="tryVerb('aller')">aller</button>
-  <button class="qv" onclick="tryVerb('faire')">faire</button>
-  <button class="qv" onclick="tryVerb('parler')">parler</button>
-  <button class="qv" onclick="tryVerb('vouloir')">vouloir</button>
-  <button class="qv" onclick="tryVerb('finir')">finir</button>
-</div>
+<div class="quick-verbs" id="quickVerbs"></div>
 
-<div class="error" id="error">Unknown verb ending — try a verb ending in -er, -ir, or -re.</div>
+<div class="error" id="error">Verb not recognized. Try a regular verb or a common irregular.</div>
 
 <div id="output">
   <div class="result-verb" id="resultVerb"></div>
-  <div class="result-note" id="resultNote"></div>
   <div class="tenses" id="tensesGrid"></div>
 </div>
 
 <script>
-const pronouns = ["je","tu","il","nous","vous","ils"];
-const labels = { je:"je", tu:"tu", il:"il / elle", nous:"nous", vous:"vous", ils:"ils / elles" };
-const allerP = { je:"vais", tu:"vas", il:"va", nous:"allons", vous:"allez", ils:"vont" };
+// Verb list and UI generation
+const verbs = ["être","avoir","aller","faire","pouvoir","vouloir","venir","prendre","savoir","voir","mettre","partir","dire","lire","écrire","sortir","parler","finir","vendre"];
+const qvDiv = document.getElementById('quickVerbs');
+verbs.forEach(v => {
+  const btn = document.createElement('button');
+  btn.className = 'qv'; btn.innerText = v; 
+  btn.onclick = () => { document.getElementById('verbInput').value = v; conjugate(); };
+  qvDiv.appendChild(btn);
+});
 
-const irregulars = {
-  être:    { meaning:"to be",        type:"irregular", présent:{je:"suis",tu:"es",il:"est",nous:"sommes",vous:"êtes",ils:"sont"}, pc:{je:"ai été",tu:"as été",il:"a été",nous:"avons été",vous:"avez été",ils:"ont été"} },
-  avoir:   { meaning:"to have",      type:"irregular", présent:{je:"ai",tu:"as",il:"a",nous:"avons",vous:"avez",ils:"ont"}, pc:{je:"ai eu",tu:"as eu",il:"a eu",nous:"avons eu",vous:"avez eu",ils:"ont eu"} },
-  aller:   { meaning:"to go",        type:"irregular", présent:{je:"vais",tu:"vas",il:"va",nous:"allons",vous:"allez",ils:"vont"}, pc:{je:"suis allé",tu:"es allé",il:"est allé",nous:"sommes allés",vous:"êtes allés",ils:"sont allés"} },
-  faire:   { meaning:"to do / make", type:"irregular", présent:{je:"fais",tu:"fais",il:"fait",nous:"faisons",vous:"faites",ils:"font"}, pc:{je:"ai fait",tu:"as fait",il:"a fait",nous:"avons fait",vous:"avez fait",ils:"ont fait"} },
-  pouvoir: { meaning:"to be able to",type:"irregular", présent:{je:"peux",tu:"peux",il:"peut",nous:"pouvons",vous:"pouvez",ils:"peuvent"}, pc:{je:"ai pu",tu:"as pu",il:"a pu",nous:"avons pu",vous:"avez pu",ils:"ont pu"} },
-  vouloir: { meaning:"to want",      type:"irregular", présent:{je:"veux",tu:"veux",il:"veut",nous:"voulons",vous:"voulez",ils:"veulent"}, pc:{je:"ai voulu",tu:"as voulu",il:"a voulu",nous:"avons voulu",vous:"avez voulu",ils:"ont voulu"} },
-  venir:   { meaning:"to come",      type:"irregular", présent:{je:"viens",tu:"viens",il:"vient",nous:"venons",vous:"venez",ils:"viennent"}, pc:{je:"suis venu",tu:"es venu",il:"est venu",nous:"sommes venus",vous:"êtes venus",ils:"sont venus"} },
-  prendre: { meaning:"to take",      type:"irregular", présent:{je:"prends",tu:"prends",il:"prend",nous:"prenons",vous:"prenez",ils:"prennent"}, pc:{je:"ai pris",tu:"as pris",il:"a pris",nous:"avons pris",vous:"avez pris",ils:"ont pris"} },
-  savoir:  { meaning:"to know",      type:"irregular", présent:{je:"sais",tu:"sais",il:"sait",nous:"savons",vous:"savez",ils:"savent"}, pc:{je:"ai su",tu:"as su",il:"a su",nous:"avons su",vous:"avez su",ils:"ont su"} },
-  voir:    { meaning:"to see",       type:"irregular", présent:{je:"vois",tu:"vois",il:"voit",nous:"voyons",vous:"voyez",ils:"voient"}, pc:{je:"ai vu",tu:"as vu",il:"a vu",nous:"avons vu",vous:"avez vu",ils:"ont vu"} },
-  mettre:  { meaning:"to put",       type:"irregular", présent:{je:"mets",tu:"mets",il:"met",nous:"mettons",vous:"mettez",ils:"mettent"}, pc:{je:"ai mis",tu:"as mis",il:"a mis",nous:"avons mis",vous:"avez mis",ils:"ont mis"} },
-  partir:  { meaning:"to leave",     type:"irregular", présent:{je:"pars",tu:"pars",il:"part",nous:"partons",vous:"partez",ils:"partent"}, pc:{je:"suis parti",tu:"es parti",il:"est parti",nous:"sommes partis",vous:"êtes partis",ils:"sont partis"} },
-  dire:    { meaning:"to say",       type:"irregular", présent:{je:"dis",tu:"dis",il:"dit",nous:"disons",vous:"dites",ils:"disent"}, pc:{je:"ai dit",tu:"as dit",il:"a dit",nous:"avons dit",vous:"avez dit",ils:"ont dit"} },
-  lire:    { meaning:"to read",      type:"irregular", présent:{je:"lis",tu:"lis",il:"lit",nous:"lisons",vous:"lisez",ils:"lisent"}, pc:{je:"ai lu",tu:"as lu",il:"a lu",nous:"avons lu",vous:"avez lu",ils:"ont lu"} },
-  écrire:  { meaning:"to write",     type:"irregular", présent:{je:"écris",tu:"écris",il:"écrit",nous:"écrivons",vous:"écrivez",ils:"écrivent"}, pc:{je:"ai écrit",tu:"as écrit",il:"a écrit",nous:"avons écrit",vous:"avez écrit",ils:"ont écrit"} },
-  sortir:  { meaning:"to go out",    type:"irregular", présent:{je:"sors",tu:"sors",il:"sort",nous:"sortons",vous:"sortez",ils:"sortent"}, pc:{je:"suis sorti",tu:"es sorti",il:"est sorti",nous:"sommes sortis",vous:"êtes sortis",ils:"sont sortis"} },
-  dormir:  { meaning:"to sleep",     type:"irregular", présent:{je:"dors",tu:"dors",il:"dort",nous:"dormons",vous:"dormez",ils:"dorment"}, pc:{je:"ai dormi",tu:"as dormi",il:"a dormi",nous:"avons dormi",vous:"avez dormi",ils:"ont dormi"} },
-  mentir:  { meaning:"to lie",       type:"irregular", présent:{je:"mens",tu:"mens",il:"ment",nous:"mentons",vous:"mentez",ils:"mentent"}, pc:{je:"ai menti",tu:"as menti",il:"a menti",nous:"avons menti",vous:"avez menti",ils:"ont menti"} },
-  sentir:  { meaning:"to feel/smell",type:"irregular", présent:{je:"sens",tu:"sens",il:"sent",nous:"sentons",vous:"sentez",ils:"sentent"}, pc:{je:"ai senti",tu:"as senti",il:"a senti",nous:"avons senti",vous:"avez senti",ils:"ont senti"} },
-  servir:  { meaning:"to serve",     type:"irregular", présent:{je:"sers",tu:"sers",il:"sert",nous:"servons",vous:"servez",ils:"servent"}, pc:{je:"ai servi",tu:"as servi",il:"a servi",nous:"avons servi",vous:"avez servi",ils:"ont servi"} },
-  courir:  { meaning:"to run",       type:"irregular", présent:{je:"cours",tu:"cours",il:"court",nous:"courons",vous:"courez",ils:"courent"}, pc:{je:"ai couru",tu:"as couru",il:"a couru",nous:"avons couru",vous:"avez couru",ils:"ont couru"} },
-  mourir:  { meaning:"to die",       type:"irregular", présent:{je:"meurs",tu:"meurs",il:"meurt",nous:"mourons",vous:"mourez",ils:"meurent"}, pc:{je:"suis mort",tu:"es mort",il:"est mort",nous:"sommes morts",vous:"êtes morts",ils:"sont morts"} },
-  ouvrir:  { meaning:"to open",      type:"irregular", présent:{je:"ouvre",tu:"ouvres",il:"ouvre",nous:"ouvrons",vous:"ouvrez",ils:"ouvrent"}, pc:{je:"ai ouvert",tu:"as ouvert",il:"a ouvert",nous:"avons ouvert",vous:"avez ouvert",ils:"ont ouvert"} },
-  offrir:  { meaning:"to offer",     type:"irregular", présent:{je:"offre",tu:"offres",il:"offre",nous:"offrons",vous:"offrez",ils:"offrent"}, pc:{je:"ai offert",tu:"as offert",il:"a offert",nous:"avons offert",vous:"avez offert",ils:"ont offert"} },
-  tenir:   { meaning:"to hold",      type:"irregular", présent:{je:"tiens",tu:"tiens",il:"tient",nous:"tenons",vous:"tenez",ils:"tiennent"}, pc:{je:"ai tenu",tu:"as tenu",il:"a tenu",nous:"avons tenu",vous:"avez tenu",ils:"ont tenu"} },
-  obtenir: { meaning:"to obtain",    type:"irregular", présent:{je:"obtiens",tu:"obtiens",il:"obtient",nous:"obtenons",vous:"obtenez",ils:"obtiennent"}, pc:{je:"ai obtenu",tu:"as obtenu",il:"a obtenu",nous:"avons obtenu",vous:"avez obtenu",ils:"ont obtenu"} },
-  devenir: { meaning:"to become",    type:"irregular", présent:{je:"deviens",tu:"deviens",il:"devient",nous:"devenons",vous:"devenez",ils:"deviennent"}, pc:{je:"suis devenu",tu:"es devenu",il:"est devenu",nous:"sommes devenus",vous:"êtes devenus",ils:"sont devenus"} },
-  revenir: { meaning:"to come back", type:"irregular", présent:{je:"reviens",tu:"reviens",il:"revient",nous:"revenons",vous:"revenez",ils:"reviennent"}, pc:{je:"suis revenu",tu:"es revenu",il:"est revenu",nous:"sommes revenus",vous:"êtes revenus",ils:"sont revenus"} },
+// Data for conjugation
+const data = {
+  pronouns: ["je", "tu", "il / elle", "nous", "vous", "ils / elles"],
+  aux: ["ai", "as", "a", "avons", "avez", "ont"],
+  irregulars: {
+    être: { pres: ["suis","es","est","sommes","êtes","sont"], pp: "été", imp: "ét", fut: "ser" },
+    avoir: { pres: ["ai","as","a","avons","avez","ont"], pp: "eu", imp: "av", fut: "aur" },
+    aller: { pres: ["vais","vas","va","allons","allez","vont"], pp: "allé", imp: "all", fut: "ir" },
+    faire: { pres: ["fais","fais","fait","faisons","faites","font"], pp: "fait", imp: "fais", fut: "fer" },
+    pouvoir: { pres: ["peux","peux","peut","pouvons","pouvez","peuvent"], pp: "pu", imp: "pouv", fut: "pourr" },
+    vouloir: { pres: ["veux","veux","veut","voulons","voulez","veulent"], pp: "voulu", imp: "voul", fut: "voudr" },
+    venir: { pres: ["viens","viens","vient","venons","venez","viennent"], pp: "venu", imp: "ven", fut: "viendr" },
+    prendre: { pres: ["prends","prends","prend","prenons","prenez","prennent"], pp: "pris", imp: "pren", fut: "prendr" },
+    savoir: { pres: ["sais","sais","sait","savons","savez","savent"], pp: "su", imp: "sav", fut: "saur" },
+    voir: { pres: ["vois","vois","voit","voyons","voyez","voient"], pp: "vu", imp: "voy", fut: "verr" },
+    mettre: { pres: ["mets","mets","met","mettons","mettez","mettent"], pp: "mis", imp: "mett", fut: "mettr" },
+    partir: { pres: ["pars","pars","part","partons","partez","partent"], pp: "parti", imp: "part", fut: "partir" },
+    dire: { pres: ["dis","dis","dit","disons","dites","disent"], pp: "dit", imp: "dis", fut: "dir" },
+    lire: { pres: ["lis","lis","lit","lisons","lisez","lisent"], pp: "lu", imp: "lis", fut: "lir" },
+    écrire: { pres: ["écris","écris","écrit","écrivons","écrivez","écrivent"], pp: "écrit", imp: "écriv", fut: "écrir" },
+    sortir: { pres: ["sors","sors","sort","sortons","sortez","sortent"], pp: "sorti", imp: "sort", fut: "sortir" }
+  },
+  regEndings: {
+    er: { pres: ["e","es","e","ons","ez","ent"], pp: "é", fut: "er" },
+    ir: { pres: ["is","is","it","issons","issez","issent"], pp: "i", fut: "ir" },
+    re: { pres: ["s","s","","ons","ez","ent"], pp: "u", fut: "r" }
+  }
 };
 
-function regularConj(verb) {
-  if (verb.endsWith("er")) {
-    const s = verb.slice(0,-2);
-    return { type:"-er regular", meaning:null,
-      présent:{je:s+"e",tu:s+"es",il:s+"e",nous:s+"ons",vous:s+"ez",ils:s+"ent"},
-      pc:{je:`ai ${s}é`,tu:`as ${s}é`,il:`a ${s}é`,nous:`avons ${s}é`,vous:`avez ${s}é`,ils:`ont ${s}é`} };
-  }
-  if (verb.endsWith("ir")) {
-    const s = verb.slice(0,-2);
-    return { type:"-ir regular", meaning:null,
-      présent:{je:s+"is",tu:s+"is",il:s+"it",nous:s+"issons",vous:s+"issez",ils:s+"issent"},
-      pc:{je:`ai ${s}i`,tu:`as ${s}i`,il:`a ${s}i`,nous:`avons ${s}i`,vous:`avez ${s}i`,ils:`ont ${s}i`} };
-  }
-  if (verb.endsWith("re")) {
-    const s = verb.slice(0,-2);
-    return { type:"-re regular", meaning:null,
-      présent:{je:s+"s",tu:s+"s",il:s,nous:s+"ons",vous:s+"ez",ils:s+"ent"},
-      pc:{je:`ai ${s}u`,tu:`as ${s}u`,il:`a ${s}u`,nous:`avons ${s}u`,vous:`avez ${s}u`,ils:`ont ${s}u`} };
-  }
-  return null;
-}
-
-// Strip accents for fuzzy matching
-function stripAccents(str) {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-// Build a map from stripped key -> accented key for all irregulars
-const strippedMap = {};
-for (const key of Object.keys(irregulars)) {
-  strippedMap[stripAccents(key)] = key;
-}
-
-// Build reverse map: conjugated form (stripped) -> infinitive
-const reverseMap = {};
-for (const [infinitive, verbData] of Object.entries(irregulars)) {
-  for (const form of [...Object.values(verbData.présent), ...Object.values(verbData.pc)]) {
-    const key = stripAccents(form.toLowerCase());
-    if (!reverseMap[key]) reverseMap[key] = [];
-    if (!reverseMap[key].includes(infinitive)) reverseMap[key].push(infinitive);
-    // Also index just the first word (auxiliary) of multi-word forms
-    const first = key.split(" ")[0];
-    if (first !== key) {
-      if (!reverseMap[first]) reverseMap[first] = [];
-      if (!reverseMap[first].includes(infinitive)) reverseMap[first].push(infinitive);
-    }
-  }
-}
-
-// Try to find the infinitive of a regular conjugated form
-function deconjugateRegular(input) {
-  // Ordered: longer endings first to avoid greedy mismatches
-  const erTry = ["aient","aient","issent","erent","ates","ames","ions","iez","ons","ais","ait","ez","es","ai","as","a","e",""];
-  // Try -er verb
-  for (const end of ["aient","erent","ates","ames","ions","iez","ons","ais","ait","ez","es","ai","as","a","e"]) {
-    if (input.endsWith(end)) {
-      const stem = input.slice(0, input.length - end.length);
-      if (stem.length >= 2) {
-        const cand = stem + "er";
-        if (regularConj(cand)) return cand;
-      }
-    }
-  }
-  // Try -ir verb (finir-type)
-  for (const end of ["issaient","issions","issiez","issons","issez","issent","issais","issait","is","it","i"]) {
-    if (input.endsWith(end)) {
-      const stem = input.slice(0, input.length - end.length);
-      if (stem.length >= 2) {
-        const cand = stem + "ir";
-        if (regularConj(cand)) return cand;
-      }
-    }
-  }
-  // Try -re verb
-  for (const end of ["aient","itions","itiez","ons","ais","ait","ez","is","it","s"]) {
-    if (input.endsWith(end)) {
-      const stem = input.slice(0, input.length - end.length);
-      if (stem.length >= 2) {
-        const cand = stem + "re";
-        if (regularConj(cand)) return cand;
-      }
-    }
-  }
-  return null;
-}
-
-function resolveVerb(input) {
-  const stripped = stripAccents(input);
-
-  // 1. Exact match against known infinitives
-  if (irregulars[input]) return { canonical: input, data: irregulars[input], foundAs: null };
-  if (strippedMap[stripped]) {
-    const canonical = strippedMap[stripped];
-    return { canonical, data: irregulars[canonical], foundAs: null };
-  }
-
-  // 2. Direct regular infinitive
-  const directRegular = regularConj(input);
-  if (directRegular) return { canonical: input, data: directRegular, foundAs: null };
-
-  // 3. Reverse lookup — is the input a known conjugated form of an irregular?
-  const hits = reverseMap[stripped];
-  if (hits && hits.length > 0) {
-    const canonical = hits[0];
-    return { canonical, data: irregulars[canonical], foundAs: input };
-  }
-
-  // 4. Try to deconjugate as a regular verb
-  const regInfinitive = deconjugateRegular(stripped);
-  if (regInfinitive) {
-    const data = regularConj(regInfinitive);
-    return { canonical: regInfinitive, data, foundAs: input };
-  }
-
-  return null;
-}
-
 function conjugate() {
-  const verb = document.getElementById("verbInput").value.trim().toLowerCase();
-  if (!verb) return;
-  const resolved = resolveVerb(verb);
-  const err = document.getElementById("error");
-  const out = document.getElementById("output");
+  const verb = document.getElementById('verbInput').value.toLowerCase().trim();
+  const type = verb.slice(-2);
+  const stem = verb.slice(0, -2);
+  const isIrr = data.irregulars[verb];
 
-  if (!resolved) { err.style.display="block"; out.style.display="none"; return; }
-  err.style.display = "none";
+  if (!isIrr && !data.regEndings[type]) {
+    document.getElementById('error').style.display = "block";
+    document.getElementById('output').style.display = "none";
+    return;
+  }
 
-  const { canonical, data, foundAs } = resolved;
+  document.getElementById('error').style.display = "none";
+  document.getElementById('output').style.display = "block";
+  document.getElementById('resultVerb').innerText = verb;
 
-  document.getElementById("resultVerb").textContent = canonical;
-  const typeNote = data.type + (data.type.includes("regular") && !irregulars[canonical] ? " · verify irregular forms" : "");
-  const foundNote = foundAs ? `recognized from "${foundAs}"` : "";
-  const note = [data.meaning, typeNote, foundNote].filter(Boolean).join(" · ");
-  document.getElementById("resultNote").textContent = note;
+  const grid = document.getElementById('tensesGrid');
+  grid.innerHTML = "";
 
-  const fp = Object.fromEntries(Object.entries(allerP).map(([p,a])=>[p,`${a} ${canonical}`]));
-
-  const tenses = [
-    { label:"Présent",       conj:data.présent },
-    { label:"Passé Composé", conj:data.pc },
-    { label:"Futur Proche",  conj:fp },
-  ];
-
-  document.getElementById("tensesGrid").innerHTML = tenses.map(t=>`
-    <div class="tense-block">
-      <h2>${t.label}</h2>
-      ${pronouns.map(p=>`
-        <div class="row">
-          <span class="pron">${labels[p]}</span>
-          <span class="form">${t.conj[p]}</span>
-        </div>`).join('')}
-    </div>`).join('');
-
-  out.style.display = "block";
+  ["Présent", "Passé Composé", "Imparfait", "Futur Simple"].forEach(tense => {
+    let html = `<div class="tense-block"><h2>${tense}</h2>`;
+    data.pronouns.forEach((p, i) => {
+      let form = "";
+      if (tense === "Présent") {
+        form = isIrr ? isIrr.pres[i] : stem + data.regEndings[type].pres[i];
+      } else if (tense === "Passé Composé") {
+        form = data.aux[i] + " " + (isIrr ? isIrr.pp : stem + data.regEndings[type].pp);
+      } else if (tense === "Imparfait") {
+        let iStem = isIrr ? isIrr.imp : (type === 'ir' ? stem + "iss" : stem);
+        form = iStem + ["ais","ais","ait","ions","iez","aient"][i];
+      } else if (tense === "Futur Simple") {
+        let fStem = isIrr ? isIrr.fut : stem + data.regEndings[type].fut;
+        form = fStem + ["ai","as","a","ons","ez","ont"][i];
+      }
+      html += `<div class="row"><span class="pron">${p}</span><span class="form">${form}</span></div>`;
+    });
+    grid.innerHTML += html + `</div>`;
+  });
 }
-
-function tryVerb(v) {
-  document.getElementById("verbInput").value = v;
-  conjugate();
-}
-
-document.getElementById("verbInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") conjugate();
-});
 </script>
 </body>
 </html>

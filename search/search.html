@@ -4,14 +4,19 @@
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <title>Search</title>
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
       <link rel="stylesheet" href="search.css">
     </head>
     <body>
+      <div id="searcher">
       <h1>Search</h1>
-      <p>French idl</p>
+      <p>Search for grammar rules, and verb conjugation.</p>
       <form action="search_results.html" method="get">
-        <input type="text" name="query" placeholder="Enter your search query">
+        <input type="text" name="query" placeholder="Select 'Conjugate' to conjugate a verb..." style="padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 4px;">
+        <input type="checkbox" name="conjugate" id="conjugate" style="accent-color: blue;">
+        <label for="conjugate">Conjugate</label>
         <button type="submit">Search</button>
       </form>
+    </div>
     </body>
 </html>

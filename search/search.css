@@ -1,0 +1,50 @@
+h1, h2 {
+   text-align: center;
+}
+
+table {
+    background-color: #ffffff;
+    border-radius: 6px;
+    margin: 20px auto;
+    width: 80%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    font-size: 18px;
+    border: 2px solid #c5c5c5;
+    text-align: center;
+}
+
+th {
+    background: #f5f5f5;
+}
+
+hr {
+    margin: 20px auto;
+    width: 80%;
+     border: none;            /* Remove the default solid border */
+  border-top: 2px dotted;   /* Add your dotted line */
+  color: #333;             /* Sets color for some browsers */
+  height: 0;
+}
+#back {
+  border: none;      /* Removes the default button edge */
+  outline: none;     /* Removes the ring that appears when clicked */
+  background: none;  /* Removes the default button background */
+}
+body {
+    background-image: url('/search/Images/background.png');
+  font-family: 'Inter', sans-serif;
+}
+
+#searcher, p {
+    position: relative;
+    text-align: center;
+}
+#results {
+      font-style: italic;
+    position: relative;
+   left: 43%;
+}

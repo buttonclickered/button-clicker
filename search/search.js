@@ -1,5 +1,6 @@
 const urlParams = new URLSearchParams(window.location.search);
-const queryValue = urlParams.get('query');
+const queryValue = urlParams.get('query').toLowerCase();
+const conjugateValue = urlParams.get('conjugate');
 const resultsSpan = document.getElementById('results');
 const displayQuery = document.getElementById('display-query');
 
@@ -9,7 +10,9 @@ if (queryValue) {
 } else {
     displayQuery.textContent = "nothing";
 }
-
+if (conjugateValue === "on") {
+    window.location.href = "Words/conjugator.html?word=" + encodeURIComponent(queryValue);
+}
 async function searchByFilename(term) {
     resultsSpan.innerHTML = "Searching...";
 
@@ -30,7 +33,7 @@ async function searchByFilename(term) {
         if (matches.length > 0) {
             matches.forEach(file => {
                 const link = document.createElement('a');
-                link.href = `Words/${file}`;
+                link.href = `Grammer/${file}`;
                 // This shows "Apple" instead of "apple.html"
                 link.textContent = file.replace('.html', ''); 
                 
@@ -40,7 +43,7 @@ async function searchByFilename(term) {
                 resultsSpan.appendChild(link);
             });
         } else {
-            resultsSpan.textContent = "No filenames match your search.";
+            resultsSpan.textContent = "No rules match your search.";
         }
 
     } catch (err) {
