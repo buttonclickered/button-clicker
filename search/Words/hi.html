@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Universal French Conjugator</title>
+    <title>French Conjugator</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
@@ -16,10 +16,10 @@
 <body>
 
 <div class="card">
-    <div id="status">⏳ Loading Dictionary...</div>
-    <input type="text" id="verbInput" placeholder="Loading..." disabled oninput="updateConjugation()">
+    <div id="status">⏳ Loading Dictionary (CORS-Bypass)...</div>
+    <input type="text" id="verbInput" placeholder="Loading..." disabled oninput="update()">
     
-    <select id="tenseSelect" onchange="updateConjugation()">
+    <select id="tenseSelect" onchange="update()">
         <option value="PRESENT">Présent</option>
         <option value="PASSE_COMPOSE">Passé Composé</option>
         <option value="FUTUR">Futur</option>
@@ -29,40 +29,31 @@
     <div id="results"></div>
 </div>
 
-<!-- 1. Load the Logic Engine (Standard Script) -->
+<!-- 1. Load the Logic Engine -->
+<script src="https://cdn.jsdelivr.net"></script>
+
+<!-- 2. Load the Data as a SCRIPT (This bypasses all CORS/Redirect errors) -->
 <script src="https://cdn.jsdelivr.net"></script>
 
 <script>
-    // 2. Logic to manually load the Dictionary since the .js tag failed
-    let Lefff = null;
-
-    async function loadDictionary() {
+    // This function checks if the script above created the 'Lefff' variable
+    function checkData() {
         const status = document.getElementById('status');
         const input = document.getElementById('verbInput');
-        
-        // Try to fetch the JSON data directly
-        const url = 'https://cdn.jsdelivr.net';
-        
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("Network error");
-            
-            Lefff = await response.json();
-            window.Lefff = Lefff; // Assign to global for the engine
 
+        if (window.Lefff) {
             status.textContent = "✅ Ready! 9,000+ verbs loaded.";
             status.style.color = "green";
             input.disabled = false;
-            input.placeholder = "Ex: être, manger, finir...";
-            updateConjugation(); 
-        } catch (e) {
-            status.textContent = "❌ Error: Dictionary blocked. Use 'Go Live'.";
+            input.placeholder = "Ex: etre, manger, finir...";
+            update();
+        } else {
+            status.textContent = "❌ Error: Dictionary could not load.";
             status.style.color = "red";
-            console.error("Dictionary Load Failed:", e);
         }
     }
 
-    function updateConjugation() {
+    function update() {
         if (!window.Lefff || !window.FrenchVerbs) return;
         
         const input = document.getElementById('verbInput');
@@ -71,11 +62,11 @@
 
         const raw = input.value.trim().toLowerCase() || "manger";
         
-        // Strip accents for fuzzy matching (etre -> être)
+        // Strip accents so "etre" finds "être"
         const cleanStr = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         const userInput = cleanStr(raw);
 
-        // Find matching verb key in database
+        // Find the matching verb in the dictionary
         const realVerb = Object.keys(window.Lefff).find(v => cleanStr(v) === userInput) || raw;
         
         const tense = select.value;
@@ -96,8 +87,8 @@
         }
     }
 
-    // Start loading immediately
-    loadDictionary();
+    // Wait 500ms to let the massive script settle, then enable the app
+    setTimeout(checkData, 500);
 </script>
 
 </body>
