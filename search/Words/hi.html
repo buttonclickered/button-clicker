@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>French Conjugator</title>
+    <title>Universal French Conjugator</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .pronoun { color: #888; font-size: 14px; }
         .verb-form { color: #007bff; font-weight: bold; }
         #status { font-size: 12px; color: orange; margin-bottom: 10px; text-align: center; font-weight: bold; }
     </style>
@@ -15,63 +16,87 @@
 <body>
 
 <div class="card">
-    <div id="status">Loading Universal Dictionary...</div>
+    <div id="status">⏳ Downloading Dictionary (9,000+ verbs)...</div>
     <input type="text" id="verbInput" placeholder="Loading..." disabled>
+    
     <select id="tenseSelect">
         <option value="PRESENT">Présent</option>
         <option value="PASSE_COMPOSE">Passé Composé</option>
         <option value="FUTUR">Futur</option>
         <option value="IMPARFAIT">Imparfait</option>
     </select>
+
     <div id="results"></div>
 </div>
 
-<!-- 1. Load the conjugation logic engine -->
+<!-- 1. Load the Logic Engine -->
 <script src="https://cdn.jsdelivr.net"></script>
 
-<!-- 2. Load the Data as a script to bypass ALL CORS/Fetch errors -->
-<script src="https://cdn.jsdelivr.net"></script>
+<!-- 2. Load the Data (We use 'onload' to wait for it to finish) -->
+<script 
+    src="https://cdn.jsdelivr.net" 
+    onload="initApp()" 
+    onerror="handleError()">
+</script>
 
 <script>
-    // This runs once the 'Lefff' script above finishes loading
-    window.onload = function() {
-        const input = document.getElementById('verbInput');
-        const select = document.getElementById('tenseSelect');
-        const status = document.getElementById('status');
-        const resultsDiv = document.getElementById('results');
+    const input = document.getElementById('verbInput');
+    const select = document.getElementById('tenseSelect');
+    const status = document.getElementById('status');
+    const resultsDiv = document.getElementById('results');
 
-        // window.Lefff is automatically created by the second script tag
+    // This runs automatically when the dictionary script finishes downloading
+    function initApp() {
         if (window.Lefff) {
-            status.textContent = "Ready! 9,000+ verbs loaded.";
+            status.textContent = "✅ Ready! 9,000+ verbs loaded.";
             status.style.color = "green";
             input.disabled = false;
-            input.placeholder = "Ex: être, manger, finir...";
+            input.placeholder = "Ex: être, manger, finir, aller...";
+            input.value = "manger";
             update();
         } else {
-            status.textContent = "Error: Dictionary failed to inject.";
-            status.style.color = "red";
+            handleError();
         }
+    }
 
-        function update() {
-            const verb = input.value.trim().toLowerCase() || "être";
-            const tense = select.value;
-            const pronouns = ['Je', 'Tu', 'Il', 'Nous', 'Vous', 'Ils'];
-            
-            let html = "";
-            try {
-                for (let i = 0; i < 6; i++) {
-                    const form = FrenchVerbs.getConjugation(window.Lefff, verb, tense, i);
-                    html += `<div class="row"><span>${pronouns[i]}</span><span class="verb-form">${form}</span></div>`;
-                }
-                resultsDiv.innerHTML = html;
-            } catch (e) {
-                resultsDiv.innerHTML = "<p style='color:red; text-align:center;'>Verb not found.</p>";
+    function handleError() {
+        status.textContent = "❌ Error: Dictionary failed to load.";
+        status.style.color = "red";
+    }
+
+    function update() {
+        if (!window.Lefff) return;
+        
+        // Clean input for fuzzy searching (no accents needed)
+        const raw = input.value.trim().toLowerCase() || "être";
+        const clean = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const userInput = clean(raw);
+
+        // Search dictionary for the real verb (with accents)
+        const realVerb = Object.keys(window.Lefff).find(v => clean(v) === userInput) || raw;
+        
+        const tense = select.value;
+        const pronouns = ['Je', 'Tu', 'Il', 'Nous', 'Vous', 'Ils'];
+        
+        let html = "";
+        try {
+            for (let i = 0; i < 6; i++) {
+                // FrenchVerbs.getConjugation is the global engine
+                const form = FrenchVerbs.getConjugation(window.Lefff, realVerb, tense, i);
+                html += `<div class="row">
+                    <span class="pronoun">${pronouns[i]}</span>
+                    <span class="verb-form">${form}</span>
+                </div>`;
             }
+            resultsDiv.innerHTML = html;
+        } catch (e) {
+            resultsDiv.innerHTML = "<p style='color:red; text-align:center;'>Verb not found.</p>";
         }
+    }
 
-        input.addEventListener('input', update);
-        select.addEventListener('change', update);
-    };
+    input.addEventListener('input', update);
+    select.addEventListener('change', update);
 </script>
+a
 </body>
 </html>
