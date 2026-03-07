@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>French Conjugator</title>
+    <title>Universal French Conjugator</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
@@ -29,31 +29,34 @@
     <div id="results"></div>
 </div>
 
-<!-- 1. Load the Logic Engine (Standard Script) -->
-<script src="https://cdn.jsdelivr.net"></script>
-
-<!-- 2. Load the Data as a SCRIPT (Bypasses all CORS/Fetch errors) -->
-<!-- This specific version of the file creates a global variable 'Lefff' -->
+<!-- Load Logic Engine -->
 <script src="https://cdn.jsdelivr.net"></script>
 
 <script>
-    // This function checks if the dictionary loaded correctly
-    function checkData() {
+    // We manually fetch because script-injection is unreliable for 2MB JSON files
+    let Lefff = null;
+
+    async function init() {
         const status = document.getElementById('status');
         const input = document.getElementById('verbInput');
 
-        // window.Lefff is created automatically by the script tag above
-        if (window.Lefff) {
-            status.textContent = "✅ Ready! 9,000+ verbs loaded.";
+        try {
+            // Fetching directly from jsDelivr with a timestamp to prevent caching old errors
+            const res = await fetch(`https://cdn.jsdelivr.net{Date.now()}`);
+            if (!res.ok) throw new Error("Server response was not ok");
+            
+            Lefff = await res.json();
+            window.Lefff = Lefff; // Assign to global scope
+
+            status.textContent = "✅ Ready! Dictionary Loaded.";
             status.style.color = "green";
             input.disabled = false;
             input.placeholder = "Ex: etre, manger, finir...";
             update();
-        } else {
-            status.textContent = "❌ Error: Dictionary failed to load. Refreshing...";
+        } catch (e) {
+            status.textContent = "❌ Error: Dictionary blocked by security policy.";
             status.style.color = "red";
-            // Retry once after 2 seconds if it's just slow
-            setTimeout(checkData, 2000);
+            console.error("Load failed:", e);
         }
     }
 
@@ -66,20 +69,17 @@
 
         const raw = input.value.trim().toLowerCase() || "manger";
         
-        // Strip accents for fuzzy matching (etre -> être)
+        // Strip accents for fuzzy search
         const cleanStr = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         const userInput = cleanStr(raw);
 
-        // Find matching verb key in database
         const realVerb = Object.keys(window.Lefff).find(v => cleanStr(v) === userInput) || raw;
-        
         const tense = select.value;
         const pronouns = ['Je', 'Tu', 'Il', 'Nous', 'Vous', 'Ils'];
         
         let html = "";
         try {
             for (let i = 0; i < 6; i++) {
-                // FrenchVerbs.getConjugation uses the loaded Lefff data
                 const form = FrenchVerbs.getConjugation(window.Lefff, realVerb, tense, i);
                 html += `<div class="row">
                     <span class="pronoun">${pronouns[i]}</span>
@@ -92,9 +92,8 @@
         }
     }
 
-    // Wait 500ms to let the massive script settle
-    setTimeout(checkData, 500);
+    init();
 </script>
-
+a
 </body>
 </html>
