@@ -1,248 +1,297 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Conjugueur Français</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        :root {
-            --ink: #1a1a2e; --cream: #faf8f3; --gold: #c9a84c;
-            --gold-light: #f0e4be; --muted: #7a7a8a; --border: #e0dbd0;
-        }
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--cream);
-            min-height: 100vh;
-            display: flex; align-items: flex-start; justify-content: center;
-            padding: 40px 20px;
-            background-image: radial-gradient(circle at 20% 20%, #f5efe0 0%, transparent 50%),
-                              radial-gradient(circle at 80% 80%, #ede8f5 0%, transparent 50%);
-        }
-        .card {
-            background: white; border: 1px solid var(--border); border-radius: 4px;
-            width: 100%; max-width: 420px;
-            box-shadow: 0 2px 40px rgba(0,0,0,0.06), 0 0 0 1px rgba(201,168,76,0.1);
-            overflow: hidden;
-        }
-        .card-header { background: var(--ink); padding: 24px 28px; position: relative; overflow: hidden; }
-        .card-header::after { content: '◆'; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 28px; opacity: 0.4; }
-        .card-header h1 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; color: white; }
-        .card-header p { font-size: 12px; color: #888; margin-top: 4px; letter-spacing: 0.08em; text-transform: uppercase; }
-        .card-body { padding: 24px 28px; }
-        .field { margin-bottom: 16px; }
-        label { display: block; font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-        input, select {
-            width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 3px;
-            font-size: 15px; font-family: 'DM Sans', sans-serif; color: var(--ink); background: white;
-            transition: border-color 0.2s, box-shadow 0.2s; appearance: none;
-        }
-        input:focus, select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-light); }
-        select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7a8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer;
-        }
-        .divider { height: 1px; background: var(--border); margin: 20px 0; }
-        #results { min-height: 60px; }
-        .status { text-align: center; padding: 20px 0; font-size: 13px; color: var(--muted); font-style: italic; }
-        .status.error { color: #c0392b; font-style: normal; }
-        .tense-label { font-family: 'Playfair Display', serif; font-size: 11px; font-style: italic; color: var(--gold); text-align: center; margin-bottom: 14px; letter-spacing: 0.04em; }
-        .row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid #f0ede6; }
-        .row:last-child { border-bottom: none; }
-        .pronoun { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); width: 90px; flex-shrink: 0; }
-        .verb-form { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--ink); text-align: right; }
-        .fade-in { animation: fadeIn 0.25s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>French Conjugator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #fff;
+    color: #111;
+    min-height: 100vh;
+    padding: 3rem 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    margin-bottom: 2rem;
+    color: #111;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 420px;
+    margin-bottom: 1rem;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    padding: 0.6rem 0.9rem;
+    border: 1.5px solid #ddd;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.15s;
+    background: #fafafa;
+    color: #111;
+  }
+
+  input[type="text"]:focus {
+    border-color: #111;
+    background: #fff;
+  }
+
+  input[type="text"]::placeholder { color: #aaa; }
+
+  button.go {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.6rem 1.2rem;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  button.go:hover { background: #333; }
+
+  .quick-verbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    max-width: 420px;
+    margin-bottom: 2.5rem;
+  }
+
+  .quick-verbs span {
+    font-size: 0.78rem;
+    color: #aaa;
+  }
+
+  .qv {
+    font-size: 0.78rem;
+    padding: 0.22rem 0.6rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    background: none;
+    cursor: pointer;
+    color: #666;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.12s;
+  }
+
+  .qv:hover { border-color: #111; color: #111; }
+
+  .error {
+    font-size: 0.82rem;
+    color: #c00;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+
+  .result-verb {
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+  }
+
+  .result-note {
+    font-size: 0.78rem;
+    color: #999;
+    margin-bottom: 2rem;
+  }
+
+  .tenses {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2rem;
+    max-width: 640px;
+  }
+
+  .tense-block h2 {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #bbb;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.28rem 0;
+    font-size: 0.88rem;
+    border-bottom: 1px solid #f7f7f7;
+  }
+
+  .row:last-child { border-bottom: none; }
+
+  .pron { color: #bbb; }
+  .form { color: #111; }
+
+  #output { display: none; }
+</style>
 </head>
 <body>
-<div class="card">
-    <div class="card-header">
-        <h1>Conjugueur</h1>
-        <p>Verbes français</p>
-    </div>
-    <div class="card-body">
-        <div class="field">
-            <label>Infinitif</label>
-            <input type="text" id="verbInput" placeholder="manger, être, aller…" value="manger">
-        </div>
-        <div class="field">
-            <label>Temps</label>
-            <select id="tenseSelect">
-                <option value="present">Présent</option>
-                <option value="imparfait">Imparfait</option>
-                <option value="futur">Futur simple</option>
-                <option value="conditionnel">Conditionnel présent</option>
-                <option value="subjonctif">Subjonctif présent</option>
-                <option value="imperatif">Impératif</option>
-            </select>
-        </div>
-        <div class="divider"></div>
-        <div id="results"><div class="status">Entrez un verbe pour commencer.</div></div>
-    </div>
+
+<h1>French Conjugator</h1>
+
+<div class="input-row">
+  <input type="text" id="verbInput" placeholder="Enter a verb (e.g. parler)" autocomplete="off" />
+  <button class="go" onclick="conjugate()">Go</button>
+</div>
+
+<div class="quick-verbs">
+  <span>Try:</span>
+  <button class="qv" onclick="tryVerb('être')">être</button>
+  <button class="qv" onclick="tryVerb('avoir')">avoir</button>
+  <button class="qv" onclick="tryVerb('aller')">aller</button>
+  <button class="qv" onclick="tryVerb('faire')">faire</button>
+  <button class="qv" onclick="tryVerb('parler')">parler</button>
+  <button class="qv" onclick="tryVerb('vouloir')">vouloir</button>
+  <button class="qv" onclick="tryVerb('finir')">finir</button>
+</div>
+
+<div class="error" id="error">Unknown verb ending — try a verb ending in -er, -ir, or -re.</div>
+
+<div id="output">
+  <div class="result-verb" id="resultVerb"></div>
+  <div class="result-note" id="resultNote"></div>
+  <div class="tenses" id="tensesGrid"></div>
 </div>
 
 <script>
-const IRREGULARS = {
-    "être":      { present:["suis","es","est","sommes","êtes","sont"], imparfait:["étais","étais","était","étions","étiez","étaient"], futur:["serai","seras","sera","serons","serez","seront"], conditionnel:["serais","serais","serait","serions","seriez","seraient"], subjonctif:["sois","sois","soit","soyons","soyez","soient"], imperatif:[null,"sois",null,"soyons","soyez",null] },
-    "avoir":     { present:["ai","as","a","avons","avez","ont"], imparfait:["avais","avais","avait","avions","aviez","avaient"], futur:["aurai","auras","aura","aurons","aurez","auront"], conditionnel:["aurais","aurais","aurait","aurions","auriez","auraient"], subjonctif:["aie","aies","ait","ayons","ayez","aient"], imperatif:[null,"aie",null,"ayons","ayez",null] },
-    "aller":     { present:["vais","vas","va","allons","allez","vont"], imparfait:["allais","allais","allait","allions","alliez","allaient"], futur:["irai","iras","ira","irons","irez","iront"], conditionnel:["irais","irais","irait","irions","iriez","iraient"], subjonctif:["aille","ailles","aille","allions","alliez","aillent"], imperatif:[null,"va",null,"allons","allez",null] },
-    "faire":     { present:["fais","fais","fait","faisons","faites","font"], imparfait:["faisais","faisais","faisait","faisions","faisiez","faisaient"], futur:["ferai","feras","fera","ferons","ferez","feront"], conditionnel:["ferais","ferais","ferait","ferions","feriez","feraient"], subjonctif:["fasse","fasses","fasse","fassions","fassiez","fassent"], imperatif:[null,"fais",null,"faisons","faites",null] },
-    "pouvoir":   { present:["peux","peux","peut","pouvons","pouvez","peuvent"], imparfait:["pouvais","pouvais","pouvait","pouvions","pouviez","pouvaient"], futur:["pourrai","pourras","pourra","pourrons","pourrez","pourront"], conditionnel:["pourrais","pourrais","pourrait","pourrions","pourriez","pourraient"], subjonctif:["puisse","puisses","puisse","puissions","puissiez","puissent"], imperatif:[null,null,null,null,null,null] },
-    "vouloir":   { present:["veux","veux","veut","voulons","voulez","veulent"], imparfait:["voulais","voulais","voulait","voulions","vouliez","voulaient"], futur:["voudrai","voudras","voudra","voudrons","voudrez","voudront"], conditionnel:["voudrais","voudrais","voudrait","voudrions","voudriez","voudraient"], subjonctif:["veuille","veuilles","veuille","voulions","vouliez","veuillent"], imperatif:[null,"veuille",null,"voulons","voulez",null] },
-    "savoir":    { present:["sais","sais","sait","savons","savez","savent"], imparfait:["savais","savais","savait","savions","saviez","savaient"], futur:["saurai","sauras","saura","saurons","saurez","sauront"], conditionnel:["saurais","saurais","saurait","saurions","sauriez","sauraient"], subjonctif:["sache","saches","sache","sachions","sachiez","sachent"], imperatif:[null,"sache",null,"sachons","sachez",null] },
-    "venir":     { present:["viens","viens","vient","venons","venez","viennent"], imparfait:["venais","venais","venait","venions","veniez","venaient"], futur:["viendrai","viendras","viendra","viendrons","viendrez","viendront"], conditionnel:["viendrais","viendrais","viendrait","viendrions","viendriez","viendraient"], subjonctif:["vienne","viennes","vienne","venions","veniez","viennent"], imperatif:[null,"viens",null,"venons","venez",null] },
-    "tenir":     { present:["tiens","tiens","tient","tenons","tenez","tiennent"], imparfait:["tenais","tenais","tenait","tenions","teniez","tenaient"], futur:["tiendrai","tiendras","tiendra","tiendrons","tiendrez","tiendront"], conditionnel:["tiendrais","tiendrais","tiendrait","tiendrions","tiendriez","tiendraient"], subjonctif:["tienne","tiennes","tienne","tenions","teniez","tiennent"], imperatif:[null,"tiens",null,"tenons","tenez",null] },
-    "prendre":   { present:["prends","prends","prend","prenons","prenez","prennent"], imparfait:["prenais","prenais","prenait","prenions","preniez","prenaient"], futur:["prendrai","prendras","prendra","prendrons","prendrez","prendront"], conditionnel:["prendrais","prendrais","prendrait","prendrions","prendriez","prendraient"], subjonctif:["prenne","prennes","prenne","prenions","preniez","prennent"], imperatif:[null,"prends",null,"prenons","prenez",null] },
-    "mettre":    { present:["mets","mets","met","mettons","mettez","mettent"], imparfait:["mettais","mettais","mettait","mettions","mettiez","mettaient"], futur:["mettrai","mettras","mettra","mettrons","mettrez","mettront"], conditionnel:["mettrais","mettrais","mettrait","mettrions","mettriez","mettraient"], subjonctif:["mette","mettes","mette","mettions","mettiez","mettent"], imperatif:[null,"mets",null,"mettons","mettez",null] },
-    "partir":    { present:["pars","pars","part","partons","partez","partent"], imparfait:["partais","partais","partait","partions","partiez","partaient"], futur:["partirai","partiras","partira","partirons","partirez","partiront"], conditionnel:["partirais","partirais","partirait","partirions","partiriez","partiraient"], subjonctif:["parte","partes","parte","partions","partiez","partent"], imperatif:[null,"pars",null,"partons","partez",null] },
-    "sortir":    { present:["sors","sors","sort","sortons","sortez","sortent"], imparfait:["sortais","sortais","sortait","sortions","sortiez","sortaient"], futur:["sortirai","sortiras","sortira","sortirons","sortirez","sortiront"], conditionnel:["sortirais","sortirais","sortirait","sortirions","sortiriez","sortiraient"], subjonctif:["sorte","sortes","sorte","sortions","sortiez","sortent"], imperatif:[null,"sors",null,"sortons","sortez",null] },
-    "dire":      { present:["dis","dis","dit","disons","dites","disent"], imparfait:["disais","disais","disait","disions","disiez","disaient"], futur:["dirai","diras","dira","dirons","direz","diront"], conditionnel:["dirais","dirais","dirait","dirions","diriez","diraient"], subjonctif:["dise","dises","dise","disions","disiez","disent"], imperatif:[null,"dis",null,"disons","dites",null] },
-    "lire":      { present:["lis","lis","lit","lisons","lisez","lisent"], imparfait:["lisais","lisais","lisait","lisions","lisiez","lisaient"], futur:["lirai","liras","lira","lirons","lirez","liront"], conditionnel:["lirais","lirais","lirait","lirions","liriez","liraient"], subjonctif:["lise","lises","lise","lisions","lisiez","lisent"], imperatif:[null,"lis",null,"lisons","lisez",null] },
-    "écrire":    { present:["écris","écris","écrit","écrivons","écrivez","écrivent"], imparfait:["écrivais","écrivais","écrivait","écrivions","écriviez","écrivaient"], futur:["écrirai","écriras","écrira","écrirons","écrirez","écriront"], conditionnel:["écrirais","écrirais","écrirait","écririons","écririez","écriraient"], subjonctif:["écrive","écrives","écrive","écrivions","écriviez","écrivent"], imperatif:[null,"écris",null,"écrivons","écrivez",null] },
-    "voir":      { present:["vois","vois","voit","voyons","voyez","voient"], imparfait:["voyais","voyais","voyait","voyions","voyiez","voyaient"], futur:["verrai","verras","verra","verrons","verrez","verront"], conditionnel:["verrais","verrais","verrait","verrions","verriez","verraient"], subjonctif:["voie","voies","voie","voyions","voyiez","voient"], imperatif:[null,"vois",null,"voyons","voyez",null] },
-    "croire":    { present:["crois","crois","croit","croyons","croyez","croient"], imparfait:["croyais","croyais","croyait","croyions","croyiez","croyaient"], futur:["croirai","croiras","croira","croirons","croirez","croiront"], conditionnel:["croirais","croirais","croirait","croirions","croiriez","croiraient"], subjonctif:["croie","croies","croie","croyions","croyiez","croient"], imperatif:[null,"crois",null,"croyons","croyez",null] },
-    "recevoir":  { present:["reçois","reçois","reçoit","recevons","recevez","reçoivent"], imparfait:["recevais","recevais","recevait","recevions","receviez","recevaient"], futur:["recevrai","recevras","recevra","recevrons","recevrez","recevront"], conditionnel:["recevrais","recevrais","recevrait","recevrions","recevriez","recevraient"], subjonctif:["reçoive","reçoives","reçoive","recevions","receviez","reçoivent"], imperatif:[null,"reçois",null,"recevons","recevez",null] },
-    "devoir":    { present:["dois","dois","doit","devons","devez","doivent"], imparfait:["devais","devais","devait","devions","deviez","devaient"], futur:["devrai","devras","devra","devrons","devrez","devront"], conditionnel:["devrais","devrais","devrait","devrions","devriez","devraient"], subjonctif:["doive","doives","doive","devions","deviez","doivent"], imperatif:[null,null,null,null,null,null] },
-    "vivre":     { present:["vis","vis","vit","vivons","vivez","vivent"], imparfait:["vivais","vivais","vivait","vivions","viviez","vivaient"], futur:["vivrai","vivras","vivra","vivrons","vivrez","vivront"], conditionnel:["vivrais","vivrais","vivrait","vivrions","vivriez","vivraient"], subjonctif:["vive","vives","vive","vivions","viviez","vivent"], imperatif:[null,"vis",null,"vivons","vivez",null] },
-    "suivre":    { present:["suis","suis","suit","suivons","suivez","suivent"], imparfait:["suivais","suivais","suivait","suivions","suiviez","suivaient"], futur:["suivrai","suivras","suivra","suivrons","suivrez","suivront"], conditionnel:["suivrais","suivrais","suivrait","suivrions","suivriez","suivraient"], subjonctif:["suive","suives","suive","suivions","suiviez","suivent"], imperatif:[null,"suis",null,"suivons","suivez",null] },
-    "ouvrir":    { present:["ouvre","ouvres","ouvre","ouvrons","ouvrez","ouvrent"], imparfait:["ouvrais","ouvrais","ouvrait","ouvrions","ouvriez","ouvraient"], futur:["ouvrirai","ouvriras","ouvrira","ouvrirons","ouvrirez","ouvriront"], conditionnel:["ouvrirais","ouvrirais","ouvrirait","ouvririons","ouvririez","ouvriraient"], subjonctif:["ouvre","ouvres","ouvre","ouvrions","ouvriez","ouvrent"], imperatif:[null,"ouvre",null,"ouvrons","ouvrez",null] },
-    "connaître": { present:["connais","connais","connaît","connaissons","connaissez","connaissent"], imparfait:["connaissais","connaissais","connaissait","connaissions","connaissiez","connaissaient"], futur:["connaîtrai","connaîtras","connaîtra","connaîtrons","connaîtrez","connaîtront"], conditionnel:["connaîtrais","connaîtrais","connaîtrait","connaîtrions","connaîtriez","connaîtraient"], subjonctif:["connaisse","connaisses","connaisse","connaissions","connaissiez","connaissent"], imperatif:[null,"connais",null,"connaissons","connaissez",null] },
-    "conduire":  { present:["conduis","conduis","conduit","conduisons","conduisez","conduisent"], imparfait:["conduisais","conduisais","conduisait","conduisions","conduisiez","conduisaient"], futur:["conduirai","conduiras","conduira","conduirons","conduirez","conduiront"], conditionnel:["conduirais","conduirais","conduirait","conduirions","conduiriez","conduiraient"], subjonctif:["conduise","conduises","conduise","conduisions","conduisiez","conduisent"], imperatif:[null,"conduis",null,"conduisons","conduisez",null] },
-    "craindre":  { present:["crains","crains","craint","craignons","craignez","craignent"], imparfait:["craignais","craignais","craignait","craignions","craigniez","craignaient"], futur:["craindrai","craindras","craindra","craindrons","craindrez","craindront"], conditionnel:["craindrais","craindrais","craindrait","craindrions","craindriez","craindraient"], subjonctif:["craigne","craignes","craigne","craignions","craigniez","craignent"], imperatif:[null,"crains",null,"craignons","craignez",null] },
-    "valoir":    { present:["vaux","vaux","vaut","valons","valez","valent"], imparfait:["valais","valais","valait","valions","valiez","valaient"], futur:["vaudrai","vaudras","vaudra","vaudrons","vaudrez","vaudront"], conditionnel:["vaudrais","vaudrais","vaudrait","vaudrions","vaudriez","vaudraient"], subjonctif:["vaille","vailles","vaille","valions","valiez","vaillent"], imperatif:[null,null,null,null,null,null] },
-    "falloir":   { present:[null,null,"faut",null,null,null], imparfait:[null,null,"fallait",null,null,null], futur:[null,null,"faudra",null,null,null], conditionnel:[null,null,"faudrait",null,null,null], subjonctif:[null,null,"faille",null,null,null], imperatif:[null,null,null,null,null,null] },
-    "pleuvoir":  { present:[null,null,"pleut",null,null,null], imparfait:[null,null,"pleuvait",null,null,null], futur:[null,null,"pleuvra",null,null,null], conditionnel:[null,null,"pleuvrait",null,null,null], subjonctif:[null,null,"pleuve",null,null,null], imperatif:[null,null,null,null,null,null] },
-    "rire":      { present:["ris","ris","rit","rions","riez","rient"], imparfait:["riais","riais","riait","riions","riiez","riaient"], futur:["rirai","riras","rira","rirons","rirez","riront"], conditionnel:["rirais","rirais","rirait","ririons","ririez","riraient"], subjonctif:["rie","ries","rie","riions","riiez","rient"], imperatif:[null,"ris",null,"rions","riez",null] },
-    "plaire":    { present:["plais","plais","plaît","plaisons","plaisez","plaisent"], imparfait:["plaisais","plaisais","plaisait","plaisions","plaisiez","plaisaient"], futur:["plairai","plairas","plaira","plairons","plairez","plairont"], conditionnel:["plairais","plairais","plairait","plairions","plairiez","plairaient"], subjonctif:["plaise","plaises","plaise","plaisions","plaisiez","plaisent"], imperatif:[null,"plais",null,"plaisons","plaisez",null] },
+const pronouns = ["je","tu","il","nous","vous","ils"];
+const labels = { je:"je", tu:"tu", il:"il / elle", nous:"nous", vous:"vous", ils:"ils / elles" };
+const allerP = { je:"vais", tu:"vas", il:"va", nous:"allons", vous:"allez", ils:"vont" };
+
+const irregulars = {
+  être:    { meaning:"to be",        type:"irregular", présent:{je:"suis",tu:"es",il:"est",nous:"sommes",vous:"êtes",ils:"sont"}, pc:{je:"ai été",tu:"as été",il:"a été",nous:"avons été",vous:"avez été",ils:"ont été"} },
+  avoir:   { meaning:"to have",      type:"irregular", présent:{je:"ai",tu:"as",il:"a",nous:"avons",vous:"avez",ils:"ont"}, pc:{je:"ai eu",tu:"as eu",il:"a eu",nous:"avons eu",vous:"avez eu",ils:"ont eu"} },
+  aller:   { meaning:"to go",        type:"irregular", présent:{je:"vais",tu:"vas",il:"va",nous:"allons",vous:"allez",ils:"vont"}, pc:{je:"suis allé",tu:"es allé",il:"est allé",nous:"sommes allés",vous:"êtes allés",ils:"sont allés"} },
+  faire:   { meaning:"to do / make", type:"irregular", présent:{je:"fais",tu:"fais",il:"fait",nous:"faisons",vous:"faites",ils:"font"}, pc:{je:"ai fait",tu:"as fait",il:"a fait",nous:"avons fait",vous:"avez fait",ils:"ont fait"} },
+  pouvoir: { meaning:"to be able to",type:"irregular", présent:{je:"peux",tu:"peux",il:"peut",nous:"pouvons",vous:"pouvez",ils:"peuvent"}, pc:{je:"ai pu",tu:"as pu",il:"a pu",nous:"avons pu",vous:"avez pu",ils:"ont pu"} },
+  vouloir: { meaning:"to want",      type:"irregular", présent:{je:"veux",tu:"veux",il:"veut",nous:"voulons",vous:"voulez",ils:"veulent"}, pc:{je:"ai voulu",tu:"as voulu",il:"a voulu",nous:"avons voulu",vous:"avez voulu",ils:"ont voulu"} },
+  venir:   { meaning:"to come",      type:"irregular", présent:{je:"viens",tu:"viens",il:"vient",nous:"venons",vous:"venez",ils:"viennent"}, pc:{je:"suis venu",tu:"es venu",il:"est venu",nous:"sommes venus",vous:"êtes venus",ils:"sont venus"} },
+  prendre: { meaning:"to take",      type:"irregular", présent:{je:"prends",tu:"prends",il:"prend",nous:"prenons",vous:"prenez",ils:"prennent"}, pc:{je:"ai pris",tu:"as pris",il:"a pris",nous:"avons pris",vous:"avez pris",ils:"ont pris"} },
+  savoir:  { meaning:"to know",      type:"irregular", présent:{je:"sais",tu:"sais",il:"sait",nous:"savons",vous:"savez",ils:"savent"}, pc:{je:"ai su",tu:"as su",il:"a su",nous:"avons su",vous:"avez su",ils:"ont su"} },
+  voir:    { meaning:"to see",       type:"irregular", présent:{je:"vois",tu:"vois",il:"voit",nous:"voyons",vous:"voyez",ils:"voient"}, pc:{je:"ai vu",tu:"as vu",il:"a vu",nous:"avons vu",vous:"avez vu",ils:"ont vu"} },
+  mettre:  { meaning:"to put",       type:"irregular", présent:{je:"mets",tu:"mets",il:"met",nous:"mettons",vous:"mettez",ils:"mettent"}, pc:{je:"ai mis",tu:"as mis",il:"a mis",nous:"avons mis",vous:"avez mis",ils:"ont mis"} },
+  partir:  { meaning:"to leave",     type:"irregular", présent:{je:"pars",tu:"pars",il:"part",nous:"partons",vous:"partez",ils:"partent"}, pc:{je:"suis parti",tu:"es parti",il:"est parti",nous:"sommes partis",vous:"êtes partis",ils:"sont partis"} },
+  dire:    { meaning:"to say",       type:"irregular", présent:{je:"dis",tu:"dis",il:"dit",nous:"disons",vous:"dites",ils:"disent"}, pc:{je:"ai dit",tu:"as dit",il:"a dit",nous:"avons dit",vous:"avez dit",ils:"ont dit"} },
+  lire:    { meaning:"to read",      type:"irregular", présent:{je:"lis",tu:"lis",il:"lit",nous:"lisons",vous:"lisez",ils:"lisent"}, pc:{je:"ai lu",tu:"as lu",il:"a lu",nous:"avons lu",vous:"avez lu",ils:"ont lu"} },
+  écrire:  { meaning:"to write",     type:"irregular", présent:{je:"écris",tu:"écris",il:"écrit",nous:"écrivons",vous:"écrivez",ils:"écrivent"}, pc:{je:"ai écrit",tu:"as écrit",il:"a écrit",nous:"avons écrit",vous:"avez écrit",ils:"ont écrit"} },
+  sortir:  { meaning:"to go out",    type:"irregular", présent:{je:"sors",tu:"sors",il:"sort",nous:"sortons",vous:"sortez",ils:"sortent"}, pc:{je:"suis sorti",tu:"es sorti",il:"est sorti",nous:"sommes sortis",vous:"êtes sortis",ils:"sont sortis"} },
+  dormir:  { meaning:"to sleep",     type:"irregular", présent:{je:"dors",tu:"dors",il:"dort",nous:"dormons",vous:"dormez",ils:"dorment"}, pc:{je:"ai dormi",tu:"as dormi",il:"a dormi",nous:"avons dormi",vous:"avez dormi",ils:"ont dormi"} },
 };
 
-// Compound verb prefixes that inherit from a base irregular
-const COMPOUND_MAP = {};
-[
-    ["venir",    ["devenir","revenir","parvenir","prévenir","intervenir","survenir","subvenir","contrevenir"]],
-    ["tenir",    ["obtenir","retenir","soutenir","maintenir","contenir","appartenir","détenir","entretenir","abstenir"]],
-    ["prendre",  ["apprendre","comprendre","reprendre","surprendre","entreprendre"]],
-    ["mettre",   ["remettre","permettre","promettre","omettre","soumettre","admettre","commettre","émettre","transmettre"]],
-    ["dire",     ["redire","contredire","prédire","médire","interdire"]],
-    ["faire",    ["défaire","refaire","satisfaire","contrefaire"]],
-    ["voir",     ["revoir","prévoir","entrevoir"]],
-    ["écrire",   ["décrire","prescrire","inscrire","souscrire","transcrire"]],
-    ["conduire", ["produire","reproduire","introduire","déduire","séduire","traduire","réduire","construire","détruire","instruire"]],
-    ["ouvrir",   ["découvrir","recouvrir","couvrir","souffrir","offrir"]],
-    ["connaître",["reconnaître","méconnaître","paraître","apparaître","disparaître"]],
-    ["craindre", ["contraindre","plaindre","rejoindre","joindre","atteindre","teindre","éteindre","feindre","peindre"]],
-    ["partir",   ["repartir"]],
-    ["sortir",   ["ressortir"]],
-    ["vivre",    ["survivre","revivre"]],
-    ["suivre",   ["poursuivre"]],
-].forEach(([base, compounds]) => {
-    compounds.forEach(c => { COMPOUND_MAP[c] = base; });
+function regularConj(verb) {
+  if (verb.endsWith("er")) {
+    const s = verb.slice(0,-2);
+    return { type:"-er regular", meaning:null,
+      présent:{je:s+"e",tu:s+"es",il:s+"e",nous:s+"ons",vous:s+"ez",ils:s+"ent"},
+      pc:{je:`ai ${s}é`,tu:`as ${s}é`,il:`a ${s}é`,nous:`avons ${s}é`,vous:`avez ${s}é`,ils:`ont ${s}é`} };
+  }
+  if (verb.endsWith("ir")) {
+    const s = verb.slice(0,-2);
+    return { type:"-ir regular", meaning:null,
+      présent:{je:s+"is",tu:s+"is",il:s+"it",nous:s+"issons",vous:s+"issez",ils:s+"issent"},
+      pc:{je:`ai ${s}i`,tu:`as ${s}i`,il:`a ${s}i`,nous:`avons ${s}i`,vous:`avez ${s}i`,ils:`ont ${s}i`} };
+  }
+  if (verb.endsWith("re")) {
+    const s = verb.slice(0,-2);
+    return { type:"-re regular", meaning:null,
+      présent:{je:s+"s",tu:s+"s",il:s,nous:s+"ons",vous:s+"ez",ils:s+"ent"},
+      pc:{je:`ai ${s}u`,tu:`as ${s}u`,il:`a ${s}u`,nous:`avons ${s}u`,vous:`avez ${s}u`,ils:`ont ${s}u`} };
+  }
+  return null;
+}
+
+// Strip accents for fuzzy matching
+function stripAccents(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+// Build a map from stripped key -> accented key for all irregulars
+const strippedMap = {};
+for (const key of Object.keys(irregulars)) {
+  strippedMap[stripAccents(key)] = key;
+}
+
+function resolveVerb(input) {
+  // Exact match first
+  if (irregulars[input]) return { canonical: input, data: irregulars[input] };
+  // Try stripped match against irregulars
+  const stripped = stripAccents(input);
+  if (strippedMap[stripped]) {
+    const canonical = strippedMap[stripped];
+    return { canonical, data: irregulars[canonical] };
+  }
+  // Fall back to regular conjugation using the input as-is
+  const data = regularConj(input);
+  return data ? { canonical: input, data } : null;
+}
+
+function conjugate() {
+  const verb = document.getElementById("verbInput").value.trim().toLowerCase();
+  if (!verb) return;
+  const resolved = resolveVerb(verb);
+  const err = document.getElementById("error");
+  const out = document.getElementById("output");
+
+  if (!resolved) { err.style.display="block"; out.style.display="none"; return; }
+  err.style.display = "none";
+
+  const { canonical, data } = resolved;
+
+  document.getElementById("resultVerb").textContent = canonical;
+  const note = [data.meaning, data.type + (data.type.includes("regular") && !irregulars[canonical] ? " (verify irregular forms)" : "")].filter(Boolean).join(" · ");
+  document.getElementById("resultNote").textContent = note;
+
+  const fp = Object.fromEntries(Object.entries(allerP).map(([p,a])=>[p,`${a} ${canonical}`]));
+
+  const tenses = [
+    { label:"Présent",       conj:data.présent },
+    { label:"Passé Composé", conj:data.pc },
+    { label:"Futur Proche",  conj:fp },
+  ];
+
+  document.getElementById("tensesGrid").innerHTML = tenses.map(t=>`
+    <div class="tense-block">
+      <h2>${t.label}</h2>
+      ${pronouns.map(p=>`
+        <div class="row">
+          <span class="pron">${labels[p]}</span>
+          <span class="form">${t.conj[p]}</span>
+        </div>`).join('')}
+    </div>`).join('');
+
+  out.style.display = "block";
+}
+
+function tryVerb(v) {
+  document.getElementById("verbInput").value = v;
+  conjugate();
+}
+
+document.getElementById("verbInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") conjugate();
 });
-
-function conjugate(verb, tense) {
-    verb = verb.toLowerCase().trim();
-
-    if (IRREGULARS[verb]) return IRREGULARS[verb][tense];
-
-    // Compound irregular
-    const base = COMPOUND_MAP[verb];
-    if (base && IRREGULARS[base]) {
-        const prefix = verb.slice(0, verb.length - base.length);
-        return IRREGULARS[base][tense].map(f => f ? prefix + f : null);
-    }
-
-    // Regular -er
-    if (verb.endsWith("er")) {
-        const rawStem = verb.slice(0, -2);
-        const getStem = (i, endings_arr) => {
-            let s = rawStem;
-            const end = endings_arr[i] || "";
-            const vowelStart = /^[aâoôuû]/.test(end);
-            if (s.endsWith("c") && vowelStart) s = s.slice(0,-1) + "ç";
-            if (s.endsWith("g") && vowelStart) s = s + "e";
-            if (s.endsWith("y") && !s.endsWith("ay")) {
-                if (tense === "present" && (i < 3 || i === 5)) s = s.slice(0,-1) + "i";
-            }
-            // lever/mener type: e→è before mute syllable
-            if (/[^aeiouéèêàâîï]e$/.test(s) && tense === "present" && (i < 3 || i === 5)) {
-                s = s.slice(0,-1) + "è";
-            }
-            return s;
-        };
-        const E = {
-            present:     ["e","es","e","ons","ez","ent"],
-            imparfait:   ["ais","ais","ait","ions","iez","aient"],
-            futur:       ["erai","eras","era","erons","erez","eront"],
-            conditionnel:["erais","erais","erait","erions","eriez","eraient"],
-            subjonctif:  ["e","es","e","ions","iez","ent"],
-            imperatif:   [null,"e",null,"ons","ez",null],
-        };
-        return E[tense].map((end, i) => end === null ? null : getStem(i, E[tense]) + end);
-    }
-
-    // Regular -ir (finir type, not partir/sortir)
-    if (verb.endsWith("ir")) {
-        const stem = verb.slice(0, -2);
-        const E = {
-            present:     ["is","is","it","issons","issez","issent"],
-            imparfait:   ["issais","issais","issait","issions","issiez","issaient"],
-            futur:       ["irai","iras","ira","irons","irez","iront"],
-            conditionnel:["irais","irais","irait","irions","iriez","iraient"],
-            subjonctif:  ["isse","isses","isse","issions","issiez","issent"],
-            imperatif:   [null,"is",null,"issons","issez",null],
-        };
-        return E[tense].map((end, i) => end === null ? null : stem + end);
-    }
-
-    // Regular -re (vendre type)
-    if (verb.endsWith("re")) {
-        const stem = verb.slice(0, -2);
-        const E = {
-            present:     ["s","s","","ons","ez","ent"],
-            imparfait:   ["ais","ais","ait","ions","iez","aient"],
-            futur:       ["rai","ras","ra","rons","rez","ront"],
-            conditionnel:["rais","rais","rait","rions","riez","raient"],
-            subjonctif:  ["e","es","e","ions","iez","ent"],
-            imperatif:   [null,"s",null,"ons","ez",null],
-        };
-        return E[tense].map((end, i) => end === null ? null : stem + end);
-    }
-
-    return null;
-}
-
-const PRONOUNS = ["Je","Tu","Il / Elle","Nous","Vous","Ils / Elles"];
-const SUBJ_PRONOUNS = ["Que je","Que tu","Qu'il","Que nous","Que vous","Qu'ils"];
-const TENSE_LABELS = {
-    present:"Présent de l'indicatif", imparfait:"Imparfait de l'indicatif",
-    futur:"Futur simple", conditionnel:"Conditionnel présent",
-    subjonctif:"Subjonctif présent", imperatif:"Impératif présent"
-};
-
-let debounceTimer;
-
-function update() {
-    const verb = document.getElementById('verbInput').value.trim();
-    const tense = document.getElementById('tenseSelect').value;
-    const results = document.getElementById('results');
-    if (!verb) { results.innerHTML = `<div class="status">Entrez un verbe pour commencer.</div>`; return; }
-    const forms = conjugate(verb, tense);
-    if (!forms || !forms.some(f => f !== null)) {
-        results.innerHTML = `<div class="status error">Verbe non reconnu. Essayez un verbe en -er, -ir ou -re.</div>`; return;
-    }
-    const pronouns = tense === "subjonctif" ? SUBJ_PRONOUNS : PRONOUNS;
-    let html = `<div class="tense-label fade-in">${TENSE_LABELS[tense]}</div><div class="fade-in">`;
-    forms.forEach((f, i) => {
-        if (f !== null) html += `<div class="row"><span class="pronoun">${pronouns[i]}</span><span class="verb-form">${f}</span></div>`;
-    });
-    html += `</div>`;
-    results.innerHTML = html;
-}
-
-document.getElementById('verbInput').addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(update, 200); });
-document.getElementById('tenseSelect').addEventListener('change', update);
-update();
 </script>
 </body>
 </html>
