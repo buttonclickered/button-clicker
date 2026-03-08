@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plural Rules</title>
-    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <title>Negation Rules</title>
     <style>
         /* 1. Parallax Setup */
         body, html {
@@ -33,21 +33,28 @@
             top: 0; left: 0; right: 0; bottom: 0;
             background-image: url('/search/Images/background.png');
             background-size: cover;
-            background-position: center;
             z-index: -1;
-            transform: translateZ(-1px) scale(3);
+            /* The lower the translateZ, the slower it scrolls */
+            transform: translateZ(-1px) scale(2);
             transform-origin: center;
         }
 
         /* 2. Layout & Text Styles */
-        h1 { text-align: center; margin: 1.5rem 0; font-size: 1.8rem; font-weight: 500; }
-        #back { align-self: flex-start; border: none; background: none; cursor: pointer; }
+        h1, h2 { text-align: center; margin: 1.5rem 0; }
         
+        #back { align-self: flex-start; border: none; background: none; cursor: pointer; }
+
+        p { text-align: center; margin: 10px 0; }
+        
+        /* Italic and Bold specific markers */
+        i { font-style: italic; }
+        u { text-decoration: underline; font-weight: bold; }
+
         /* 3. Table Styling */
         table {
             background-color: #ffffff;
             border-radius: 6px;
-            margin: 10px auto 30px auto;
+            margin: 20px auto;
             width: 90%;
             max-width: 600px;
             border-collapse: collapse;
@@ -72,60 +79,52 @@
             <img src="/search/Images/back.png" width="35">
         </button>
 
-        <h1>Plural Rules</h1>
+        <h1>Negation Rules</h1>
         
+        <p style="font-size: 30px;"> Je <u>ne</u> <i>verb</i> <u>pas</u></p>
+        <p style="font-size: 23px;"> I <u>don't</u> <i>verb</i></p>
+
+        <h2>Examples:</h2>
         <table>
             <tr>
-                <th>Ending</th>
-                <th>Plural Ending</th>
+                <th>Normal</th>
+                <th>Negation</th>
+                <th>English</th>
             </tr>
             <tr>
-                <td>-s, -x, -z</td>
-                <td>doesn't change</td>
+                <td>Je saute beaucoup</td>
+                <td>Je ne saute pas beaucoup</td>
+                <td>I don't jump a lot</td>
             </tr>
             <tr>
-                <td>-al</td>
-                <td>-aux</td>
+                <td>J'aime les chiens</td>
+                <td>Je n'aime pas les chiens</td>
+                <td>I don't like dogs</td>
             </tr>
             <tr>
-                <td>-eau, -au, -eu</td>
-                <td>-eaux, -aux, -eux</td>
-            </tr>
-            <tr>
-                <td>-ou</td>
-                <td>-ous (exceptions)</td>
-            </tr>
-            <tr>
-                <td>Others</td>
-                <td>add -s</td>
+                <td>Il y a des pommes</td>
+                <td>Il n'y a pas de pommes</td>
+                <td>There aren't apples</td>
             </tr>
         </table>
 
-        <h1>Examples:</h1>
+        <h2>Others:</h2>
         <table>
             <tr>
-                <th>Singular</th>
-                <th>Plural</th>
+                <th>French</th>
+                <th>English</th>
             </tr>
             <tr>
-                <td>un chat</td>
-                <td>des chats</td>
+                <td>Ne pas / pas</td>
+                <td>Not</td>
             </tr>
             <tr>
-                <td>un cheval</td>
-                <td>des chevaux</td>
+                <td>Pas ici</td>
+                <td>Not here</td>
             </tr>
             <tr>
-                <td>un bureau</td>
-                <td>des bureaux</td>
-            </tr>
-            <tr>
-                <td>un bijou</td>
-                <td>des bijoux</td>
-            </tr>
-            <tr>
-                <td>une maison</td>
-                <td>des maisons</td>
+                <td>Jamais</td>
+                <td>Never</td>
             </tr>
         </table>
     </div>

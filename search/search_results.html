@@ -1,21 +1,70 @@
 <!DOCTYPE html>
 <html>
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Search</title>
-      <link rel="stylesheet" href="search.css">
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* 1. Parallax Setup */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden; /* Prevent body from scrolling */
+            font-family: 'Inter', sans-serif;
+        }
+
+        .parallax-wrapper {
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto; /* This is the scrolling layer */
+            perspective: 1px;
+            transform-style: preserve-3d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .parallax-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('/search/Images/background.png');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            /* With perspective 1px, scale(3) is needed to fill the screen */
+            transform: translateZ(-1px) scale(3); 
+            transform-origin: center;
+        }
+
+        /* 2. Layout & Text Styles */
+        h1 { text-align: center; margin: 1.5rem 0; font-size: 1.5rem; }
+        
+        #back { align-self: flex-start; border: none; background: none; cursor: pointer; }
+
+        p { text-align: center; margin: 10px 0; }
+        
+        #display-query { font-weight: bold; }
+        
+        #results { font-style: italic; margin-top: 20px; }
+    </style>
+</head>
 <body>
-  <button id="back" type="button" onclick="history.back()">
-        <img src="/search/Images/back.png" alt="Submit" width="35" height="35">
-      </button>
-  <h1>Search Results</h1>
-  
-  <!-- This is where the query will be displayed -->
-  <p>You searched for: <span id="display-query"></span></p>
-   <span id="results"></span>
-    <script src="search.js"></script>
+    <!-- Everything MUST go inside the wrapper to scroll with the parallax effect -->
+    <div class="parallax-wrapper">
+        <button id="back" type="button" onclick="history.back()">
+            <img src="/search/Images/back.png" alt="Back" width="35" height="35">
+        </button>
+
+        <h1>Search Results</h1>
+        
+        <p>You searched for: <span id="display-query"></span></p>
+        <span id="results"></span>
+
+        <script src="search.js"></script>
+    </div>
 </body>
 </html>

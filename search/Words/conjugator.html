@@ -1,181 +1,175 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>French Conjugator</title>
-<link href="https://fonts.googleapis.com" rel="stylesheet">
-<style>
-  /* 1. Global Reset - REMOVED text-align: center from here */
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>French Conjugator</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { height: 100vh; overflow: hidden; font-family: 'Inter', sans-serif; color: #111; }
 
-  /* 2. Back Button - Specifically Left Aligned */
-  #back { 
-    border: none; 
-    outline: none; 
-    background: none; 
-    cursor: pointer; 
-    margin-bottom: 1rem;
-    align-self: flex-start; /* Forces it to the left in the flex body */
-  }
+        .parallax-wrapper {
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            perspective: 1px;
+            transform-style: preserve-3d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 1.5rem;
+        }
 
-  body {
-    background-image: url('/search/Images/background.png');
-    font-family: 'Inter', sans-serif; 
-    color: #111; 
-    min-height: 100vh;
-    padding: 3rem 1.5rem; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; /* Centers everything else horizontally */
-  }
+        .parallax-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('/search/Images/background.png');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            transform: translateZ(-1px) scale(3);
+            transform-origin: center;
+        }
 
-  /* 3. Re-applying center alignment to specific text elements */
-  h1, .result-verb, .result-note, .error, .tense-block h2 {
-    text-align: center;
-  }
+        #back { align-self: flex-start; border: none; background: none; cursor: pointer; margin-bottom: 1rem; }
+        h1 { font-size: 1.5rem; font-weight: 500; letter-spacing: 0.01em; margin-bottom: 2rem; text-align: center; }
+        
+        .input-row { display: flex; gap: 0.5rem; width: 100%; max-width: 420px; margin-bottom: 1.5rem; }
+        input { flex: 1; padding: 0.7rem; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+        button.go { padding: 0.7rem 1.5rem; background: #111; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
 
-  h1 { font-size: 1.1rem; font-weight: 500; letter-spacing: 0.01em; margin-bottom: 2rem; }
+        .quick-verbs { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; max-width: 550px; margin-bottom: 2.5rem; }
+        .qv { font-size: 0.75rem; padding: 0.3rem 0.7rem; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-family: inherit; }
 
-  .input-row { display: flex; gap: 0.5rem; width: 100%; max-width: 420px; margin-bottom: 1rem; }
+        #output { display: none; width: 100%; max-width: 650px; margin-top: 20px; }
+        .result-verb { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; text-transform: capitalize; text-align: center; }
 
-  input {
-    flex: 1; font-size: 1rem; padding: 0.6rem 0.9rem; border: 1.5px solid #ddd;
-    border-radius: 6px; outline: none; background: #fafafa;
-  }
+        .tenses {
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 1.5rem;
+            background: rgba(244, 244, 244, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
 
-  button.go {
-    font-size: 0.9rem; font-weight: 500; padding: 0.6rem 1.2rem;
-    background: #111; color: #fff; border: none; border-radius: 6px; cursor: pointer;
-  }
+        .tense-block h2 { font-size: 0.65rem; text-transform: uppercase; color: #999; border-bottom: 1px solid #ddd; margin-bottom: 10px; padding-bottom: 5px; text-align: center; letter-spacing: 1px; }
+        .row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+        .pron { color: #aaa; font-style: italic; padding-right: 10px; }
+        .form { font-weight: 700; color: #111; }
 
-  .quick-verbs { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; max-width: 500px; margin-bottom: 2.5rem; }
-  .qv { font-size: 0.78rem; padding: 0.22rem 0.6rem; border: 1px solid #e0e0e0; border-radius: 20px; background: none; cursor: pointer; color: #666; }
-  
-  .error { font-size: 0.82rem; color: #c00; margin-bottom: 1.5rem; display: none; width: 100%; }
-
-  #output { display: none; width: 100%; max-width: 600px; }
-  .result-verb { font-size: 1.3rem; font-weight: 500; margin-bottom: 1.5rem; text-transform: capitalize; }
-
-  .tenses {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;
-    background-color: #f3f3f3; border: 15px solid #f3f3f3; border-radius: 8px;
-  }
-
-  .tense-block { text-align: left; padding: 5px; }
-  .tense-block h2 {
-    font-size: 0.6rem; font-weight: 600; text-transform: uppercase; color: #bbb;
-    margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e8e8e8;
-  }
-
-  .row { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 0.85rem; border-bottom: 1px solid #f0f0f0; }
-  .pron { color: #bbb; padding-right: 8px; }
-  .form { color: #111; }
-
-  @media (max-width: 500px) { .tenses { grid-template-columns: 1fr; } }
-</style>
+        @media (max-width: 500px) { .tenses { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
 
-<button id="back" onclick="history.back()">
-  <img src="/search/Images/back.png" width="35">
-</button>
-
-<h1>French Conjugator</h1>
-
-<div class="input-row">
-  <input type="text" id="verbInput" placeholder="Enter a verb..." autocomplete="off" />
-  <button class="go" onclick="conjugate()">Go</button>
-</div>
-
-<div class="quick-verbs" id="quickVerbs"></div>
-
-<div class="error" id="error">Verb not recognized. Try a regular verb or a common irregular.</div>
-
-<div id="output">
-  <div class="result-verb" id="resultVerb"></div>
-  <div class="tenses" id="tensesGrid"></div>
+<div class="parallax-wrapper">
+    <button id="back" onclick="history.back()"><img src="/search/Images/back.png" width="35"></button>
+    <h1>French Conjugator</h1>
+    <div class="input-row">
+        <input type="text" id="verbInput" placeholder="Enter a verb..." autocomplete="off">
+        <button class="go" onclick="conjugate()">Go</button>
+    </div>
+    <div class="quick-verbs" id="quickVerbs"></div>
+    <div id="error" style="color:red; display:none; margin-bottom:1rem; text-align:center;">Verb not recognized.</div>
+    <div id="output">
+        <div class="result-verb" id="resultVerb"></div>
+        <div class="tenses" id="tensesGrid"></div>
+    </div>
 </div>
 
 <script>
-// Verb list and UI generation
-const verbs = ["être","avoir","aller","faire","pouvoir","vouloir","venir","prendre","savoir","voir","mettre","partir","dire","lire","écrire","sortir","parler","finir","vendre"];
-const qvDiv = document.getElementById('quickVerbs');
-verbs.forEach(v => {
-  const btn = document.createElement('button');
-  btn.className = 'qv'; btn.innerText = v; 
-  btn.onclick = () => { document.getElementById('verbInput').value = v; conjugate(); };
-  qvDiv.appendChild(btn);
-});
-
-// Data for conjugation
 const data = {
-  pronouns: ["je", "tu", "il / elle", "nous", "vous", "ils / elles"],
-  aux: ["ai", "as", "a", "avons", "avez", "ont"],
-  irregulars: {
-    être: { pres: ["suis","es","est","sommes","êtes","sont"], pp: "été", imp: "ét", fut: "ser" },
-    avoir: { pres: ["ai","as","a","avons","avez","ont"], pp: "eu", imp: "av", fut: "aur" },
-    aller: { pres: ["vais","vas","va","allons","allez","vont"], pp: "allé", imp: "all", fut: "ir" },
-    faire: { pres: ["fais","fais","fait","faisons","faites","font"], pp: "fait", imp: "fais", fut: "fer" },
-    pouvoir: { pres: ["peux","peux","peut","pouvons","pouvez","peuvent"], pp: "pu", imp: "pouv", fut: "pourr" },
-    vouloir: { pres: ["veux","veux","veut","voulons","voulez","veulent"], pp: "voulu", imp: "voul", fut: "voudr" },
-    venir: { pres: ["viens","viens","vient","venons","venez","viennent"], pp: "venu", imp: "ven", fut: "viendr" },
-    prendre: { pres: ["prends","prends","prend","prenons","prenez","prennent"], pp: "pris", imp: "pren", fut: "prendr" },
-    savoir: { pres: ["sais","sais","sait","savons","savez","savent"], pp: "su", imp: "sav", fut: "saur" },
-    voir: { pres: ["vois","vois","voit","voyons","voyez","voient"], pp: "vu", imp: "voy", fut: "verr" },
-    mettre: { pres: ["mets","mets","met","mettons","mettez","mettent"], pp: "mis", imp: "mett", fut: "mettr" },
-    partir: { pres: ["pars","pars","part","partons","partez","partent"], pp: "parti", imp: "part", fut: "partir" },
-    dire: { pres: ["dis","dis","dit","disons","dites","disent"], pp: "dit", imp: "dis", fut: "dir" },
-    lire: { pres: ["lis","lis","lit","lisons","lisez","lisent"], pp: "lu", imp: "lis", fut: "lir" },
-    écrire: { pres: ["écris","écris","écrit","écrivons","écrivez","écrivent"], pp: "écrit", imp: "écriv", fut: "écrir" },
-    sortir: { pres: ["sors","sors","sort","sortons","sortez","sortent"], pp: "sorti", imp: "sort", fut: "sortir" }
-  },
-  regEndings: {
-    er: { pres: ["e","es","e","ons","ez","ent"], pp: "é", fut: "er" },
-    ir: { pres: ["is","is","it","issons","issez","issent"], pp: "i", fut: "ir" },
-    re: { pres: ["s","s","","ons","ez","ent"], pp: "u", fut: "r" }
-  }
+    pronouns: ["je", "tu", "il/elle", "nous", "vous", "ils/elles"],
+    aux: ["ai", "as", "a", "avons", "avez", "ont"],
+    irregulars: {
+        être: { pres:["suis","es","est","sommes","êtes","sont"], pp:"été", imp:"ét", fut:"ser" },
+        avoir: { pres:["ai","as","a","avons","avez","ont"], pp:"eu", imp:"av", fut:"aur" },
+        aller: { pres:["vais","vas","va","allons","allez","vont"], pp:"allé", imp:"all", fut:"ir" },
+        faire: { pres:["fais","fais","fait","faisons","faites","font"], pp:"fait", imp:"fais", fut:"fer" },
+        pouvoir: { pres:["peux","peux","peut","pouvons","pouvez","peuvent"], pp:"pu", imp:"pouv", fut:"pourr" },
+        vouloir: { pres:["veux","veux","veut","voulons","voulez","veulent"], pp:"voulu", imp:"voul", fut:"voudr" },
+        venir: { pres:["viens","viens","vient","venons","venez","viennent"], pp:"venu", imp:"ven", fut:"viendr" },
+        prendre: { pres:["prends","prends","prend","prenons","prenez","prennent"], pp:"pris", imp:"pren", fut:"prendr" },
+        savoir: { pres:["sais","sais","sait","savons","savez","savent"], pp:"su", imp:"sav", fut:"saur" },
+        voir: { pres:["vois","vois","voit","voyons","voyez","voient"], pp:"vu", imp:"voy", fut:"verr" },
+        mettre: { pres:["mets","mets","met","mettons","mettez","mettent"], pp:"mis", imp:"mett", fut:"mettr" },
+        partir: { pres:["pars","pars","part","partons","partez","partent"], pp:"parti", imp:"part", fut:"partir" },
+        dire: { pres:["dis","dis","dit","disons","dites","disent"], pp:"dit", imp:"dis", fut:"dir" },
+        lire: { pres:["lis","lis","lit","lisons","lisez","lisent"], pp:"lu", imp:"lis", fut:"lir" },
+        écrire: { pres:["écris","écris","écrit","écrivons","écrivez","écrivent"], pp:"écrit", imp:"écriv", fut:"écrir" },
+        sortir: { pres:["sors","sors","sort","sortons","sortez","sortent"], pp:"sorti", imp:"sort", fut:"sortir" }
+    },
+    regEndings: {
+        er: { pres:["e","es","e","ons","ez","ent"], pp:"é", fut:"er" },
+        ir: { pres:["is","is","it","issons","issez","issent"], pp:"i", fut:"ir" },
+        re: { pres:["s","s","","ons","ez","ent"], pp:"u", fut:"r" }
+    }
 };
 
-function conjugate() {
-  const verb = document.getElementById('verbInput').value.toLowerCase().trim();
-  const type = verb.slice(-2);
-  const stem = verb.slice(0, -2);
-  const isIrr = data.irregulars[verb];
+const qvDiv = document.getElementById('quickVerbs');
+Object.keys(data.irregulars).concat(["parler","finir","vendre"]).forEach(v => {
+    const btn = document.createElement('button');
+    btn.className = 'qv'; btn.innerText = v;
+    btn.onclick = () => { document.getElementById('verbInput').value = v; conjugate(); };
+    qvDiv.appendChild(btn);
+});
 
-  if (!isIrr && !data.regEndings[type]) {
-    document.getElementById('error').style.display = "block";
-    document.getElementById('output').style.display = "none";
-    return;
-  }
-
-  document.getElementById('error').style.display = "none";
-  document.getElementById('output').style.display = "block";
-  document.getElementById('resultVerb').innerText = verb;
-
-  const grid = document.getElementById('tensesGrid');
-  grid.innerHTML = "";
-
-  ["Présent", "Passé Composé", "Imparfait", "Futur Simple"].forEach(tense => {
-    let html = `<div class="tense-block"><h2>${tense}</h2>`;
-    data.pronouns.forEach((p, i) => {
-      let form = "";
-      if (tense === "Présent") {
-        form = isIrr ? isIrr.pres[i] : stem + data.regEndings[type].pres[i];
-      } else if (tense === "Passé Composé") {
-        form = data.aux[i] + " " + (isIrr ? isIrr.pp : stem + data.regEndings[type].pp);
-      } else if (tense === "Imparfait") {
-        let iStem = isIrr ? isIrr.imp : (type === 'ir' ? stem + "iss" : stem);
-        form = iStem + ["ais","ais","ait","ions","iez","aient"][i];
-      } else if (tense === "Futur Simple") {
-        let fStem = isIrr ? isIrr.fut : stem + data.regEndings[type].fut;
-        form = fStem + ["ai","as","a","ons","ez","ont"][i];
-      }
-      html += `<div class="row"><span class="pron">${p}</span><span class="form">${form}</span></div>`;
-    });
-    grid.innerHTML += html + `</div>`;
-  });
+function stripAccents(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
+
+function conjugate() {
+    const rawInput = document.getElementById('verbInput').value.toLowerCase().trim();
+    if (!rawInput) return;
+    const cleanInput = stripAccents(rawInput);
+    let verbToConjugate = null;
+    
+    for (let v in data.irregulars) {
+        if (stripAccents(v) === cleanInput) { verbToConjugate = v; break; }
+    }
+    if (!verbToConjugate) verbToConjugate = rawInput;
+
+    const type = verbToConjugate.slice(-2);
+    const stem = verbToConjugate.slice(0, -2);
+    const isIrr = data.irregulars[verbToConjugate];
+    const output = document.getElementById('output');
+    const error = document.getElementById('error');
+
+    if (!isIrr && !data.regEndings[type]) {
+        error.style.display = "block"; output.style.display = "none"; return;
+    }
+
+    error.style.display = "none"; output.style.display = "block";
+    document.getElementById('resultVerb').innerText = verbToConjugate;
+    const grid = document.getElementById('tensesGrid');
+    grid.innerHTML = "";
+
+    ["Présent", "Passé Composé", "Imparfait", "Futur Simple"].forEach(tense => {
+        let html = `<div class="tense-block"><h2>${tense}</h2>`;
+        data.pronouns.forEach((p, i) => {
+            let form = "";
+            if (tense === "Présent") form = isIrr ? isIrr.pres[i] : stem + data.regEndings[type].pres[i];
+            else if (tense === "Passé Composé") form = data.aux[i] + " " + (isIrr ? isIrr.pp : stem + data.regEndings[type].pp);
+            else if (tense === "Imparfait") form = (isIrr ? isIrr.imp : (type === 'ir' ? stem + "iss" : stem)) + ["ais","ais","ait","ions","iez","aient"][i];
+            else if (tense === "Futur Simple") {
+                let fStem = isIrr ? isIrr.fut : (type === 'er' ? stem + "er" : (type === 'ir' ? stem + "ir" : stem + "r"));
+                form = fStem + ["ai","as","a","ons","ez","ont"][i];
+            }
+            html += `<div class="row"><span class="pron">${p}</span><span class="form">${form}</span></div>`;
+        });
+        grid.innerHTML += html + `</div>`;
+    });
+}
+
+window.onload = function() {
+    const params = new URLSearchParams(window.location.search);
+    const verbFromUrl = params.get('word') || params.get('query') || params.get('verb'); 
+    if (verbFromUrl) { document.getElementById('verbInput').value = verbFromUrl; conjugate(); }
+};
 </script>
 </body>
 </html>

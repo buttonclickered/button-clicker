@@ -24,27 +24,41 @@ th {
 hr {
     margin: 20px auto;
     width: 80%;
-     border: none;            /* Remove the default solid border */
-  border-top: 2px dotted;   /* Add your dotted line */
-  color: #333;             /* Sets color for some browsers */
-  height: 0;
+    border: none;
+    border-top: 2px dotted #333;
+    height: 0;
 }
+
 #back {
-  border: none;      /* Removes the default button edge */
-  outline: none;     /* Removes the ring that appears when clicked */
-  background: none;  /* Removes the default button background */
+    border: none;
+    outline: none;
+    background: none;
+    cursor: pointer;
 }
+
 body {
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    perspective: 1px; /* Fix: Changed from 0px to 2px */
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
     background-image: url('/search/Images/background.png');
-  font-family: 'Inter', sans-serif;
+    background-size: cover;
+    z-index: -1;
+    transform: translateZ(-1px) scale(1.5); 
 }
 
 #searcher, p {
-    position: relative;
     text-align: center;
 }
+
 #results {
-      font-style: italic;
-    position: relative;
-   left: 43%;
+    font-style: italic;
+    text-align: center; /* Fix: Replaced position/left with text-align */
 }
