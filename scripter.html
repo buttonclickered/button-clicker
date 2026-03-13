@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Scripter</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+
+  <body>
+    <h1 style="font-size:75px;text-align:center;">Scripter</h1>
+    <h2 style="text-align:center;">
+      A simple website that allows you to write and run JavaScript code in your browser!
+    </h2>
+
+    <input type="text" id="codeInput" placeholder="Enter your JavaScript code here..." style="width:80%;margin:20px auto;display:block;padding:10px;font-size:16px;">
+    <button id="runButton" style="display:block;margin:0 auto;padding:10px 20px;font-size:16px;cursor:pointer;">Run Code</button>
+    <script>
+      document.getElementById("runButton").addEventListener("click", function() {
+        var code = document.getElementById("codeInput").value;
+        eval(code);
+      });
+    </script>
+  </body>
