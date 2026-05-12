@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulaire</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('/search/Images/background.png');
+            background-size: auto;
+            background-repeat: repeat;
+            /* Changed to scroll so the JS can move the position manually */
+            background-attachment: scroll;
+            background-position: 0 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .parallax-wrapper {
+            padding: 3rem 1.5rem;
+            padding-top: 5rem;
+            /* Added relative position to ensure content stays above background */
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            text-align: center;
+            margin: 1.5rem 0;
+            font-size: 1.8rem;
+            font-weight: 500;
+        }
+        h2 {
+            text-align: center;
+            margin: 2rem 0 1rem 0;
+        }
+        #back {
+            border: none;
+            background: none;
+            cursor: pointer;
+            display: block;
+        }
+        table {
+            background-color: #ffffff;
+            border-radius: 6px;
+            margin: 10px auto 30px auto;
+            width: 90%;
+            max-width: 600px;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #eee;
+            text-align: center;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #666;
+        }
+        td {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="parallax-wrapper">
+    <button id="back" onclick="history.back()">
+        <img src="/search/Images/back.png" width="35">
+    </button>
+    
+    <h1>Vocabulaire</h1>
+
+    <h2>Spring Vocabulary (Printemps)</h2>
+    <table>
+        <tr><th>English</th><th>French</th></tr>
+        <tr><td>A frog</td><td>une grenouille</td></tr>
+        <tr><td>A bee</td><td>un abeille</td></tr>
+        <tr><td>A rainbow</td><td>un arc-en-ciel</td></tr>
+        <tr><td>An umbrella</td><td>un parapluie</td></tr>
+        <tr><td>A lilac</td><td>un lilas</td></tr>
+        <tr><td>A ladybug</td><td>une coccinelle</td></tr>
+        <tr><td>A butterfly</td><td>un papillon</td></tr>
+        <tr><td>A bud</td><td>un bourgeon</td></tr>
+        <tr><td>A caterpillar</td><td>une chenille</td></tr>
+        <tr><td>A puddle</td><td>une flaque d'eau</td></tr>
+        <tr><td>To melt</td><td>fondre</td></tr>
+        <tr><td>To grow</td><td>pousser</td></tr>
+    </table>
+
+    <h2>Easter Vocabulary (Pâques)</h2>
+    <table>
+        <tr><th>English</th><th>French</th></tr>
+        <tr><td>A cross</td><td>une croix</td></tr>
+        <tr><td>A male/female/baby</td><td>un lapin / une lapine / un lapereau</td></tr>
+        <tr><td>A daffodil</td><td>une jonquille</td></tr>
+        <tr><td>A basket</td><td>un panier</td></tr>
+        <tr><td>A church</td><td>une église</td></tr>
+        <tr><td>A ashes</td><td>des cendres (f.)</td></tr>
+        <tr><td>A lamb</td><td>un agneau</td></tr>
+        <tr><td>A daisy</td><td>une marguerite</td></tr>
+        <tr><td>A chick</td><td>un poussin/une poussine</td></tr>
+        <tr><td>To search</td><td>chercher</td></tr>
+        <tr><td>To paint</td><td>peindre</td></tr>
+        <tr><td>To forgive</td><td>pardonner</td></tr>
+    </table>
+</div>
+
+<script>
+    window.addEventListener('scroll', function() {
+        // This calculates the scroll position
+        const scrolled = window.pageYOffset;
+        // This moves the background at 20% speed (0.2)
+        document.body.style.backgroundPositionY = (scrolled * 0.2) + 'px';
+    });
+</script>
+
+</body>
+</html>

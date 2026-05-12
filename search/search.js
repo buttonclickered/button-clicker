@@ -5,14 +5,17 @@ const resultsSpan = document.getElementById('results');
 const displayQuery = document.getElementById('display-query');
 
 if (queryValue) {
+   // 
     displayQuery.textContent = queryValue;
     searchByFilename(queryValue.toLowerCase());
+   
 } else {
     displayQuery.textContent = "nothing";
 }
 if (conjugateValue === "on") {
     window.location.href = "Words/conjugator.html?word=" + encodeURIComponent(queryValue);
 }
+
 async function searchByFilename(term) {
     resultsSpan.innerHTML = "Searching...";
 
@@ -50,4 +53,11 @@ async function searchByFilename(term) {
         console.error(err);
         resultsSpan.textContent = "Error: Could not load the file list.";
     }
+     if (queryValue == "htm") {
+          displayQuery.textContent = 'htm';
+   }
+}
+
+function listRules() {
+    window.location.href = "search_results.html?query=htm";
 }
