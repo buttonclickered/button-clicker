@@ -115,6 +115,55 @@ if (randomNumber <= 50) {
     // persist immediately after each roll
     saveState();
 }
+
+function rollNoDelay() {
+    // enforce cooldown: disable button for `cooldown` seconds to prevent spamming
+    const rngButton = document.getElementById('roll');
+    rngButton.disabled = true;
+    rngButton.style.opacity = '0.6';
+    setTimeout(() => {
+        rngButton.disabled = false;
+        rngButton.style.opacity = '1';
+    }, cooldown * 1000);
+
+    // increment persisted roll count and update UI
+    rollCount += 1;
+    if (rolledsEl) rolledsEl.innerHTML = 'Rolls: ' + rollCount;
+
+    console.log("Rolled!");
+
+    show(result);
+    let randomNumber = secureRandomInt(1, 100);
+if (randomNumber <= 50) {
+    result.innerHTML = 'You got: ' + "Common";
+    points += common;
+    commonRolled += 1;
+    commonRolledEl.innerHTML = 'Common: ' + commonRolled;
+} else if (randomNumber > 50 && randomNumber <= 75) {
+    result.innerHTML = 'You got: ' + "Uncommon";
+    points += uncommon;
+    uncommonRolled += 1;
+    uncommonRolledEl.innerHTML = 'Uncommon: ' + uncommonRolled;
+} else if (randomNumber > 75 && randomNumber <= 90) {
+    result.innerHTML = 'You got: ' + "‌​‌​‌​‌​‌​Rare";
+    points += rare;
+    rareRolled += 1;
+    rareRolledEl.innerHTML = 'Rare: ' + rareRolled;
+} else if (randomNumber > 90 && randomNumber <= 99) {
+    result.innerHTML = 'You got: ' + "Epic";
+    points += epic;
+    epicRolled += 1;
+    epicRolledEl.innerHTML = 'Epic: ' + epicRolled;
+} else if (randomNumber === 100) {
+    result.innerHTML = 'You got: ' + "Legendary";
+    points += legendary;
+    legendaryRolled += 1;
+    legendaryRolledEl.innerHTML = 'Legendary: ' + legendaryRolled;
+}
+    document.getElementById('money').innerHTML = 'Points: ' + points;
+    // persist immediately after each roll
+    saveState();
+}
 // Save and load state using localStorage
 function saveState() {
     try {
@@ -173,7 +222,7 @@ document.addEventListener('contextmenu', (event) => {
 });
 
 setInterval(() => {
- points += autoclick;
+rollNoDelay()
  cps.innerHTML = 'Auto Rolls Per Second: ' + autoclick;
  document.getElementById('money').innerHTML = 'Points: ' + points;
  saveState();
