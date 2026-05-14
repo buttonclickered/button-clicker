@@ -5,7 +5,7 @@ const rolledsEl = document.getElementById('rolleds');
 const cps = document.getElementById('CPS');
 
 let points = 0;
-
+let rolltimes = 0
 let autoclick = 0; 
 
 let commonRolled = 0;
@@ -222,7 +222,12 @@ document.addEventListener('contextmenu', (event) => {
 });
 
 setInterval(() => {
+    rolltimes = 0
+    while (rolltimes < Number(cps.innerText)) {
+        rolltimes++;
 rollNoDelay()
+    }
+
  cps.innerHTML = 'Auto Rolls Per Second: ' + autoclick;
  document.getElementById('money').innerHTML = 'Points: ' + points;
  saveState();
