@@ -223,7 +223,7 @@ document.addEventListener('contextmenu', (event) => {
 
 setInterval(() => {
     rolltimes = 0
-    while (rolltimes < Number(cps.innerText)) {
+    while (rolltimes < Number(cps.innerText.slice(23))) {
         rolltimes++;
 rollNoDelay()
     }
