@@ -1,5 +1,29 @@
 console.log("Script loaded");
 
+// --- MULTI-TAB PREVENTION SYSTEM ---
+const tabChannel = new BroadcastChannel('game_tab_validation');
+const overlay = document.getElementById('duplicate-overlay');
+const instanceId = Math.random().toString(36).substring(2); // Unique ID for this tab instance
+
+function claimActiveTab() {
+    // Tell all other open tabs that this new instance is taking over
+    tabChannel.postMessage({ type: 'NEW_TAB_OPENED', id: instanceId });
+    if (overlay) overlay.style.display = 'none';
+}
+
+tabChannel.onmessage = (event) => {
+    // If another tab sends a takeover message, block this current tab
+    if (event.data.type === 'NEW_TAB_OPENED' && event.data.id !== instanceId) {
+        if (overlay) overlay.style.display = 'block';
+        // Proactively save state before freezing to avoid data loss
+        if (typeof saveState === 'function') saveState(); 
+    }
+};
+
+// Claim dominance immediately on load
+claimActiveTab();
+// ------------------------------------
+
 const result = document.getElementById('result');
 const rolledsEl = document.getElementById('rolleds');
 const cps = document.getElementById('CPS');
