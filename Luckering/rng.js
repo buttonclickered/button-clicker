@@ -136,7 +136,7 @@ function roll() {
     setTimeout(() => {
         rngButton.disabled = false;
         rngButton.style.opacity = '1';
-    }, cooldown * 1000);
+    }, 1000);
 
     // increment persisted roll count and update UI
     rollCount += 1;
