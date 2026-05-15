@@ -45,6 +45,7 @@ let cooldown = 1;
 
 // persisted state
 let rollCount = 0;
+let lastAutoSaveTime = Date.now();
 
 function formatNumber(num) {
     if (num < 1000) return num;
@@ -230,7 +231,13 @@ if (randomNumber <= 5000000) {
     saveState();
 }
 
+function fastRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function simulateRolls(count) {
+    if (count <= 0) return;
+
     // Simulate multiple rolls at once without DOM updates for each one
     let tempCommonRolled = 0;
     let tempUncommonRolled = 0;
@@ -245,35 +252,35 @@ function simulateRolls(count) {
     let tempPoints = 0;
 
     for (let i = 0; i < count; i++) {
-        let randomNumber = secureRandomInt(1, 10000112);
+        let randomNumber = fastRandomInt(1, 10000112);
         if (randomNumber <= 5000000) {
             tempCommonRolled++;
             tempPoints += common;
-        } else if (randomNumber > 5000000 && randomNumber <= 7500000) {
+        } else if (randomNumber <= 7500000) {
             tempUncommonRolled++;
             tempPoints += uncommon;
-        } else if (randomNumber > 7500000 && randomNumber <= 9000000) {
+        } else if (randomNumber <= 9000000) {
             tempRareRolled++;
             tempPoints += rare;
-        } else if (randomNumber > 9000000 && randomNumber <= 9900000) {
+        } else if (randomNumber <= 9900000) {
             tempEpicRolled++;
             tempPoints += epic;
-        } else if (randomNumber > 9900000 && randomNumber <= 9990000) {
+        } else if (randomNumber <= 9990000) {
             tempLegendaryRolled++;
             tempPoints += legendary;
-        } else if (randomNumber > 9990000 && randomNumber <= 10000000) {
+        } else if (randomNumber <= 10000000) {
             tempGalaxyRolled++;
             tempPoints += galaxy;
-        } else if (randomNumber > 10000000 && randomNumber <= 10000100) {
+        } else if (randomNumber <= 10000100) {
             tempCelestialRolled++;
             tempPoints += celestial;
-        } else if (randomNumber > 10000100 && randomNumber <= 10000110) {
+        } else if (randomNumber <= 10000110) {
             tempVoidRolled++;
             tempPoints += void_;
-        } else if (randomNumber > 10000110 && randomNumber <= 10000111) {
+        } else if (randomNumber <= 10000111) {
             tempInfiniteRolled++;
             tempPoints += infinite;
-        } else if (randomNumber === 10000112) {
+        } else {
             tempOmniscientRolled++;
             tempPoints += omniscient;
         }
@@ -395,11 +402,20 @@ document.addEventListener('contextmenu', (event) => {
   event.preventDefault(); // blocks the context menu
 });
 
-setInterval(() => {
+function autoRollTick() {
+    const start = performance.now();
     simulateRolls(autoclick);
-    cps.innerHTML = 'Auto Rolls Per Second: ' + formatNumber(autoclick);
-    saveState();
-}, 1000);
+    if (cps) cps.innerHTML = 'Auto Rolls Per Second: ' + formatNumber(autoclick);
+    const now = Date.now();
+    if (now - lastAutoSaveTime >= 5000) {
+        saveState();
+        lastAutoSaveTime = now;
+    }
+    const elapsed = performance.now() - start;
+    setTimeout(autoRollTick, Math.max(0, 1000 - elapsed));
+}
+
+autoRollTick();
 setInterval(() => {
  cps.innerHTML = 'Auto Rolls Per Second: ' + formatNumber(autoclick);
 }, 75);
