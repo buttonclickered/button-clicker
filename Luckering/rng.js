@@ -13,18 +13,33 @@ let uncommonRolled = 0;
 let rareRolled = 0;
 let epicRolled = 0;
 let legendaryRolled = 0;
+let galaxyRolled = 0;
+let celestialRolled = 0;
+let voidRolled = 0;
+let infiniteRolled = 0;
+let omniscientRolled = 0;
 
 const commonRolledEl = document.getElementById('commonrolled');
 const uncommonRolledEl = document.getElementById('uncommonrolled');
 const rareRolledEl = document.getElementById('rarerolled');
 const epicRolledEl = document.getElementById('epicrolled');
 const legendaryRolledEl = document.getElementById('legendaryrolled');
+const galaxyRolledEl = document.getElementById('galaxyrolled');
+const celestialRolledEl = document.getElementById('celestialrolled');
+const voidRolledEl = document.getElementById('voidrolled');
+const infiniteRolledEl = document.getElementById('infiniterolled');
+const omniscientRolledEl = document.getElementById('omniscientrolled');
 
 let common = 1;
 let uncommon = 2;
 let rare = 3;
 let epic = 5;
 let legendary = 9;
+let galaxy = 20;
+let celestial = 50;
+let void_ = 100;
+let infinite = 250;
+let omniscient = 500;
 
 let cooldown = 1;
 
@@ -104,32 +119,37 @@ function roll() {
     console.log("Rolled!");
 
     show(result);
-    let randomNumber = secureRandomInt(1, 100);
-if (randomNumber <= 50) {
+    let randomNumber = secureRandomInt(1, 10000000);
+if (randomNumber <= 5000000) {
     result.innerHTML = 'You got: ' + "Common";
     points += common;
     commonRolled += 1;
     commonRolledEl.innerHTML = 'Common: ' + formatNumber(commonRolled);
-} else if (randomNumber > 50 && randomNumber <= 75) {
+} else if (randomNumber > 5000000 && randomNumber <= 7500000) {
     result.innerHTML = 'You got: ' + "Uncommon";
     points += uncommon;
     uncommonRolled += 1;
     uncommonRolledEl.innerHTML = 'Uncommon: ' + formatNumber(uncommonRolled);
-} else if (randomNumber > 75 && randomNumber <= 90) {
+} else if (randomNumber > 7500000 && randomNumber <= 9000000) {
     result.innerHTML = 'You got: ' + "‌​‌​‌​‌​‌​Rare";
     points += rare;
     rareRolled += 1;
     rareRolledEl.innerHTML = 'Rare: ' + formatNumber(rareRolled);
-} else if (randomNumber > 90 && randomNumber <= 99) {
+} else if (randomNumber > 9000000 && randomNumber <= 9900000) {
     result.innerHTML = 'You got: ' + "Epic";
     points += epic;
     epicRolled += 1;
     epicRolledEl.innerHTML = 'Epic: ' + formatNumber(epicRolled);
-} else if (randomNumber === 100) {
+} else if (randomNumber > 9900000 && randomNumber <= 9990000) {
     result.innerHTML = 'You got: ' + "Legendary";
     points += legendary;
     legendaryRolled += 1;
     legendaryRolledEl.innerHTML = 'Legendary: ' + formatNumber(legendaryRolled);
+} else if (randomNumber > 9990000 && randomNumber <= 10000000) {
+    result.innerHTML = 'You got: ' + "Galaxy";
+    points += galaxy;
+    galaxyRolled += 1;
+    galaxyRolledEl.innerHTML = 'Galaxy: ' + formatNumber(galaxyRolled);
 }
     document.getElementById('money').innerHTML = 'Points: ' + formatNumber(points);
     // persist immediately after each roll
@@ -153,32 +173,57 @@ function rollNoDelay() {
     console.log("Rolled!");
 
     show(result);
-    let randomNumber = secureRandomInt(1, 100);
-if (randomNumber <= 50) {
+    let randomNumber = secureRandomInt(1, 10000112);
+if (randomNumber <= 5000000) {
     result.innerHTML = 'You got: ' + "Common";
     points += common;
     commonRolled += 1;
     commonRolledEl.innerHTML = 'Common: ' + formatNumber(commonRolled);
-} else if (randomNumber > 50 && randomNumber <= 75) {
+} else if (randomNumber > 5000000 && randomNumber <= 7500000) {
     result.innerHTML = 'You got: ' + "Uncommon";
     points += uncommon;
     uncommonRolled += 1;
     uncommonRolledEl.innerHTML = 'Uncommon: ' + formatNumber(uncommonRolled);
-} else if (randomNumber > 75 && randomNumber <= 90) {
+} else if (randomNumber > 7500000 && randomNumber <= 9000000) {
     result.innerHTML = 'You got: ' + "‌​‌​‌​‌​‌​Rare";
     points += rare;
     rareRolled += 1;
     rareRolledEl.innerHTML = 'Rare: ' + formatNumber(rareRolled);
-} else if (randomNumber > 90 && randomNumber <= 99) {
+} else if (randomNumber > 9000000 && randomNumber <= 9900000) {
     result.innerHTML = 'You got: ' + "Epic";
     points += epic;
     epicRolled += 1;
     epicRolledEl.innerHTML = 'Epic: ' + formatNumber(epicRolled);
-} else if (randomNumber === 100) {
+} else if (randomNumber > 9900000 && randomNumber <= 9990000) {
     result.innerHTML = 'You got: ' + "Legendary";
     points += legendary;
     legendaryRolled += 1;
     legendaryRolledEl.innerHTML = 'Legendary: ' + formatNumber(legendaryRolled);
+} else if (randomNumber > 9990000 && randomNumber <= 10000000) {
+    result.innerHTML = 'You got: ' + "Galaxy";
+    points += galaxy;
+    galaxyRolled += 1;
+    galaxyRolledEl.innerHTML = 'Galaxy: ' + formatNumber(galaxyRolled);
+} else if (randomNumber > 10000000 && randomNumber <= 10000100) {
+    result.innerHTML = 'You got: ' + "Celestial";
+    points += celestial;
+    celestialRolled += 1;
+    celestialRolledEl.innerHTML = 'Celestial: ' + formatNumber(celestialRolled);
+} else if (randomNumber > 10000100 && randomNumber <= 10000110) {
+    result.innerHTML = 'You got: ' + "Void";
+    points += void_;
+    voidRolled += 1;
+    voidRolledEl.innerHTML = 'Void: ' + formatNumber(voidRolled);
+} else if (randomNumber > 10000110 && randomNumber <= 10000111) {
+    result.innerHTML = 'You got: ' + "Infinite";
+    points += infinite;
+    infiniteRolled += 1;
+    infiniteRolledEl.innerHTML = 'Infinite: ' + formatNumber(infiniteRolled);
+} else if (randomNumber === 10000112) {
+    result.innerHTML = 'You got: ' + "Omniscient";
+    points += omniscient;
+    omniscientRolled += 1;
+    omniscientRolledEl.innerHTML = 'Omniscient: ' + formatNumber(omniscientRolled);
 }
     document.getElementById('money').innerHTML = 'Points: ' + formatNumber(points);
     // persist immediately after each roll
@@ -192,25 +237,45 @@ function simulateRolls(count) {
     let tempRareRolled = 0;
     let tempEpicRolled = 0;
     let tempLegendaryRolled = 0;
+    let tempGalaxyRolled = 0;
+    let tempCelestialRolled = 0;
+    let tempVoidRolled = 0;
+    let tempInfiniteRolled = 0;
+    let tempOmniscientRolled = 0;
     let tempPoints = 0;
 
     for (let i = 0; i < count; i++) {
-        let randomNumber = secureRandomInt(1, 100);
-        if (randomNumber <= 50) {
+        let randomNumber = secureRandomInt(1, 10000112);
+        if (randomNumber <= 5000000) {
             tempCommonRolled++;
             tempPoints += common;
-        } else if (randomNumber > 50 && randomNumber <= 75) {
+        } else if (randomNumber > 5000000 && randomNumber <= 7500000) {
             tempUncommonRolled++;
             tempPoints += uncommon;
-        } else if (randomNumber > 75 && randomNumber <= 90) {
+        } else if (randomNumber > 7500000 && randomNumber <= 9000000) {
             tempRareRolled++;
             tempPoints += rare;
-        } else if (randomNumber > 90 && randomNumber <= 99) {
+        } else if (randomNumber > 9000000 && randomNumber <= 9900000) {
             tempEpicRolled++;
             tempPoints += epic;
-        } else if (randomNumber === 100) {
+        } else if (randomNumber > 9900000 && randomNumber <= 9990000) {
             tempLegendaryRolled++;
             tempPoints += legendary;
+        } else if (randomNumber > 9990000 && randomNumber <= 10000000) {
+            tempGalaxyRolled++;
+            tempPoints += galaxy;
+        } else if (randomNumber > 10000000 && randomNumber <= 10000100) {
+            tempCelestialRolled++;
+            tempPoints += celestial;
+        } else if (randomNumber > 10000100 && randomNumber <= 10000110) {
+            tempVoidRolled++;
+            tempPoints += void_;
+        } else if (randomNumber > 10000110 && randomNumber <= 10000111) {
+            tempInfiniteRolled++;
+            tempPoints += infinite;
+        } else if (randomNumber === 10000112) {
+            tempOmniscientRolled++;
+            tempPoints += omniscient;
         }
     }
 
@@ -221,6 +286,11 @@ function simulateRolls(count) {
     rareRolled += tempRareRolled;
     epicRolled += tempEpicRolled;
     legendaryRolled += tempLegendaryRolled;
+    galaxyRolled += tempGalaxyRolled;
+    celestialRolled += tempCelestialRolled;
+    voidRolled += tempVoidRolled;
+    infiniteRolled += tempInfiniteRolled;
+    omniscientRolled += tempOmniscientRolled;
     points += tempPoints;
 
     // Update UI
@@ -230,6 +300,11 @@ function simulateRolls(count) {
     rareRolledEl.innerHTML = 'Rare: ' + formatNumber(rareRolled);
     epicRolledEl.innerHTML = 'Epic: ' + formatNumber(epicRolled);
     legendaryRolledEl.innerHTML = 'Legendary: ' + formatNumber(legendaryRolled);
+    galaxyRolledEl.innerHTML = 'Galaxy: ' + formatNumber(galaxyRolled);
+    celestialRolledEl.innerHTML = 'Celestial: ' + formatNumber(celestialRolled);
+    voidRolledEl.innerHTML = 'Void: ' + formatNumber(voidRolled);
+    infiniteRolledEl.innerHTML = 'Infinite: ' + formatNumber(infiniteRolled);
+    omniscientRolledEl.innerHTML = 'Omniscient: ' + formatNumber(omniscientRolled);
     document.getElementById('money').innerHTML = 'Points: ' + formatNumber(points);
 }
 // Save and load state using localStorage
@@ -243,6 +318,11 @@ function saveState() {
         localStorage.setItem('rareRolled', String(rareRolled));
         localStorage.setItem('epicRolled', String(epicRolled));
         localStorage.setItem('legendaryRolled', String(legendaryRolled));
+        localStorage.setItem('galaxyRolled', String(galaxyRolled));
+        localStorage.setItem('celestialRolled', String(celestialRolled));
+        localStorage.setItem('voidRolled', String(voidRolled));
+        localStorage.setItem('infiniteRolled', String(infiniteRolled));
+        localStorage.setItem('omniscientRolled', String(omniscientRolled));
     } catch (e) {
         console.warn('Could not save state to localStorage', e);
     }
@@ -258,12 +338,22 @@ function loadState() {
         rareRolled = Number(localStorage.getItem('rareRolled')) || 0;
         epicRolled = Number(localStorage.getItem('epicRolled')) || 0;
         legendaryRolled = Number(localStorage.getItem('legendaryRolled')) || 0;
+        galaxyRolled = Number(localStorage.getItem('galaxyRolled')) || 0;
+        celestialRolled = Number(localStorage.getItem('celestialRolled')) || 0;
+        voidRolled = Number(localStorage.getItem('voidRolled')) || 0;
+        infiniteRolled = Number(localStorage.getItem('infiniteRolled')) || 0;
+        omniscientRolled = Number(localStorage.getItem('omniscientRolled')) || 0;
 
         commonRolledEl.innerHTML = 'Common: ' + formatNumber(commonRolled);
         uncommonRolledEl.innerHTML = 'Uncommon: ' + formatNumber(uncommonRolled);
         rareRolledEl.innerHTML = 'Rare: ' + formatNumber(rareRolled);
         epicRolledEl.innerHTML = 'Epic: ' + formatNumber(epicRolled);
         legendaryRolledEl.innerHTML = 'Legendary: ' + formatNumber(legendaryRolled);
+        galaxyRolledEl.innerHTML = 'Galaxy: ' + formatNumber(galaxyRolled);
+        celestialRolledEl.innerHTML = 'Celestial: ' + formatNumber(celestialRolled);
+        voidRolledEl.innerHTML = 'Void: ' + formatNumber(voidRolled);
+        infiniteRolledEl.innerHTML = 'Infinite: ' + formatNumber(infiniteRolled);
+        omniscientRolledEl.innerHTML = 'Omniscient: ' + formatNumber(omniscientRolled);
         if (a !== null) autoclick = Number(a) || 0;
         if (p !== null) points = Number(p) || 0;
         if (r !== null) rollCount = Number(r) || 0;
