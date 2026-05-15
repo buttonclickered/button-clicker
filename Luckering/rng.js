@@ -46,6 +46,7 @@ let cooldown = 1;
 // persisted state
 let rollCount = 0;
 let lastAutoSaveTime = Date.now();
+let nextAutoRollTime = performance.now() + 1000;
 
 function formatNumber(num) {
     if (num < 1000) return num;
@@ -404,15 +405,18 @@ document.addEventListener('contextmenu', (event) => {
 
 function autoRollTick() {
     const start = performance.now();
-    simulateRolls(autoclick);
+    if (autoclick > 0) {
+        simulateRolls(autoclick);
+    }
     if (cps) cps.innerHTML = 'Auto Rolls Per Second: ' + formatNumber(autoclick);
     const now = Date.now();
     if (now - lastAutoSaveTime >= 5000) {
         saveState();
         lastAutoSaveTime = now;
     }
-    const elapsed = performance.now() - start;
-    setTimeout(autoRollTick, Math.max(0, 1000 - elapsed));
+    nextAutoRollTime += 1000;
+    const delay = Math.max(0, nextAutoRollTime - performance.now());
+    setTimeout(autoRollTick, delay);
 }
 
 autoRollTick();
