@@ -184,6 +184,54 @@ if (randomNumber <= 50) {
     // persist immediately after each roll
     saveState();
 }
+
+function simulateRolls(count) {
+    // Simulate multiple rolls at once without DOM updates for each one
+    let tempCommonRolled = 0;
+    let tempUncommonRolled = 0;
+    let tempRareRolled = 0;
+    let tempEpicRolled = 0;
+    let tempLegendaryRolled = 0;
+    let tempPoints = 0;
+
+    for (let i = 0; i < count; i++) {
+        let randomNumber = secureRandomInt(1, 100);
+        if (randomNumber <= 50) {
+            tempCommonRolled++;
+            tempPoints += common;
+        } else if (randomNumber > 50 && randomNumber <= 75) {
+            tempUncommonRolled++;
+            tempPoints += uncommon;
+        } else if (randomNumber > 75 && randomNumber <= 90) {
+            tempRareRolled++;
+            tempPoints += rare;
+        } else if (randomNumber > 90 && randomNumber <= 99) {
+            tempEpicRolled++;
+            tempPoints += epic;
+        } else if (randomNumber === 100) {
+            tempLegendaryRolled++;
+            tempPoints += legendary;
+        }
+    }
+
+    // Update all counters at once
+    rollCount += count;
+    commonRolled += tempCommonRolled;
+    uncommonRolled += tempUncommonRolled;
+    rareRolled += tempRareRolled;
+    epicRolled += tempEpicRolled;
+    legendaryRolled += tempLegendaryRolled;
+    points += tempPoints;
+
+    // Update UI
+    if (rolledsEl) rolledsEl.innerHTML = 'Rolls: ' + formatNumber(rollCount);
+    commonRolledEl.innerHTML = 'Common: ' + formatNumber(commonRolled);
+    uncommonRolledEl.innerHTML = 'Uncommon: ' + formatNumber(uncommonRolled);
+    rareRolledEl.innerHTML = 'Rare: ' + formatNumber(rareRolled);
+    epicRolledEl.innerHTML = 'Epic: ' + formatNumber(epicRolled);
+    legendaryRolledEl.innerHTML = 'Legendary: ' + formatNumber(legendaryRolled);
+    document.getElementById('money').innerHTML = 'Points: ' + formatNumber(points);
+}
 // Save and load state using localStorage
 function saveState() {
     try {
@@ -258,15 +306,8 @@ document.addEventListener('contextmenu', (event) => {
 });
 
 setInterval(() => {
-    const startTime = Date.now();
-    rolltimes = 0;
-    while (rolltimes < autoclick && (Date.now() - startTime) < 900) {
-        rolltimes++;
-        rollNoDelay();
-    }
-
+    simulateRolls(autoclick);
     cps.innerHTML = 'Auto Rolls Per Second: ' + formatNumber(autoclick);
-    document.getElementById('money').innerHTML = 'Points: ' + formatNumber(points);
     saveState();
 }, 1000);
 setInterval(() => {
