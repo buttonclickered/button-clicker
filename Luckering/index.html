@@ -13,6 +13,8 @@
 </head>
 <body>
 hi
+<button class="upgrade" style="transform: translateX(0);" onclick="don()"> Double Or Nothing (ALL)</button>
+
   <h1 id="title">Luckering</h1>
 
   <button id="roll" onclick="roll()">Roll</button>
@@ -23,7 +25,6 @@ hi
   <h2 id="CPS">Auto Rolls Per Second: 0</h2>
 
   <h1 id="rolltitle">Possible Rolls</h1>
-
   <p class="rolls">Common - 50% (1 point)</p>
   <p class="rolls">Uncommon - 30% (2 points)</p>
   <p class="rolls">Rare - 15% (3 points)</p>
@@ -36,7 +37,93 @@ hi
   <h2 class="amountrolled" id="rarerolled">Rare: 0</h2>
   <h2 class="amountrolled" id="epicrolled">Epic: 0</h2>
   <h2 class="amountrolled" id="legendaryrolled">Legendary: 0</h2>
-  <button class="upgrade" id="as1" onclick="addauto(1, 45)">1 CPS Autoclicker (45 points)</button>
+
+<button class="upgrade" id="as1" onclick="addauto(1, 45)">1 CPS Autoclicker (45 points)</button>
+<button class="upgrade" id="as2" onclick="addauto(2, 100)">2 CPS Autoclicker (100 points)</button>
+<button class="upgrade" id="as4" onclick="addauto(4, 1000)">4 CPS Autoclicker (1k points)</button>
+<button class="upgrade" id="as10" onclick="addauto(10, 3000)">10 CPS Autoclicker (3k points)</button>
+<button class="upgrade" id="as15" onclick="addauto(15, 5000)">15 CPS Autoclicker (5k points)</button>
+<button class="upgrade" id="as25" onclick="addauto(25, 10000)">25 CPS Autoclicker (10k points)</button>
+<button class="upgrade" id="as50" onclick="addauto(50, 25000)">50 CPS Autoclicker (25k points)</button>
+<button class="upgrade" id="as100" onclick="addauto(100, 50000)">100 CPS Autoclicker (50k points)</button>
+<button class="upgrade" id="as250" onclick="addauto(250, 100000)">250 CPS Autoclicker (100k points)</button>
+<button class="upgrade" id="as500" onclick="addauto(500, 250000)">500 CPS Autoclicker (250k points)</button>
+<button class="upgrade" id="as1000" onclick="addauto(1000, 500000)">1k CPS Autoclicker (500k points)</button>
+<button class="upgrade" id="as2500" onclick="addauto(2500, 1000000)">2.5k CPS Autoclicker (1M points)</button>
+<button class="upgrade" id="as5000" onclick="addauto(5000, 2500000)">5k CPS Autoclicker (2.5M points)</button>
+<button class="upgrade" id="as10000" onclick="addauto(10000, 5000000)">10k CPS Autoclicker (5M points)</button>
+<button class="upgrade" id="as25000" onclick="addauto(25000, 10000000)">25k CPS Autoclicker (10M points)</button>
+<button class="upgrade" id="as50000" onclick="addauto(50000, 25000000)">50k CPS Autoclicker (25M points)</button>
+<button class="upgrade" id="as100000" onclick="addauto(100000, 50000000)">100k CPS Autoclicker (50M points)</button>
+<button class="upgrade" id="as250000" onclick="addauto(250000, 100000000)">250k CPS Autoclicker (100M points)</button>
+<button class="upgrade" id="as500000" onclick="addauto(500000, 250000000)">500k CPS Autoclicker (250M points)</button>
+<button class="upgrade" id="as1000000" onclick="addauto(1000000, 500000000)">1M CPS Autoclicker (500M points)</button>
+<button class="upgrade" id="as2000000" onclick="addauto(2000000, 1000000000)">2M CPS Autoclicker (1B points)</button>
+<button class="upgrade" id="as4000000" onclick="addauto(4000000, 2000000000)">4M CPS Autoclicker (2B points)</button>
+<button class="upgrade" id="as8000000" onclick="addauto(8000000, 4000000000)">8M CPS Autoclicker (4B points)</button>
+<button class="upgrade" id="as16000000" onclick="addauto(16000000, 8000000000)">16M CPS Autoclicker (8B points)</button>
+<button class="upgrade" id="as32000000" onclick="addauto(32000000, 16000000000)">32M CPS Autoclicker (16B points)</button>
+<button class="upgrade" id="as64000000" onclick="addauto(64000000, 32000000000)">64M CPS Autoclicker (32B points)</button>
+<button class="upgrade" id="as128000000" onclick="addauto(128000000, 64000000000)">128M CPS Autoclicker (64B points)</button>
+<button class="upgrade" id="as256000000" onclick="addauto(256000000, 128000000000)">256M CPS Autoclicker (128B points)</button>
+<button class="upgrade" id="as512000000" onclick="addauto(512000000, 256000000000)">512M CPS Autoclicker (256B points)</button>
+<button class="upgrade" id="as1024000000" onclick="addauto(1024000000, 512000000000)">1B CPS Autoclicker (512B points)</button>
+<button class="upgrade" id="as2048000000" onclick="addauto(2048000000, 1024000000000)">2B CPS Autoclicker (1T points)</button>
+<button class="upgrade" id="as4096000000" onclick="addauto(4096000000, 2048000000000)">4B CPS Autoclicker (2T points)</button>
+<button class="upgrade" id="as8192000000" onclick="addauto(8192000000, 4096000000000)">8B CPS Autoclicker (4T points)</button>
+<button class="upgrade" id="as16384000000" onclick="addauto(16384000000, 8192000000000)">16B CPS Autoclicker (8T points)</button>
+<button class="upgrade" id="as32768000000" onclick="addauto(32768000000, 16384000000000)">32B CPS Autoclicker (16T points)</button>
+<button class="upgrade" id="as65536000000" onclick="addauto(65536000000, 32768000000000)">64B CPS Autoclicker (32T points)</button>
+<button class="upgrade" id="as131072000000" onclick="addauto(131072000000, 65536000000000)">128B CPS Autoclicker (64T points)</button>
+<button class="upgrade" id="as262144000000" onclick="addauto(262144000000, 131072000000000)">256B CPS Autoclicker (128T points)</button>
+<button class="upgrade" id="as524288000000" onclick="addauto(524288000000, 262144000000000)">512B CPS Autoclicker (256T points)</button>
+<button class="upgrade" id="as1048576000000" onclick="addauto(1048576000000, 524288000000000)">1T CPS Autoclicker (512T points)</button>
+<button class="upgrade" id="as2097152000000" onclick="addauto(2097152000000, 1048576000000000)">2T CPS Autoclicker (1Q points)</button>
+<button class="upgrade" id="as4194304000000" onclick="addauto(4194304000000, 2097152000000000)">4T CPS Autoclicker (2Q points)</button>
+<button class="upgrade" id="as8388608000000" onclick="addauto(8388608000000, 4194304000000000)">8T CPS Autoclicker (4Q points)</button>
+<button class="upgrade" id="as16777216000000" onclick="addauto(16777216000000, 8388608000000000)">16T CPS Autoclicker (8Q points)</button>
+<button class="upgrade" id="as33554432000000" onclick="addauto(33554432000000, 16777216000000000)">32T CPS Autoclicker (16Q points)</button>
+<button class="upgrade" id="as67108864000000" onclick="addauto(67108864000000, 33554432000000000)">64T CPS Autoclicker (32Q points)</button>
+<button class="upgrade" id="as134217728000000" onclick="addauto(134217728000000, 67108864000000000)">128T CPS Autoclicker (64Q points)</button>
+<button class="upgrade" id="as268435456000000" onclick="addauto(268435456000000, 134217728000000000)">256T CPS Autoclicker (128Q points)</button>
+<button class="upgrade" id="as536870912000000" onclick="addauto(536870912000000, 268435456000000000)">512T CPS Autoclicker (256Q points)</button>
+<button class="upgrade" id="as1073741824000000" onclick="addauto(1073741824000000, 536870912000000000)">1Q CPS Autoclicker (512Q points)</button>
+<button class="upgrade" id="as2147483648000000" onclick="addauto(2147483648000000, 1073741824000000000)">2Q CPS Autoclicker (1e15 points)</button>
+<button class="upgrade" id="as4294967296000000" onclick="addauto(4294967296000000, 2147483648000000000)">4Q CPS Autoclicker (2e15 points)</button>
+<button class="upgrade" id="as8589934592000000" onclick="addauto(8589934592000000, 4294967296000000000)">8Q CPS Autoclicker (4e15 points)</button>
+<button class="upgrade" id="as17179869184000000" onclick="addauto(17179869184000000, 8589934592000000000)">16Q CPS Autoclicker (8e15 points)</button>
+<button class="upgrade" id="as34359738368000000" onclick="addauto(34359738368000000, 17179869184000000000)">32Q CPS Autoclicker (16e15 points)</button>
+<button class="upgrade" id="as68719476736000000" onclick="addauto(68719476736000000, 34359738368000000000)">64Q CPS Autoclicker (32e15 points)</button>
+<button class="upgrade" id="as137438953472000000" onclick="addauto(137438953472000000, 68719476736000000000)">128Q CPS Autoclicker (64e15 points)</button>
+<button class="upgrade" id="as274877906944000000" onclick="addauto(274877906944000000, 137438953472000000000)">256Q CPS Autoclicker (128e15 points)</button>
+<button class="upgrade" id="as549755813888000000" onclick="addauto(549755813888000000, 274877906944000000000)">512Q CPS Autoclicker (256e15 points)</button>
+<button class="upgrade" id="as1099511627776000000" onclick="addauto(1099511627776000000, 549755813888000000000)">1e15 CPS Autoclicker (512e15 points)</button>
+<button class="upgrade" id="as2199023255552000000" onclick="addauto(2199023255552000000, 1099511627776000000000)">2e15 CPS Autoclicker (1e18 points)</button>
+<button class="upgrade" id="as4398046511104000000" onclick="addauto(4398046511104000000, 2199023255552000000000)">4e15 CPS Autoclicker (2e18 points)</button>
+<button class="upgrade" id="as8796093022208000000" onclick="addauto(8796093022208000000, 4398046511104000000000)">8e15 CPS Autoclicker (4e18 points)</button>
+<button class="upgrade" id="as17592186044416000000" onclick="addauto(17592186044416000000, 8796093022208000000000)">16e15 CPS Autoclicker (8e18 points)</button>
+<button class="upgrade" id="as35184372088832000000" onclick="addauto(35184372088832000000, 17592186044416000000000)">32e15 CPS Autoclicker (16e18 points)</button>
+<button class="upgrade" id="as70368744177664000000" onclick="addauto(70368744177664000000, 35184372088832000000000)">64e15 CPS Autoclicker (32e18 points)</button>
+<button class="upgrade" id="as140737488355328000000" onclick="addauto(140737488355328000000, 70368744177664000000000)">128e15 CPS Autoclicker (64e18 points)</button>
+<button class="upgrade" id="as281474976710656000000" onclick="addauto(281474976710656000000, 140737488355328000000000)">256e15 CPS Autoclicker (128e18 points)</button>
+<button class="upgrade" id="as562949953421312000000" onclick="addauto(562949953421312000000, 281474976710656000000000)">512e15 CPS Autoclicker (256e18 points)</button>
+<button class="upgrade" id="as1125899906842624000000" onclick="addauto(1125899906842624000000, 562949953421312000000000)">1e18 CPS Autoclicker (512e18 points)</button>
+<button class="upgrade" id="as2251799813685248000000" onclick="addauto(2251799813685248000000, 1125899906842624000000000)">2e18 CPS Autoclicker (1e21 points)</button>
+<button class="upgrade" id="as4503599627370496000000" onclick="addauto(4503599627370496000000, 2251799813685248000000000)">4e18 CPS Autoclicker (2e21 points)</button>
+<button class="upgrade" id="as9007199254740992000000" onclick="addauto(9007199254740992000000, 4503599627370496000000000)">8e18 CPS Autoclicker (4e21 points)</button>
+<button class="upgrade" id="as18014398509481984000000" onclick="addauto(18014398509481984000000, 9007199254740992000000000)">16e18 CPS Autoclicker (8e21 points)</button>
+<button class="upgrade" id="as36028797018963968000000" onclick="addauto(36028797018963968000000, 18014398509481984000000000)">32e18 CPS Autoclicker (16e21 points)</button>
+<button class="upgrade" id="as72057594037927936000000" onclick="addauto(72057594037927936000000, 36028797018963968000000000)">64e18 CPS Autoclicker (32e21 points)</button>
+<button class="upgrade" id="as144115188075855872000000" onclick="addauto(144115188075855872000000, 72057594037927936000000000)">128e18 CPS Autoclicker (64e21 points)</button>
+<button class="upgrade" id="as288230376151711744000000" onclick="addauto(288230376151711744000000, 144115188075855872000000000)">256e18 CPS Autoclicker (128e21 points)</button>
+<button class="upgrade" id="as576460752303423488000000" onclick="addauto(576460752303423488000000, 288230376151711744000000000)">512e18 CPS Autoclicker (256e21 points)</button>
+<button class="upgrade" id="as1152921504606846976000000" onclick="addauto(1152921504606846976000000, 576460752303423488000000000)">1e21 CPS Autoclicker (512e21 points)</button>
+                     
+
+
+  <div id="notification" style="display:none;"></div>
+
+<div style="height: 2000px;"></div>
 
     <script src="rng.js" defer></script>
     <script>

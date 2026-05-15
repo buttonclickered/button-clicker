@@ -7,7 +7,11 @@
 }
 #money {
     font-size: 40px;
-    transform: translateY(-480px) translateX(250px);
+    position: fixed;
+    top: 0;
+    left: 250px;
+    background: white;
+    z-index: 10;
     pointer-events: none;
 }
 #CPS {
@@ -57,7 +61,23 @@
     background-color: orange;
     border-radius: 12px;
     border: 5px solid black;
-    transform: translateX(600px) translateY(-570px);
+    transform:  translateY(-570px);
+}
+#notification {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  background: #ff4444;
+  color: #fff;
+  padding: 18px 36px;
+  border-radius: 10px;
+  font-size: 22px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  z-index: 1000;
+  display: none;
+  opacity: 0.95;
+  pointer-events: none;
 }
 .rolls {
     color: black;

@@ -31,14 +31,25 @@ let cooldown = 1;
 // persisted state
 let rollCount = 0;
 
+function formatNumber(num) {
+    if (num < 1000) return num;
+    const units = ['k', 'M', 'B', 'T', 'Q'];
+    let unitIndex = -1;
+    while (num >= 1000 && unitIndex < units.length - 1) {
+        num /= 1000;
+        unitIndex++;
+    }
+    return num.toFixed(1) + units[unitIndex];
+}
+
 function addauto(amount,cost) {
   if (points >= cost) {
     autoclick = autoclick + amount;
     points -= cost;
-    document.getElementById('money').innerHTML = 'Points: ' + points;
+    document.getElementById('money').innerHTML = 'Points: ' + formatNumber(points);
     saveState();
   } else {
-    alert('Not enough points!');
+    showNotification('Not enough points!');
   }}
 
 function hide(Element) {
@@ -65,6 +76,15 @@ function secureRandomInt(min, max) {
     }
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+function showNotification(message) {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.style.display = 'block';
+  setTimeout(() => {
+    notification.style.display = 'none';
+  }, 2000);
+}
 function roll() {
     // enforce cooldown: disable button for `cooldown` seconds to prevent spamming
     const rngButton = document.getElementById('roll');
@@ -79,7 +99,7 @@ function roll() {
 
     // increment persisted roll count and update UI
     rollCount += 1;
-    if (rolledsEl) rolledsEl.innerHTML = 'Rolls: ' + rollCount;
+    if (rolledsEl) rolledsEl.innerHTML = 'Rolls: ' + formatNumber(rollCount);
 
     console.log("Rolled!");
 
@@ -89,29 +109,29 @@ if (randomNumber <= 50) {
     result.innerHTML = 'You got: ' + "Common";
     points += common;
     commonRolled += 1;
-    commonRolledEl.innerHTML = 'Common: ' + commonRolled;
+    commonRolledEl.innerHTML = 'Common: ' + formatNumber(commonRolled);
 } else if (randomNumber > 50 && randomNumber <= 75) {
     result.innerHTML = 'You got: ' + "Uncommon";
     points += uncommon;
     uncommonRolled += 1;
-    uncommonRolledEl.innerHTML = 'Uncommon: ' + uncommonRolled;
+    uncommonRolledEl.innerHTML = 'Uncommon: ' + formatNumber(uncommonRolled);
 } else if (randomNumber > 75 && randomNumber <= 90) {
     result.innerHTML = 'You got: ' + "‌​‌​‌​‌​‌​Rare";
     points += rare;
     rareRolled += 1;
-    rareRolledEl.innerHTML = 'Rare: ' + rareRolled;
+    rareRolledEl.innerHTML = 'Rare: ' + formatNumber(rareRolled);
 } else if (randomNumber > 90 && randomNumber <= 99) {
     result.innerHTML = 'You got: ' + "Epic";
     points += epic;
     epicRolled += 1;
-    epicRolledEl.innerHTML = 'Epic: ' + epicRolled;
+    epicRolledEl.innerHTML = 'Epic: ' + formatNumber(epicRolled);
 } else if (randomNumber === 100) {
     result.innerHTML = 'You got: ' + "Legendary";
     points += legendary;
     legendaryRolled += 1;
-    legendaryRolledEl.innerHTML = 'Legendary: ' + legendaryRolled;
+    legendaryRolledEl.innerHTML = 'Legendary: ' + formatNumber(legendaryRolled);
 }
-    document.getElementById('money').innerHTML = 'Points: ' + points;
+    document.getElementById('money').innerHTML = 'Points: ' + formatNumber(points);
     // persist immediately after each roll
     saveState();
 }
@@ -128,7 +148,7 @@ function rollNoDelay() {
 
     // increment persisted roll count and update UI
     rollCount += 1;
-    if (rolledsEl) rolledsEl.innerHTML = 'Rolls: ' + rollCount;
+    if (rolledsEl) rolledsEl.innerHTML = 'Rolls: ' + formatNumber(rollCount);
 
     console.log("Rolled!");
 
@@ -138,29 +158,29 @@ if (randomNumber <= 50) {
     result.innerHTML = 'You got: ' + "Common";
     points += common;
     commonRolled += 1;
-    commonRolledEl.innerHTML = 'Common: ' + commonRolled;
+    commonRolledEl.innerHTML = 'Common: ' + formatNumber(commonRolled);
 } else if (randomNumber > 50 && randomNumber <= 75) {
     result.innerHTML = 'You got: ' + "Uncommon";
     points += uncommon;
     uncommonRolled += 1;
-    uncommonRolledEl.innerHTML = 'Uncommon: ' + uncommonRolled;
+    uncommonRolledEl.innerHTML = 'Uncommon: ' + formatNumber(uncommonRolled);
 } else if (randomNumber > 75 && randomNumber <= 90) {
     result.innerHTML = 'You got: ' + "‌​‌​‌​‌​‌​Rare";
     points += rare;
     rareRolled += 1;
-    rareRolledEl.innerHTML = 'Rare: ' + rareRolled;
+    rareRolledEl.innerHTML = 'Rare: ' + formatNumber(rareRolled);
 } else if (randomNumber > 90 && randomNumber <= 99) {
     result.innerHTML = 'You got: ' + "Epic";
     points += epic;
     epicRolled += 1;
-    epicRolledEl.innerHTML = 'Epic: ' + epicRolled;
+    epicRolledEl.innerHTML = 'Epic: ' + formatNumber(epicRolled);
 } else if (randomNumber === 100) {
     result.innerHTML = 'You got: ' + "Legendary";
     points += legendary;
     legendaryRolled += 1;
-    legendaryRolledEl.innerHTML = 'Legendary: ' + legendaryRolled;
+    legendaryRolledEl.innerHTML = 'Legendary: ' + formatNumber(legendaryRolled);
 }
-    document.getElementById('money').innerHTML = 'Points: ' + points;
+    document.getElementById('money').innerHTML = 'Points: ' + formatNumber(points);
     // persist immediately after each roll
     saveState();
 }
@@ -191,11 +211,11 @@ function loadState() {
         epicRolled = Number(localStorage.getItem('epicRolled')) || 0;
         legendaryRolled = Number(localStorage.getItem('legendaryRolled')) || 0;
 
-        commonRolledEl.innerHTML = 'Common: ' + commonRolled;
-        uncommonRolledEl.innerHTML = 'Uncommon: ' + uncommonRolled;
-        rareRolledEl.innerHTML = 'Rare: ' + rareRolled;
-        epicRolledEl.innerHTML = 'Epic: ' + epicRolled;
-        legendaryRolledEl.innerHTML = 'Legendary: ' + legendaryRolled;
+        commonRolledEl.innerHTML = 'Common: ' + formatNumber(commonRolled);
+        uncommonRolledEl.innerHTML = 'Uncommon: ' + formatNumber(uncommonRolled);
+        rareRolledEl.innerHTML = 'Rare: ' + formatNumber(rareRolled);
+        epicRolledEl.innerHTML = 'Epic: ' + formatNumber(epicRolled);
+        legendaryRolledEl.innerHTML = 'Legendary: ' + formatNumber(legendaryRolled);
         if (a !== null) autoclick = Number(a) || 0;
         if (p !== null) points = Number(p) || 0;
         if (r !== null) rollCount = Number(r) || 0;
@@ -205,9 +225,25 @@ function loadState() {
     // update UI
     const moneyEl = document.getElementById('money');
 
-    if (moneyEl) moneyEl.innerHTML = 'Points: ' + points;
-    if (rolledsEl) rolledsEl.innerHTML = 'Rolls: ' + rollCount;
-    if (cps) cps.innerHTML = 'Auto Rolls Per Second: ' + autoclick;
+    if (moneyEl) moneyEl.innerHTML = 'Points: ' + formatNumber(points);
+    if (rolledsEl) rolledsEl.innerHTML = 'Rolls: ' + formatNumber(rollCount);
+    if (cps) cps.innerHTML = 'Auto Rolls Per Second: ' + formatNumber(autoclick);
+}
+
+function don() {
+    if (points > 0) {
+        const gamble = secureRandomInt(1, 2);
+        if (gamble === 1) {
+            points *= 2;
+        showNotification('You won! Your points have been doubled to ' + formatNumber(points));
+        } else {
+            points = 0;
+            showNotification('You lost! Your points have been reset to 0');
+        }
+        document.getElementById('money').innerHTML = 'Points: ' + formatNumber(points);
+        saveState();
+    } else {
+    }
 }
 
 // load saved state on script run
@@ -222,16 +258,17 @@ document.addEventListener('contextmenu', (event) => {
 });
 
 setInterval(() => {
-    rolltimes = 0
-    while (rolltimes < Number(cps.innerText.slice(23))) {
+    const startTime = Date.now();
+    rolltimes = 0;
+    while (rolltimes < autoclick && (Date.now() - startTime) < 900) {
         rolltimes++;
-rollNoDelay()
+        rollNoDelay();
     }
 
- cps.innerHTML = 'Auto Rolls Per Second: ' + autoclick;
- document.getElementById('money').innerHTML = 'Points: ' + points;
- saveState();
+    cps.innerHTML = 'Auto Rolls Per Second: ' + formatNumber(autoclick);
+    document.getElementById('money').innerHTML = 'Points: ' + formatNumber(points);
+    saveState();
 }, 1000);
 setInterval(() => {
- cps.innerHTML = 'Auto Rolls Per Second: ' + autoclick;
+ cps.innerHTML = 'Auto Rolls Per Second: ' + formatNumber(autoclick);
 }, 75);
