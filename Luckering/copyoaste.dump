@@ -1,0 +1,1 @@
+can you optimize the rolling in a way so say i have 200 auto rolls a sec. it starts with getting a random number between 0-100 (half a two hundred for 50%). that is the amount of commons i get and then pick a random number between 0-50(a quarter of 200 for 25%) and thats how many rares a get and it keeps going and make some sort of system for we
