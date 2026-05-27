@@ -10,25 +10,37 @@
         body, html {
             margin: 0;
             padding: 0;
+            height: 100vh;
+            overflow: hidden;
             font-family: 'Inter', sans-serif;
-            width: 100%;
-            overflow-x: hidden;
-        }
-
-        body {
-            background-image: url('/search/Images/background.png');
-            background-size: auto;
-            background-repeat: repeat;
-            background-attachment: fixed;
         }
 
         .parallax-wrapper {
-            min-height: 100vh;
+            position: relative;
+            height: 100vh;
             overflow-x: hidden;
+            overflow-y: auto;
+            perspective: 1px;
+            transform-style: preserve-3d;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 3rem 1.5rem;
+        }
+
+        .parallax-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('/search/Images/background.png');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            transform: translateZ(-1px) scale(3);
+            transform-origin: center;
         }
 
         /* 2. Layout & Text Styles */

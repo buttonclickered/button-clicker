@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulaire</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('/search/Images/background.png');
+            background-size: auto;
+            background-repeat: repeat;
+            /* Changed to scroll so the JS can move the position manually */
+            background-attachment: scroll;
+            background-position: 0 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .parallax-wrapper {
+            padding: 3rem 1.5rem;
+            padding-top: 5rem;
+            /* Added relative position to ensure content stays above background */
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            text-align: center;
+            margin: 1.5rem 0;
+            font-size: 1.8rem;
+            font-weight: 500;
+        }
+        h2, a {
+            text-align: center;
+            margin: 2rem 0 1rem 0;
+        }
+        #back {
+            border: none;
+            background: none;
+            cursor: pointer;
+            display: block;
+        }
+        table {
+            background-color: #ffffff;
+            border-radius: 6px;
+            margin: 10px auto 30px auto;
+            width: 90%;
+            max-width: 600px;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #eee;
+            text-align: center;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #666;
+        }
+        td {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="parallax-wrapper">
+    <button id="back" onclick="history.back()">
+        <img src="/search/Images/back.png" width="35">
+    </button>
+    
+    <h1>Videos and Songs</h1>
+   <div style="text-align:center;">
+  <a target="_blank" rel="noopener noreferrer" href="https://scratch.mit.edu/projects/1265013933/">Les verbes faire et aller</a>
+</div>
+
+<br><br>
+
+<div style="text-align:center;">
+    <iframe width="300" height="200" src="https://www.youtube.com/embed/MFk9YmJv-jc?si=9R4250pp56x2tXwD" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  <iframe width="300" height="200" src="https://www.youtube.com/embed/DQqyBqP6wiw?si=Jv7zmqblvBWF0hws" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <iframe width="300" height="200" src="https://www.youtube.com/embed/PlSqLftQJ_s?si=zo6Agxd8HNgtRseP" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+<div style="text-align:center;">
+    <iframe width="300" height="200" src="https://www.youtube.com/embed/PlSqLftQJ_s?si=iARCeotpHWpdb2kn" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <iframe width="300" height="200" src="https://www.youtube.com/embed/Lpwf5N0rfVE?si=-1mdfBrimW4qtBJy" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <iframe width="300" height="200" src="https://www.youtube.com/embed/DnrTrbJ6mYs?si=p1C7rZkUnxCX9M4l" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
+<div style="text-align:center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/NFsN5R4JreI?si=gN9Fmf8hUxX9jp0l" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+ </div>
+
+<script>
+    window.addEventListener('scroll', function() {
+        // This calculates the scroll position
+        const scrolled = window.pageYOffset;
+        // This moves the background at 40% speed (0.4)
+        document.body.style.backgroundPositionY = (scrolled * 0.4) + 'px';
+    });
+</script>
+
+</body>
+</html>
