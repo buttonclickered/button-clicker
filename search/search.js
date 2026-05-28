@@ -27,22 +27,47 @@ async function searchByFilename(term) {
         const files = await response.json();
         resultsSpan.innerHTML = ""; // Clear "Searching..."
 
-        // 2. Filter the list based on the filename
-        const matches = files.filter(fileName => 
-            fileName.toLowerCase().includes(term)
-        );
+        const results = await Promise.all(files.map(async fileName => {
+            const lowerName = fileName.toLowerCase();
+            const filenameMatch = lowerName.includes(term);
+            let contentMatch = false;
 
-        // 3. Display the matching filenames as links
+            if (!filenameMatch) {
+                try {
+                    const fileResponse = await fetch(`Grammer/${fileName}`);
+                    if (fileResponse.ok) {
+                        const html = await fileResponse.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const text = doc.body.textContent || '';
+                        contentMatch = text.toLowerCase().includes(term);
+                    }
+                } catch (e) {
+                    console.warn(`Unable to search contents of ${fileName}`, e);
+                }
+            }
+
+            return { fileName, filenameMatch, contentMatch };
+        }));
+
+        const matches = results.filter(result => result.filenameMatch || result.contentMatch);
+
         if (matches.length > 0) {
-            matches.forEach(file => {
+            matches.forEach(({ fileName, filenameMatch, contentMatch }) => {
                 const link = document.createElement('a');
-                link.href = `Grammer/${file}`;
-                // This shows "Apple" instead of "apple.html"
-                link.textContent = file.replace('.html', ''); 
-                
-                link.style.display = "block";
-                link.style.marginBottom = "8px";
-                link.style.fontSize = "1.2rem";
+                link.href = `Grammer/${fileName}`;
+                link.textContent = fileName.replace('.html', '');
+                link.style.display = 'block';
+                link.style.marginBottom = '8px';
+                link.style.fontSize = '1.2rem';
+
+                if (!filenameMatch && contentMatch) {
+                    const note = document.createElement('span');
+                    note.style.fontSize = '0.9rem';
+                    note.style.color = '#555';
+                    link.appendChild(note);
+                }
+
                 resultsSpan.appendChild(link);
             });
         } else {
@@ -53,9 +78,10 @@ async function searchByFilename(term) {
         console.error(err);
         resultsSpan.textContent = "Error: Could not load the file list.";
     }
-     if (queryValue == "htm") {
-          displayQuery.textContent = 'htm';
-   }
+
+    if (queryValue == "htm") {
+        displayQuery.textContent = 'htm';
+    }
 }
 
 function listRules() {
