@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plural Rules</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <style>
+        /* 1. Parallax Setup */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .parallax-wrapper {
+            position: relative;
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            perspective: 1px;
+            transform-style: preserve-3d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .parallax-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('/search/Images/background.png');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            transform: translateZ(-1px) scale(3);
+            transform-origin: center;
+        }
+
+        /* 2. Layout & Text Styles */
+        h1 { text-align: center; margin: 1.5rem 0; font-size: 1.8rem; font-weight: 500; }
+        #back { border: none; background: none; cursor: pointer; }
+        
+        /* 3. Table Styling */
+        table {
+            background-color: #ffffff;
+            border-radius: 6px;
+            margin: 10px auto 30px auto;
+            width: 90%;
+            max-width: 600px;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #eee;
+            text-align: center;
+        }
+
+        th { background: #f5f5f5; font-weight: 600; color: #666; }
+        td { color: #333; }
+    </style>
+</head>
+<body>
+
+    <div class="parallax-wrapper">
+        <button id="back" onclick="history.back()">
+            <img src="/search/Images/back.png" width="35">
+        </button>
+
+        <h1>Les Pronoms</h1>
+        
+        <table>
+            <tr>
+                <th>Singular</th>
+                <th>Plural</th>
+            </tr>
+            <tr>
+                <td><b>Je</b> (1ere personne singulier)</td>
+                <td><b>Nous</b> (1ere personne pluriel)</td>
+            </tr>
+            <tr>
+                <td><b>Tu</b> (2eme personne singulier)</td>
+                <td><b>Vous</b> (2eme personne pluriel)</td>
+            </tr>
+            <tr>
+                <td><b>Il/Elle</b> (3eme personne singulier)</td>
+                <td><b>Ils/Elles</b> (3eme personne pluriel)</td>
+            </tr>
+        </table>
+
+
+    </div>
+
+</body>
+</html>
