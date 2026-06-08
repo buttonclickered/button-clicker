@@ -356,7 +356,7 @@
     // Check the answer
     function checkAnswer() {
         const feedback = document.getElementById('feedback');
-        const userAnswer = document.getElementById('quiz-answer').value.toLowerCase().trim();
+        let userAnswer = document.getElementById('quiz-answer').value.toLowerCase().trim();
         
         if (!currentWord) {
             feedback.textContent = 'Click "New Word" to start!';
@@ -371,6 +371,9 @@
             feedback.style.background = '#FFC107';
             return;
         }
+
+        // Remove optional leading articles (a, an, the)
+        userAnswer = userAnswer.replace(/^(a |an |the )/i, '').trim();
 
         let isCorrect = false;
         
