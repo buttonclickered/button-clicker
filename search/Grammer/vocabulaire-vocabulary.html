@@ -372,7 +372,17 @@
             return;
         }
 
-        if (userAnswer === currentWord.french) {
+        let isCorrect = false;
+        
+        // Check if the french word contains a slash (multiple valid answers)
+        if (currentWord.french.includes('/')) {
+            const options = currentWord.french.split('/').map(opt => opt.trim().toLowerCase());
+            isCorrect = options.includes(userAnswer);
+        } else {
+            isCorrect = userAnswer === currentWord.french;
+        }
+
+        if (isCorrect) {
             feedback.textContent = '✓ Correct! ' + currentWord.french;
             feedback.style.display = 'block';
             feedback.style.background = '#4CAF50';
