@@ -1,41 +1,70 @@
 const express = require("express");
-const fs = require("fs");
+const cors = require("cors");
+
 const app = express();
+
+// IMPORTANT: allows your website to talk to this server
+app.use(cors({
+  origin: "https://buttonclicker.ca"
+}));
 
 app.use(express.json());
 
-const FILE = "leaderboard.json";
+// In-memory leaderboard storage (resets if server restarts)
+let leaderboards = {
+  easy: [],
+  medium: [],
+  hard: []
+};
 
-function load() {
-    if (!fs.existsSync(FILE)) {
-        return { easy: [], medium: [], hard: [] };
-    }
-    return JSON.parse(fs.readFileSync(FILE));
-}
+// =====================
+// GET leaderboard
+// =====================
+app.get("/leaderboard/:mode", (req, res) => {
+  const mode = req.params.mode;
 
-function save(data) {
-    fs.writeFileSync(FILE, JSON.stringify(data));
-}
+  if (!leaderboards[mode]) {
+    return res.json([]);
+  }
 
-app.get("/leaderboard/:mode", (req,res)=>{
-    let data = load();
-    res.json(data[req.params.mode] || []);
+  // sort highest score first
+  const sorted = leaderboards[mode]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+
+  res.json(sorted);
 });
 
-app.post("/leaderboard", (req,res)=>{
-    let { name, mode, score } = req.body;
+// =====================
+// POST score
+// =====================
+app.post("/leaderboard/:mode", (req, res) => {
+  const mode = req.params.mode;
 
-    let data = load();
+  const { name, score } = req.body;
 
-    data[mode].push({ name, score });
+  if (!leaderboards[mode]) {
+    leaderboards[mode] = [];
+  }
 
-    data[mode].sort((a,b)=>b.score-a.score);
+  if (!name || typeof score !== "number") {
+    return res.status(400).json({ error: "Invalid data" });
+  }
 
-    data[mode] = data[mode].slice(0,10);
+  leaderboards[mode].push({
+    name,
+    score,
+    time: Date.now()
+  });
 
-    save(data);
-
-    res.json({ ok:true });
+  res.json({ success: true });
 });
 
-app.listen(3000, ()=>console.log("Leaderboard running"));
+// =====================
+// START SERVER (IMPORTANT for Render)
+// =====================
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Leaderboard running on port " + PORT);
+});
