@@ -2,233 +2,233 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Spelling Game + Leaderboard</title>
+<title>Spelling Game Pro</title>
 
 <style>
 body { font-family: Arial; margin:20px; }
 
+table { width:100%; border-collapse:collapse; margin-bottom:20px; }
+td,th { border:1px solid black; padding:6px; }
+
 .hidden { display:none; }
 
-.box {
-  border:2px solid black;
-  padding:20px;
-  max-width:800px;
-  margin-bottom:20px;
-}
+.box { border:2px solid black; padding:20px; max-width:700px; }
 
-input, select, button {
-  padding:8px;
-  margin:5px;
-}
+#answer { width:100%; padding:10px; font-size:18px; }
 
-#answer {
-  width:100%;
-  font-size:18px;
-}
+button,select { padding:8px; margin:5px; }
 
-.leaderboard {
-  border:1px solid #000;
-  padding:10px;
-  margin-top:10px;
-}
+.locked { opacity:0.5; pointer-events:none; }
 
-.tab {
-  cursor:pointer;
-  padding:5px 10px;
-  border:1px solid black;
-  margin-right:5px;
-  display:inline-block;
-}
-
-.active {
-  background:black;
-  color:white;
-}
 </style>
 </head>
 
 <body>
 
-<h1>Spelling Game Pro</h1>
+<h1 id="title">Word List</h1>
 
-<!-- NAME -->
-<input id="name" placeholder="Enter your name">
+<!-- WORD TABLE -->
+<div id="wordTable">
+<table>
+<tr><th>1</th><th>2</th><th>3</th></tr>
+<tr><td>rocket</td><td>solemn</td><td>pocket</td></tr>
+<tr><td>intrigue</td><td>debt</td><td>scenic</td></tr>
+<tr><td>science</td><td>subtle</td><td>nickel</td></tr>
+<tr><td>guardian</td><td>ascend</td><td>autumn</td></tr>
+<tr><td>league</td><td>doubt</td><td>column</td></tr>
+<tr><td>afford</td><td>excellent</td><td>mirror</td></tr>
+<tr><td>possess</td><td>college</td><td>dilemma</td></tr>
+<tr><td>puzzle</td><td>necessary</td><td>recess</td></tr>
+<tr><td>compassion</td><td>address</td><td>announcement</td></tr>
+<tr><td>broccoli</td><td>community</td><td>committee</td></tr>
+<tr><td>champion</td><td>alphabet</td><td>accomplish</td></tr>
+<tr><td>athletic</td><td>wheat</td><td>check</td></tr>
+<tr><td>photo</td><td>finish</td><td>marathon</td></tr>
+<tr><td>when</td><td>chocolate</td><td>physical</td></tr>
+<tr><td>shudder</td><td>thousand</td><td>wheeze</td></tr>
+<tr><td>appointment</td><td>oyster</td><td>coil</td></tr>
+<tr><td>royal</td><td>coin</td><td>cloud</td></tr>
+<tr><td>joint</td><td>house</td><td>choice</td></tr>
+<tr><td>mountain</td><td>employ</td><td>crowd</td></tr>
+<tr><td>enjoy</td><td>shower</td><td>tower</td></tr>
+<tr><td>first</td><td>historical</td><td>larger</td></tr>
+<tr><td>bureau</td><td>urban</td><td>inspiration</td></tr>
+<tr><td>serve</td><td>wardrobe</td><td>stir</td></tr>
+<tr><td>determine</td><td>director</td><td>disturb</td></tr>
+<tr><td>humorous</td><td>pattern</td><td>department</td></tr>
+<tr><td>ancient</td><td>especially</td><td>immunization</td></tr>
+<tr><td>introduction</td><td>commercial</td><td>glacier</td></tr>
+<tr><td>infection</td><td>portion</td><td>efficient</td></tr>
+<tr><td>social</td><td>innovation</td><td>production</td></tr>
+<tr><td>sufficient</td><td>question</td><td>vaccination</td></tr>
+<tr><td>admirer</td><td>valentine</td><td>smitten</td></tr>
+<tr><td>beloved</td><td>lovebirds</td><td>fourteenth</td></tr>
+<tr><td>enamored</td><td>February</td><td>sweetheart</td></tr>
+<tr><td>affectionate</td><td>swoon</td><td>commitment</td></tr>
+<tr><td>unrequited</td><td>betrothed</td><td>backyard</td></tr>
+<tr><td>birdbath</td><td>butterfly</td><td>classmate</td></tr>
+<tr><td>classroom</td><td>hallway</td><td>homeroom</td></tr>
+<tr><td>outside</td><td>wildlife</td><td>teamwork</td></tr>
+<tr><td>summertime</td><td>everybody</td><td>everywhere</td></tr>
+<tr><td>hummingbird</td><td>letters</td><td>flamingoes</td></tr>
+<tr><td>thousands</td><td>studios</td><td>databases</td></tr>
+<tr><td>reefs</td><td>languages</td><td>staffs</td></tr>
+<tr><td>cities</td><td>bookshelves</td><td>libraries</td></tr>
+<tr><td>calves</td><td>dictionaries</td><td>dominoes</td></tr>
+<tr><td>volcanoes</td><td>prearrange</td><td>precaution</td></tr>
+<tr><td>predetermine</td><td>preheat</td><td>precede</td></tr>
+<tr><td>predate</td><td>postgraduate</td><td>preamble</td></tr>
+<tr><td>preface</td><td>prelude</td><td>preview</td></tr>
+<tr><td>postwar</td><td>postdate</td><td>postpone</td></tr>
+<tr><td>postscript</td><td></td><td></td></tr>
+</table>
+</div>
 
-<!-- SETTINGS -->
-<select id="difficulty">
-  <option value="easy">Easy</option>
-  <option value="medium">Medium</option>
-  <option value="hard">Hard</option>
-</select>
+<!-- GAME -->
+<div class="box">
+
+<h2>Spelling Game Pro</h2>
 
 <button onclick="startGame()">Start Game</button>
 
-<!-- GAME -->
-<div id="game" class="box hidden">
+<div id="gameArea" class="hidden">
 
 <div>
 🔥 Streak: <span id="streak">0</span> |
 ⭐ Points: <span id="points">0</span>
 </div>
 
+<select id="difficulty">
+<option value="easy">Easy</option>
+<option value="medium">Medium</option>
+<option value="hard">Hard</option>
+</select>
+
+<select id="voiceSelect"></select>
+
 <input id="answer" placeholder="Type word">
 
+<button id="checkBtn" onclick="check()">Check</button>
 <button onclick="newWord()">New Word</button>
-<button onclick="check()">Check</button>
 <button onclick="repeat()">🔊 Repeat</button>
-<button onclick="submitScore()">🏆 Submit Score</button>
 
 <div id="status"></div>
 <div id="result"></div>
 
 </div>
-
-<!-- LEADERBOARD -->
-<div class="box">
-
-<h2>Leaderboard</h2>
-
-<div>
-<span class="tab active" onclick="loadBoard('easy')">Easy</span>
-<span class="tab" onclick="loadBoard('medium')">Medium</span>
-<span class="tab" onclick="loadBoard('hard')">Hard</span>
-</div>
-
-<div id="board" class="leaderboard">Loading...</div>
-
 </div>
 
 <script>
 
-/* ================= SERVER ================= */
-
-const SERVER = "https://button-clicker.onrender.com/leaderboard";
-
-/* ================= WORDS ================= */
+/* ================= FULL WORD SET ================= */
 
 const words = {
-easy:["rocket","pocket","science","coin","house","tower","mirror","check","finish"],
-medium:["intrigue","debt","guardian","dilemma","committee","compassion","marathon","infection"],
-hard:["prearrange","postscript","predetermine","unrequited","betrothed","enamored","volcanoes"]
+easy:[
+"rocket","pocket","science","coin","house","tower","mirror","check","photo",
+"finish","cloud","coin","urban","stir","first","ancient","glacier","wildlife"
+],
+medium:[
+"intrigue","debt","guardian","dilemma","committee","compassion","athletic",
+"marathon","physical","appointment","choice","mountain","enjoy","director",
+"disturb","humorous","infection","innovation","production","vaccination",
+"valentine","sweetheart","commitment","butterfly","summertime","everybody"
+],
+hard:[
+"prearrange","postscript","predetermine","unrequited","betrothed","enamored",
+"introduction","commercial","sufficient","predate","precede","preheat",
+"postgraduate","volcanoes","dictionaries","languages","bookshelves"
+]
 };
 
-/* ================= GAME STATE ================= */
+/* ================= STATE ================= */
 
 let currentWord = "";
 let used = false;
 let streak = 0;
 let points = 0;
+let voices = [];
 
-/* ================= START GAME ================= */
+/* ================= GAME START ================= */
 
 function startGame() {
-  document.getElementById("game").classList.remove("hidden");
-  newWord();
+    document.getElementById("wordTable").classList.add("hidden");
+    document.getElementById("gameArea").classList.remove("hidden");
+    loadVoices();
 }
+
+/* ================= VOICES ================= */
+
+function loadVoices() {
+    voices = speechSynthesis.getVoices();
+    let sel = document.getElementById("voiceSelect");
+    sel.innerHTML = "";
+
+    voices.forEach((v,i)=>{
+        let o = document.createElement("option");
+        o.value = i;
+        o.textContent = v.name;
+        sel.appendChild(o);
+    });
+}
+
+speechSynthesis.onvoiceschanged = loadVoices;
 
 /* ================= SPEAK ================= */
 
 function speak(word) {
-  let u = new SpeechSynthesisUtterance(word);
-  u.rate = 0.4;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
+    speechSynthesis.cancel();
+    let u = new SpeechSynthesisUtterance(word);
+
+    let v = voices[document.getElementById("voiceSelect").value];
+    if (v) u.voice = v;
+
+    u.rate = 0.4;
+    speechSynthesis.speak(u);
 }
 
 /* ================= NEW WORD ================= */
 
 function newWord() {
-  let diff = document.getElementById("difficulty").value;
-  let pool = words[diff];
+    let diff = document.getElementById("difficulty").value;
+    let pool = words[diff];
 
-  currentWord = pool[Math.floor(Math.random()*pool.length)];
-  used = false;
+    currentWord = pool[Math.floor(Math.random()*pool.length)];
+    used = false;
 
-  document.getElementById("answer").value = "";
-  document.getElementById("status").innerText = "Spell the word";
-  document.getElementById("result").innerText = "";
+    document.getElementById("answer").value = "";
+    document.getElementById("result").textContent = "";
+    document.getElementById("status").textContent = "Spell the word";
 
-  speak(currentWord);
+    speak(currentWord);
 }
 
 /* ================= CHECK (ANTI CHEAT) ================= */
 
 function check() {
-  if (used) return;
-  used = true;
+    if (used) return;
+    used = true;
 
-  let user = document.getElementById("answer").value.trim().toLowerCase();
+    let user = document.getElementById("answer").value.trim().toLowerCase();
 
-  if (user === currentWord) {
-    streak++;
-    points += streak;
-    document.getElementById("result").innerText = "✅ Correct!";
-  } else {
-    streak = 0;
-    document.getElementById("result").innerText = "❌ Wrong: " + currentWord;
-  }
+    if (user === currentWord) {
+        streak++;
+        points += streak;
+        document.getElementById("result").textContent = "✅ Correct!";
+    } else {
+        streak = 0;
+        document.getElementById("result").textContent =
+            "❌ Wrong: " + currentWord;
+    }
 
-  document.getElementById("streak").innerText = streak;
-  document.getElementById("points").innerText = points;
+    document.getElementById("streak").textContent = streak;
+    document.getElementById("points").textContent = points;
 }
 
 /* ================= REPEAT ================= */
 
 function repeat() {
-  speak(currentWord);
+    if (currentWord) speak(currentWord);
 }
-
-/* ================= SUBMIT SCORE ================= */
-
-function submitScore() {
-  let name = document.getElementById("name").value || "Player";
-  let mode = document.getElementById("difficulty").value;
-
-  fetch(`${SERVER}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: name,
-      mode: mode,
-      score: points
-    })
-  }).then(()=>{
-    loadBoard(mode);
-    alert("Score submitted!");
-  });
-}
-
-/* ================= LEADERBOARD ================= */
-
-function loadBoard(mode) {
-
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  event?.target?.classList.add("active");
-
-  fetch(`${SERVER}/${mode}`)
-    .then(res=>res.json())
-    .then(data=>{
-
-      let html = "<ol>";
-
-      data.forEach(p=>{
-        html += `<li>${p.name} - ${p.score}</li>`;
-      });
-
-      html += "</ol>";
-
-      document.getElementById("board").innerHTML = html;
-    });
-}
-
-/* auto refresh */
-setInterval(()=>{
-  let mode = document.getElementById("difficulty")?.value || "easy";
-  loadBoard(mode);
-}, 5000);
-
-/* default load */
-loadBoard("easy");
 
 </script>
 
