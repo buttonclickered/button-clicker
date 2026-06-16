@@ -54,6 +54,34 @@
     "points": "800",
     "verifier": "yourboykurdis",
     "victors": [] 
+  },
+    {
+    "level": "How to spider",
+    "id": "122370463",
+    "points": "30",
+    "verifier": "yourboykurdis",
+    "victors": ["wsp", "charlie", "josh", "sam", "felix", "cormick"] 
+  },
+      {
+    "level": "Demon Mixed",
+    "id": "566659",
+    "points": "80",
+    "verifier": "josh",
+    "victors": ["felix"] 
+  },
+        {
+    "level": "Many Fun Rooms Await",
+    "id": "112326019",
+    "points": "356",
+    "verifier": "charlie",
+    "victors": ["josh"] 
+  },
+       {
+    "level": "Permafrost Mountain",
+    "id": "80790301",
+    "points": "320",
+    "verifier": "yourboykurdis",
+    "victors": [] 
   }
   
 ]

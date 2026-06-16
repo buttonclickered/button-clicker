@@ -5,6 +5,15 @@ const jsonFilePath = 'JSONS/levels.json';
 
 const container = document.getElementById('level-detail');
 
+function createProfileLink(name) {
+    if (!name) return document.createTextNode('—');
+    const link = document.createElement('a');
+    link.href = `profile.html?name=${encodeURIComponent(name)}`;
+    link.textContent = name;
+    link.className = 'person-link';
+    return link;
+}
+
 if (!id) {
     container.innerHTML = '<p>No id provided in the URL.</p>';
 } else {
@@ -29,11 +38,24 @@ if (!id) {
             points.style.textAlign = 'center';
 
             const verifier = document.createElement('p');
-            verifier.innerHTML = `<strong>Verifier:</strong> ${item.verifier || '—'}`;
+            verifier.appendChild(document.createElement('strong')).textContent = 'Verifier: ';
+            verifier.appendChild(createProfileLink(item.verifier));
 
             const victors = document.createElement('p');
-            const vict = Array.isArray(item.victors) && item.victors.length ? item.victors.join(', ') : 'None';
-            victors.innerHTML = `<strong>Victors:</strong> ${vict}`;
+            const strongVictors = document.createElement('strong');
+            strongVictors.textContent = 'Victors: ';
+            victors.appendChild(strongVictors);
+
+            if (Array.isArray(item.victors) && item.victors.length) {
+                item.victors.forEach((victor, index) => {
+                    victors.appendChild(createProfileLink(victor));
+                    if (index < item.victors.length - 1) {
+                        victors.appendChild(document.createTextNode(', '));
+                    }
+                });
+            } else {
+                victors.appendChild(document.createTextNode('None'));
+            }
 
             container.appendChild(title);
             container.appendChild(points);
