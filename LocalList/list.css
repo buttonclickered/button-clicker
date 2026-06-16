@@ -1,0 +1,47 @@
+h1, h2, h3 {
+    text-align: center;
+}
+
+#levels-box {
+    border: 2px solid #333;
+    padding: 1rem;
+    border-radius: 6px;
+    max-width: 700px;
+    margin: 1rem auto;
+    background: #fafafa;
+}
+
+#levels-box li {
+    margin-bottom: 0.75rem;
+    list-style: none;
+    padding: 0.75rem 0.9rem;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border: 1px solid #ddd;
+    display: block;
+}
+
+/* make the whole list item clickable and remove default link styles */
+#levels-box li a.level-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+#levels-box li a.level-link:hover {
+    background: #f7f7ff;
+}
+
+.detail-box {
+    max-width: 700px;
+    margin: 1rem auto;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.detail-box p#back { margin: 0 0 0.5rem 0; }
+.detail-box a { color: #0366d6; text-decoration: none; }
+.detail-box a:hover { text-decoration: underline; }
