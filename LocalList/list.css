@@ -22,11 +22,13 @@ h1, h2, h3 {
     display: block;
 }
 
-/* make the whole list item clickable and remove default link styles */
+/* make the whole list item clickable and remove default link styles; use flex so thumb stays right */
 #levels-box li a.level-link {
     text-decoration: none;
     color: inherit;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
 }
 
 #levels-box li a.level-link:hover {
@@ -68,6 +70,36 @@ h1, h2, h3 {
     font-weight: 700;
     margin-right: 0.6rem;
     color: #222;
+}
+
+.level-thumb {
+    width: 96px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 0.6rem;
+    vertical-align: middle;
+}
+
+/* layout: put text on left, thumbnail on right; thumb scales until it hits max width/height */
+.level-link {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.level-content {
+    flex: 1 1 auto;
+    min-width: 0; /* allow truncation inside flex */
+}
+
+.level-thumb {
+    flex: 0 0 auto;
+    max-width: 40%;
+    max-height: 120px;
+    width: auto;
+    height: auto;
+    margin-left: 0.6rem;
 }
 
 .level-meta {

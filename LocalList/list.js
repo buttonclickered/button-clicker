@@ -79,6 +79,19 @@ fetch(jsonFilePath)
             const link = document.createElement('a');
             link.href = `level.html?id=${encodeURIComponent(item.id)}`;
             link.className = 'level-link';
+            // thumbnail (png -> jpg fallback). images are in project root /Thumbnails
+            const img = document.createElement('img');
+            img.className = 'level-thumb';
+            let thumbTried = 0;
+            img.onerror = () => {
+                if (thumbTried === 0) {
+                    thumbTried = 1;
+                    img.src = `thumbnails/${encodeURIComponent(item.id)}.jpg`;
+                } else {
+                    img.remove();
+                }
+            };
+            img.src = `thumbnails/${encodeURIComponent(item.id)}.png`;
 
             const title = document.createElement('h2');
             const rank = idx + 1;
@@ -103,9 +116,16 @@ fetch(jsonFilePath)
                 });
             }
 
-            link.appendChild(title);
-            link.appendChild(points);
-            link.appendChild(details);
+            // group the textual content so the thumbnail can sit to the right
+            const content = document.createElement('div');
+            content.className = 'level-content';
+            content.appendChild(title);
+            content.appendChild(points);
+            content.appendChild(details);
+
+            link.appendChild(content);
+            // thumbnail sits to the right and will scale until constrained
+            link.appendChild(img);
             listItem.appendChild(link);
             listContainer.appendChild(listItem);
         });

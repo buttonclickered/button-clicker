@@ -33,6 +33,22 @@ if (!id) {
             title.textContent = item.level;
             title.style.textAlign = 'center';
 
+            // try to show thumbnail if available
+            const thumb = document.createElement('img');
+            thumb.className = 'level-thumb';
+            let tried = 0;
+            thumb.onerror = () => {
+                if (tried === 0) {
+                    tried = 1;
+                    thumb.src = `thumbnails/${encodeURIComponent(item.id)}.jpg`;
+                } else {
+                    thumb.remove();
+                }
+            };
+            thumb.src = `thumbnails/${encodeURIComponent(item.id)}.png`;
+            thumb.style.display = 'block';
+            thumb.style.margin = '0 auto 0.7rem auto';
+
             const points = document.createElement('h3');
             points.textContent = `${Number(item.points) || item.points} points`;
             points.style.textAlign = 'center';
@@ -57,6 +73,7 @@ if (!id) {
                 victors.appendChild(document.createTextNode('None'));
             }
 
+            container.appendChild(thumb);
             container.appendChild(title);
             container.appendChild(points);
             container.appendChild(verifier);
