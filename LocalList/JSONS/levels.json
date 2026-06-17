@@ -28,9 +28,16 @@
     "victors": []                                            
   },     
     {
-    "level": "Dark Hell",            
+    "level": "Dark Hell",
     "id": "134128126",
     "points": "832",
+    "verifier": "wsp",          
+    "victors": []                                            
+  },   
+     {
+    "level": "Max Chall ",
+    "id": "141979564",
+    "points": "874",
     "verifier": "wsp",          
     "victors": []                                            
   },   
