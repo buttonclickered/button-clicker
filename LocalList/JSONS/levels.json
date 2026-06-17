@@ -116,7 +116,7 @@
     "id": "13519",
     "points": "50",
     "verifier": "wsp",
-    "victors": ["josh", "felix", "noah", "yourboykurdis"] 
+    "victors": ["josh", "felix", "noah", "yourboykurdis", "nolan", "arthur"] 
   },
   {
     "level": "Lights And Thunder",
@@ -142,9 +142,16 @@
      {
     "level": "Level Devil",
     "id": "134077341",
-    "points": "90",
+    "points": "112",
     "verifier": "charlie",
     "victors": ["josh"] 
-  }
+  },
+      {
+    "level": "Platinum Adventure",
+    "id": "5904109",
+    "points": "455",
+    "verifier": "wsp",
+    "victors": ["josh","nolan", "arthur", "yourboykurdis"] 
+      }
 ]
 
