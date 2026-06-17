@@ -53,6 +53,34 @@ if (!id) {
             points.textContent = `${Number(item.points) || item.points} points`;
             points.style.textAlign = 'center';
 
+            const idLine = document.createElement('p');
+            idLine.style.textAlign = 'center';
+            const idLabel = document.createElement('strong');
+            idLabel.textContent = 'ID: ';
+            const idButton = document.createElement('button');
+            idButton.type = 'button';
+            idButton.textContent = item.id;
+            idButton.title = 'Copy level ID';
+            idButton.style.background = 'none';
+            idButton.style.border = 'none';
+            idButton.style.color = '#007bff';
+            idButton.style.cursor = 'pointer';
+            idButton.style.padding = '0';
+            idButton.style.textDecoration = 'underline';
+            idButton.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(String(item.id));
+                    idButton.textContent = 'Copied!';
+                    setTimeout(() => {
+                        idButton.textContent = item.id;
+                    }, 1200);
+                } catch (err) {
+                    console.error('Could not copy level ID:', err);
+                }
+            });
+            idLine.appendChild(idLabel);
+            idLine.appendChild(idButton);
+
             const verifier = document.createElement('p');
             verifier.appendChild(document.createElement('strong')).textContent = 'Verifier: ';
             verifier.appendChild(createProfileLink(item.verifier));
@@ -76,6 +104,7 @@ if (!id) {
             container.appendChild(thumb);
             container.appendChild(title);
             container.appendChild(points);
+            container.appendChild(idLine);
             container.appendChild(verifier);
             container.appendChild(victors);
         })

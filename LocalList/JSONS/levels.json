@@ -79,28 +79,28 @@
         {
     "level": "Many Fun Rooms Await",
     "id": "112326019",
-    "points": "356",
-    "verifier": "charlie",
-    "victors": ["josh"] 
+    "points": "762",
+    "verifier": "josh",
+    "victors": [] 
   },
        {
     "level": "Permafrost Mountain",
     "id": "80790301",
-    "points": "320",
+    "points": "121",
     "verifier": "yourboykurdis",
     "victors": [] 
   },
        {
     "level": "Forsaken City",
     "id": "97906220",
-    "points": "45",
-    "verifier": "cormick",
-    "victors": [] 
+    "points": "76",
+    "verifier": "josh",
+    "victors": ["cormick"] 
   },
     {
     "level": "Deadlocked",
     "id": "0",
-    "points": "78",
+    "points": "140",
     "verifier": "wsp",
     "victors": ["josh"] 
   },
@@ -110,6 +110,41 @@
     "points": "1545",
     "verifier": "noah",
     "victors": [] 
+  },
+  {
+    "level": "The Nightmare",
+    "id": "13519",
+    "points": "50",
+    "verifier": "wsp",
+    "victors": ["josh", "felix", "noah", "yourboykurdis"] 
+  },
+  {
+    "level": "Lights And Thunder",
+    "id": "848722",
+    "points": "65",
+    "verifier": "wsp",
+    "victors": [] 
+  },
+  {
+    "level": "Snap To Grid",
+    "id": "84035083",
+    "points": "912",
+    "verifier": "wsp",
+    "victors": [] 
+  },
+   {
+    "level": "Felix Challenge",
+    "id": "140980426",
+    "points": "765",
+    "verifier": "wsp",
+    "victors": [] 
+  },
+     {
+    "level": "Level Devil",
+    "id": "134077341",
+    "points": "90",
+    "verifier": "charlie",
+    "victors": ["josh"] 
   }
-  
 ]
+
