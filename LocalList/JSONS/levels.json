@@ -79,7 +79,7 @@
         {
     "level": "Many Fun Rooms Await",
     "id": "112326019",
-    "points": "762",
+    "points": "164",
     "verifier": "josh",
     "victors": [] 
   },
@@ -99,8 +99,8 @@
   },
     {
     "level": "Deadlocked",
-    "id": "0",
-    "points": "140",
+    "id": "deadlocked",
+    "points": "180",
     "verifier": "wsp",
     "victors": ["josh"] 
   },
@@ -159,6 +159,13 @@
     "points": "95",
     "verifier": "josh",
     "victors": ["nolan", "arthur", "yourboykurdis"] 
+      },
+        {
+    "level": "Clubstep",
+    "id": "clubstep",
+    "points": "276",
+    "verifier": "wsp",
+    "victors": ["noah"] 
       }
 ]
 
