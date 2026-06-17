@@ -107,13 +107,9 @@ fetch(jsonFilePath)
             details.appendChild(createProfileLink(item.verifier || 'Unknown'));
 
             if (Array.isArray(item.victors) && item.victors.length) {
-                details.appendChild(document.createTextNode(' • Victors: '));
-                item.victors.forEach((victor, index) => {
-                    details.appendChild(createProfileLink(victor));
-                    if (index < item.victors.length - 1) {
-                        details.appendChild(document.createTextNode(', '));
-                    }
-                });
+                const firstVictor = item.victors.find(Boolean) || 'Unknown';
+                details.appendChild(document.createTextNode(` • Victors (${item.victors.length}): `));
+                details.appendChild(createProfileLink(firstVictor));
             }
 
             // group the textual content so the thumbnail can sit to the right

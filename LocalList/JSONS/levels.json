@@ -2,14 +2,14 @@
   {
     "level": "Poltergeist",
     "id": "7054561",
-    "points": "1503",
+    "points": "1603",
     "verifier": "wsp",
     "victors": ["noah"]
   },
   {
     "level": "Defeated Circles Nerfed",
     "id": "136189328",
-    "points": "1397",
+    "points": "1350",
     "verifier": "wsp",
     "victors": []
   },
@@ -37,7 +37,7 @@
       {
     "level": "Hell",            
     "id": "25706351",
-    "points": "817",
+    "points": "897",
     "verifier": "wsp",          
     "victors": []                                            
   },            
@@ -67,7 +67,7 @@
     "id": "566659",
     "points": "80",
     "verifier": "josh",
-    "victors": ["felix"] 
+    "victors": ["felix", "nolan", "arthur"] 
   },
         {
     "level": "Many Fun Rooms Await",
@@ -88,6 +88,20 @@
     "id": "97906220",
     "points": "45",
     "verifier": "cormick",
+    "victors": [] 
+  },
+    {
+    "level": "Deadlocked",
+    "id": "0",
+    "points": "78",
+    "verifier": "wsp",
+    "victors": ["josh"] 
+  },
+    {
+    "level": "Forest Temple",
+    "id": "11402965",
+    "points": "1545",
+    "verifier": "noah",
     "victors": [] 
   }
   
