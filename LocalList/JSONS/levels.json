@@ -149,9 +149,16 @@
       {
     "level": "Platinum Adventure",
     "id": "5904109",
-    "points": "455",
+    "points": "45",
     "verifier": "wsp",
     "victors": ["josh","nolan", "arthur", "yourboykurdis"] 
+      },
+        {
+    "level": "The Lighting Road",
+    "id": "55520",
+    "points": "95",
+    "verifier": "josh",
+    "victors": ["nolan", "arthur", "yourboykurdis"] 
       }
 ]
 
