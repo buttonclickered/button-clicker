@@ -90,6 +90,46 @@ if (!name) {
             const summary = document.createElement('p');
             summary.innerHTML = `<strong>Rank:</strong> ${rankText} <br><strong>Points:</strong> ${person.points} <br><strong>Verifications:</strong> ${person.verifications} <br><strong>Victors:</strong> ${person.victors}`;
 
+            // Compute hardest ever beaten or verified (highest points among completed levels)
+            let hardest = null;
+            const addHardestCandidate = it => {
+                const pts = Number(it.points) || 0;
+                if (!hardest || pts > (Number(hardest.points) || 0)) {
+                    hardest = it;
+                }
+            };
+
+            // Include both victor and verified levels, but avoid duplicates by item id.
+            const uniqueCompleted = new Set();
+            person.verifiedLevels.forEach(it => {
+                if (!uniqueCompleted.has(it.id)) {
+                    uniqueCompleted.add(it.id);
+                    addHardestCandidate(it);
+                }
+            });
+            person.victorLevels.forEach(it => {
+                if (!uniqueCompleted.has(it.id)) {
+                    uniqueCompleted.add(it.id);
+                    addHardestCandidate(it);
+                }
+            });
+
+            const hardestSection = document.createElement('div');
+            hardestSection.className = 'detail-section';
+            const hardestTitle = document.createElement('h2');
+            hardestTitle.textContent = 'Hardest Ever Beaten';
+            hardestSection.appendChild(hardestTitle);
+            const hardestContent = document.createElement('p');
+            if (hardest) {
+                const link = document.createElement('a');
+                link.href = `level.html?id=${encodeURIComponent(hardest.id)}`;
+                link.textContent = `${hardest.level} (${hardest.points} points)`;
+                hardestContent.appendChild(link);
+            } else {
+                hardestContent.textContent = 'None';
+            }
+            hardestSection.appendChild(hardestContent);
+
             const verifiedSection = document.createElement('div');
             verifiedSection.className = 'detail-section';
             const verifiedTitle = document.createElement('h2');
@@ -132,6 +172,7 @@ if (!name) {
 
             container.appendChild(title);
             container.appendChild(summary);
+            container.appendChild(hardestSection);
             container.appendChild(verifiedSection);
             container.appendChild(victorSection);
         })
