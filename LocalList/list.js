@@ -1,6 +1,5 @@
 // Path to your JSON file
 const jsonFilePath = 'JSONS/levels.json';
-
 function createProfileLink(name) {
     const link = document.createElement('a');
     link.href = `profile.html?name=${encodeURIComponent(name)}`;
