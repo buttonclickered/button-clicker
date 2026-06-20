@@ -93,6 +93,16 @@ h1, h2, h3 {
     min-width: 0; /* allow truncation inside flex */
 }
 
+.level-video {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-top: 0.7rem;
+    border-radius: 4px;
+    background: #000;
+}
+
 .level-thumb {
     flex: 0 0 auto;
     max-width: 40%;

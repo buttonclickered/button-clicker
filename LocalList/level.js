@@ -101,12 +101,25 @@ if (!id) {
                 victors.appendChild(document.createTextNode('None'));
             }
 
+            const video = document.createElement('video');
+            video.className = 'level-video';
+            video.controls = true;
+            video.preload = 'metadata';
+            video.playsInline = true;
+            video.style.display = 'block';
+            video.style.margin = '1rem auto 0';
+            video.onerror = () => {
+                video.remove();
+            };
+            video.src = `videos/${encodeURIComponent(item.id)}.mp4`;
+
             container.appendChild(thumb);
             container.appendChild(title);
             container.appendChild(points);
             container.appendChild(idLine);
             container.appendChild(verifier);
             container.appendChild(victors);
+            container.appendChild(video);
         })
         .catch(err => {
             container.innerHTML = `<p>Error loading details: ${err.message}</p>`;
