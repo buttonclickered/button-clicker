@@ -102,12 +102,12 @@
     "id": "deadlocked",
     "points": "180",
     "verifier": "wsp",
-    "victors": ["josh"] 
+    "victors": ["josh", "felix"] 
   },
     {
     "level": "Forest Temple",
     "id": "11402965",
-    "points": "1545",
+    "points": "1607",
     "verifier": "noah",
     "victors": [] 
   },
@@ -213,6 +213,19 @@
     "level": "ben chall",
     "id": "14310950",
     "points": "653",
+    "verifier": "wsp",
+    "victors": [] 
+      },
+           {
+    "level": "Firework layout easy",
+    "id": "78532078",
+    "points": "630",
+    "verifier": "wsp",
+    "victors": [] 
+      },      {
+    "level": "Denouement",
+    "id": "60619762",
+    "points": "1619",
     "verifier": "wsp",
     "victors": [] 
       }
