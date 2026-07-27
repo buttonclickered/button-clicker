@@ -55,13 +55,6 @@
     "verifier": "wsp",
     "victors": ["noah"]
   },
-   {
-    "level": "Depressure",
-    "id": "45622672",
-    "points": "800",
-    "verifier": "yourboykurdis",
-    "victors": [] 
-  },
     {
     "level": "How to spider",
     "id": "122370463",
@@ -79,14 +72,14 @@
         {
     "level": "Many Fun Rooms Await",
     "id": "112326019",
-    "points": "830",
+    "points": "181",
     "verifier": "josh",
     "victors": ["wsp"] 
   },
        {
     "level": "Permafrost Mountain",
     "id": "80790301",
-    "points": "121",
+    "points": "150",
     "verifier": "yourboykurdis",
     "victors": [] 
   },
@@ -109,7 +102,7 @@
     "id": "11402965",
     "points": "1607",
     "verifier": "noah",
-    "victors": [] 
+    "victors": ["wsp"] 
   },
   {
     "level": "The Nightmare",
@@ -142,7 +135,7 @@
      {
     "level": "Level Devil",
     "id": "134077341",
-    "points": "433",
+    "points": "177",
     "verifier": "charlie",
     "victors": ["josh","wsp"] 
   },
@@ -155,7 +148,7 @@
       },
         {
     "level": "The Lighting Road",
-    "id": "55520",
+    "id": "55520", 
     "points": "95",
     "verifier": "yourboykurdis",
     "victors": ["nolan", "arthur", "josh", "felix", "wsp"] 
@@ -165,7 +158,7 @@
     "id": "clubstep",
     "points": "276",
     "verifier": "wsp",
-    "victors": ["noah"] 
+    "victors": ["noah", "felix", "josh"] 
       },
            {
     "level": "Theory of Everything 2",
@@ -235,7 +228,30 @@
     "points": "179",
     "verifier": "wsp",
     "victors": [] 
+      },
+       {      
+    "level": "sUffer",
+    "id": "145397043",
+    "points": "824",
+    "verifier": "wsp",
+    "victors": [] 
+      },
+       {      
+    "level": "B",
+    "id": "34085027",
+    "points": "1023",
+    "verifier": "noah",
+    "victors": ["wsp"] 
+      },
+         {      
+    "level": "Anto Chall",
+    "id": "145773850",
+    "points": "884",
+    "verifier": "wsp",
+    "victors": [] 
       }
 ]
+
+
 
 
