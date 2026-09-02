@@ -9,7 +9,7 @@
   {
     "level": "Defeated Circles Nerfed",
     "id": "136189328",
-    "points": "1350",
+    "points": "1606",
     "verifier": "wsp",
     "victors": []
   },
@@ -248,6 +248,20 @@
     "id": "145773850",
     "points": "884",
     "verifier": "wsp",
+    "victors": [] 
+      },
+      {      
+    "level": "Super Mario Wave",
+    "id": "72240540",
+    "points": "1670",
+    "verifier": "noah",
+    "victors": [] 
+      },
+      {      
+    "level": "Acropolis",
+    "id": "5155022",
+    "points": "1800",
+    "verifier": "noah",
     "victors": [] 
       }
 ]
