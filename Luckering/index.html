@@ -20,13 +20,17 @@ V10
 <h1 id="money">Points:</h1>
 <h2 id="rolleds">Rolls: 0</h2>
 <h2 id="CPS">Auto Rolls Per Second: 0</h2>
+<h2 id="rarest">Rarest Roll: None</h2>
+<h2 id="luck">Luck: x1.0</h2>
+<h2 id="bonus">Achievement Bonus: +0% points</h2>
+<button class="upgrade" id="luckbtn" onclick="buyluck()">Luck +10%</button>
 
 <h1 id="rolltitle">Possible Rolls</h1>
 <p class="rolls">Common - 1 in 2 (1 point)</p>
 <p class="rolls">Uncommon - 1 in 4 (2 points)</p>
 <p class="rolls">Rare - 1 in 6.67 (3 points)</p>
 <p class="rolls">Epic - 1 in 11.1 (5 points)</p>
-<p class="rolls">Legendary - 1 in 111 (9 points)</p>
+<p class="rolls">Legendary - 1 in 100 (9 points)</p>
 <p class="rolls">Galaxy - 1 in 1,000 (20 points)</p>
 <p class="rolls">Celestial - 1 in 10,000 (50 points)</p>
 <p class="rolls">Void - 1 in 100,000 (100 points)</p>
@@ -39,9 +43,19 @@ V10
 <p class="rolls">Primordial - 1 in 1T (25,000 points)</p>
 <p class="rolls">Ethereal - 1 in 10T (50,000 points)</p>
 <p class="rolls">Paradox - 1 in 100T (100,000 points)</p>
-<p class="rolls">Singularity - 1 in 1Q (250,000 points)</p>
-<p class="rolls">Genesis - 1 in 10Q (500,000 points)</p>
-<p class="rolls">Absolute - 1 in 100Q (1,000,000 points)</p>
+<p class="rolls">Singularity - 1 in 1Qa (250,000 points)</p>
+<p class="rolls">Genesis - 1 in 10Qa (500,000 points)</p>
+<p class="rolls">Absolute - 1 in 100Qa (1,000,000 points)</p>
+<p class="rolls">Mythic - 1 in 1Qi (2,500,000 points)</p>
+<p class="rolls">Immortal - 1 in 10Qi (5,000,000 points)</p>
+<p class="rolls">Arcane - 1 in 100Qi (10,000,000 points)</p>
+<p class="rolls">Forbidden - 1 in 1Sx (25,000,000 points)</p>
+<p class="rolls">Unfathomable - 1 in 10Sx (50,000,000 points)</p>
+<p class="rolls">Boundless - 1 in 100Sx (100,000,000 points)</p>
+<p class="rolls">Timeless - 1 in 1Sp (250,000,000 points)</p>
+<p class="rolls">Omnipotent - 1 in 10Sp (500,000,000 points)</p>
+<p class="rolls">Multiversal - 1 in 100Sp (1,000,000,000 points)</p>
+<p class="rolls">Ultimate - 1 in 1Oc (2,500,000,000 points)</p>
 
 <h1 id="amountrolleds"> All Time Rolled: </h1>
 <h2 class="amountrolled" id="commonrolled">Common: 0</h2>
@@ -64,6 +78,19 @@ V10
 <h2 class="amountrolled" id="singularityrolled">Singularity: 0</h2>
 <h2 class="amountrolled" id="genesisrolled">Genesis: 0</h2>
 <h2 class="amountrolled" id="absoluterolled">Absolute: 0</h2>
+<h2 class="amountrolled" id="mythicrolled">Mythic: 0</h2>
+<h2 class="amountrolled" id="immortalrolled">Immortal: 0</h2>
+<h2 class="amountrolled" id="arcanerolled">Arcane: 0</h2>
+<h2 class="amountrolled" id="forbiddenrolled">Forbidden: 0</h2>
+<h2 class="amountrolled" id="unfathomablerolled">Unfathomable: 0</h2>
+<h2 class="amountrolled" id="boundlessrolled">Boundless: 0</h2>
+<h2 class="amountrolled" id="timelessrolled">Timeless: 0</h2>
+<h2 class="amountrolled" id="omnipotentrolled">Omnipotent: 0</h2>
+<h2 class="amountrolled" id="multiversalrolled">Multiversal: 0</h2>
+<h2 class="amountrolled" id="ultimaterolled">Ultimate: 0</h2>
+
+<h1 id="achtitle">Achievements</h1>
+<div id="achievements"></div>
 
 <!-- Upgrades Shop -->
 <button class="upgrade" id="as1" onclick="addauto(1, 45)">1 CPS Autoclicker (45 points)</button>
@@ -106,17 +133,26 @@ V10
 <button class="upgrade" id="as262144000000" onclick="addauto(262144000000, 131072000000000)">256B CPS Autoclicker (128T points)</button>
 <button class="upgrade" id="as524288000000" onclick="addauto(524288000000, 262144000000000)">512B CPS Autoclicker (256T points)</button>
 <button class="upgrade" id="as1048576000000" onclick="addauto(1048576000000, 524288000000000)">1T CPS Autoclicker (512T points)</button>
-<button class="upgrade" id="as2097152000000" onclick="addauto(2097152000000, 1048576000000000)">2T CPS Autoclicker (1Q points)</button>
-<button class="upgrade" id="as4194304000000" onclick="addauto(4194304000000, 2097152000000000)">4T CPS Autoclicker (2Q points)</button>
-<button class="upgrade" id="as8388608000000" onclick="addauto(8388608000000, 4194304000000000)">8T CPS Autoclicker (4Q points)</button>
-<button class="upgrade" id="as16777216000000" onclick="addauto(16777216000000, 8388608000000000)">16T CPS Autoclicker (8Q points)</button>
-<button class="upgrade" id="as33554432000000" onclick="addauto(33554432000000, 16777216000000000)">32T CPS Autoclicker (16Q points)</button>
-<button class="upgrade" id="as67108864000000" onclick="addauto(67108864000000, 33554432000000000)">64T CPS Autoclicker (32Q points)</button>
-<button class="upgrade" id="as134217728000000" onclick="addauto(134217728000000, 67108864000000000)">128T CPS Autoclicker (64Q points)</button>
-<button class="upgrade" id="as268435456000000" onclick="addauto(268435456000000, 134217728000000000)">256T CPS Autoclicker (128Q points)</button>
-<button class="upgrade" id="as536870912000000" onclick="addauto(536870912000000, 268435456000000000)">512T CPS Autoclicker (256Q points)</button>
-<button class="upgrade" id="as1073741824000000" onclick="addauto(1073741824000000, 536870912000000000)">1Q CPS Autoclicker (512Q points)</button>
-<button class="upgrade" id="as2147483648000000" onclick="addauto(2147483648000000, 1073741824000000000)">2Q CPS Autoclicker (1e15 points)</button>
+<button class="upgrade" id="as2097152000000" onclick="addauto(2097152000000, 1048576000000000)">2T CPS Autoclicker (1Qa points)</button>
+<button class="upgrade" id="as4194304000000" onclick="addauto(4194304000000, 2097152000000000)">4T CPS Autoclicker (2Qa points)</button>
+<button class="upgrade" id="as8388608000000" onclick="addauto(8388608000000, 4194304000000000)">8T CPS Autoclicker (4Qa points)</button>
+<button class="upgrade" id="as16777216000000" onclick="addauto(16777216000000, 8388608000000000)">16T CPS Autoclicker (8Qa points)</button>
+<button class="upgrade" id="as33554432000000" onclick="addauto(33554432000000, 16777216000000000)">32T CPS Autoclicker (16Qa points)</button>
+<button class="upgrade" id="as67108864000000" onclick="addauto(67108864000000, 33554432000000000)">64T CPS Autoclicker (32Qa points)</button>
+<button class="upgrade" id="as134217728000000" onclick="addauto(134217728000000, 67108864000000000)">128T CPS Autoclicker (64Qa points)</button>
+<button class="upgrade" id="as268435456000000" onclick="addauto(268435456000000, 134217728000000000)">256T CPS Autoclicker (128Qa points)</button>
+<button class="upgrade" id="as536870912000000" onclick="addauto(536870912000000, 268435456000000000)">512T CPS Autoclicker (256Qa points)</button>
+<button class="upgrade" id="as1073741824000000" onclick="addauto(1073741824000000, 536870912000000000)">1Qa CPS Autoclicker (512Qa points)</button>
+<button class="upgrade" id="as2147483648000000" onclick="addauto(2147483648000000, 1073741824000000000)">2Qa CPS Autoclicker (1Qi points)</button>
+<button class="upgrade" id="as4294967296000000" onclick="addauto(4294967296000000, 2147483648000000000)">4Qa CPS Autoclicker (2Qi points)</button>
+<button class="upgrade" id="as8589934592000000" onclick="addauto(8589934592000000, 4294967296000000000)">8Qa CPS Autoclicker (4Qi points)</button>
+<button class="upgrade" id="as17179869184000000" onclick="addauto(17179869184000000, 8589934592000000000)">16Qa CPS Autoclicker (8Qi points)</button>
+<button class="upgrade" id="as34359738368000000" onclick="addauto(34359738368000000, 17179869184000000000)">32Qa CPS Autoclicker (16Qi points)</button>
+<button class="upgrade" id="as68719476736000000" onclick="addauto(68719476736000000, 34359738368000000000)">64Qa CPS Autoclicker (32Qi points)</button>
+
+
+
+<button id="resetbtn" onclick="hardReset()">Reset Save</button>
 
 <script src="rng.js"></script>
 

@@ -1,112 +1,119 @@
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    
-}
-#money {
-    font-size: 40px;
-    position: fixed;
-    top: 0;
-    left: 250px;
-    background: white;
-    z-index: 10;
-    pointer-events: none;
-}
-#CPS {
-    transform: translateY(-500px) translateX(200px);
-    pointer-events: none;
-}
-#rolleds {
-   font-size: 40px;
-    transform: translateY(-500px) translateX(250px);
-    pointer-events: none;
-}
-#roll {
-    width: 200px;
-    height: 100px;
-    font-size: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 12px;
-    margin: 20px auto;
-}
-#result {
-    width: 350px;
-    height: 200px;
-    font-size: 30px;
-    margin: 20px auto;
+/* Simple white page */
+body {
+    margin: 20px;
+    padding: 0;
+    background: #fff;
+    color: #000;
+    font-family: Arial, Helvetica, sans-serif;
     text-align: center;
-    border-radius: 12px;
-    display: flex;
-     pointer-events: none;
-    justify-content: center;
-    align-items: center;
-}
-#title {
-    font-size: 65px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-     pointer-events: none;
-    text-align: center;
-}
-.upgrade {
-    margin: 20px auto;
-    width: 200px;
-    height: 100px;
-    font-size: 20px;
-    background-color: orange;
-    border-radius: 12px;
-    border: 5px solid black;
-    transform:  translateY(-570px);
-}
-#notification {
-  position: fixed;
-  left: 50%;
-  bottom: 30px;
-  transform: translateX(-50%);
-  background: #ff4444;
-  color: #fff;
-  padding: 18px 36px;
-  border-radius: 10px;
-  font-size: 22px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-  z-index: 1000;
-  display: none;
-  opacity: 0.95;
-  pointer-events: none;
-}
-.rolls {
-    color: black;
-    font-size: 25px;
-    margin-top: 20px;
-    text-align: center;
-     pointer-events: none;
-    font-style: normal;
-    transform: translateX(350px) translateY(-600px);
 }
 
-#rolltitle {
-    font-size: 40px;
-     pointer-events: none;
-    margin-top: 20px;
-    text-align: center;
-      transform: translateX(350px) translateY(-600px);
+h1, h2, p {
+    margin: 6px 0;
 }
+
+h2 {
+    font-size: 1.1rem;
+    font-weight: normal;
+}
+
+/* Buttons */
+button {
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 8px 14px;
+    color: #000;
+    background: #fff;
+    border: 1px solid #000;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #eee;
+}
+
+#roll {
+    display: block;
+    margin: 15px auto 8px;
+    padding: 14px 40px;
+    font-size: 1.5rem;
+}
+
+#result {
+    display: block;
+    margin: 8px auto 15px;
+    min-width: 240px;
+    border-style: dashed;
+    cursor: default;
+}
+
+#result:hover {
+    background: #fff;
+}
+
+#money {
+    font-size: 1.8rem;
+}
+
+#rolltitle,
+#amountrolleds,
+#achtitle {
+    margin-top: 30px;
+}
+
+.rolls,
 .amountrolled {
-    font-size: 20px;
-    margin-top: 10px;
-     pointer-events: none;
-    text-align: center;
-      transform: translateX(-560px) translateY(-1010px);
+    margin: 3px 0;
+    font-size: 1rem;
+    font-weight: normal;
 }
-#amountrolleds {
-    font-size: 30px;
-    margin-top: 20px;
-     pointer-events: none;
-    text-align: center;
-      transform: translateX(-560px) translateY(-1010px);
+
+/* Upgrade shop */
+.upgrade {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    margin: 6px auto;
+}
+
+/* Can't afford it: greyed out */
+.upgrade.cant,
+.upgrade.cant:hover {
+    color: #999;
+    background: #efefef;
+    border-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Achievements */
+#achievements {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 6px;
+    max-width: 900px;
+    margin: 10px auto;
+}
+
+.ach {
+    padding: 8px;
+    border: 1px solid #ccc;
+    color: #aaa;
+}
+
+.ach b {
+    display: block;
+}
+
+.ach span {
+    font-size: 0.8rem;
+}
+
+.ach.done {
+    border-color: #000;
+    color: #000;
+}
+
+#resetbtn {
+    display: block;
+    margin: 40px auto 20px;
 }
