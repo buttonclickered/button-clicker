@@ -36,6 +36,26 @@ const RARITIES = [
     { name: "Omnipotent",   points: 500000000,  p: 1e-25 },
     { name: "Multiversal",  points: 1000000000, p: 1e-26 },
     { name: "Ultimate",     points: 2500000000, p: 1e-27 },
+    { name: "Eldritch", points: 5000000000, p: 1e-28 },
+    { name: "Abyssal", points: 10000000000, p: 1e-29 },
+    { name: "Sovereign", points: 25000000000, p: 1e-30 },
+    { name: "Empyrean", points: 50000000000, p: 1e-31 },
+    { name: "Seraphic", points: 100000000000, p: 1e-32 },
+    { name: "Primeval", points: 250000000000, p: 1e-33 },
+    { name: "Axiom", points: 500000000000, p: 1e-34 },
+    { name: "Nexus", points: 1000000000000, p: 1e-35 },
+    { name: "Zenith", points: 2500000000000, p: 1e-36 },
+    { name: "Apex", points: 5000000000000, p: 1e-37 },
+    { name: "Infinitum", points: 10000000000000, p: 1e-38 },
+    { name: "Omega", points: 25000000000000, p: 1e-39 },
+    { name: "Alpha", points: 50000000000000, p: 1e-40 },
+    { name: "Paragon", points: 100000000000000, p: 1e-41 },
+    { name: "Ascendant", points: 250000000000000, p: 1e-42 },
+    { name: "Cataclysm", points: 500000000000000, p: 1e-43 },
+    { name: "Oblivion", points: 1000000000000000, p: 1e-44 },
+    { name: "Everlasting", points: 2500000000000000, p: 1e-45 },
+    { name: "Beyond", points: 5000000000000000, p: 1e-46 },
+    { name: "Finality", points: 10000000000000000, p: 1e-47 },
 ];
 
 const WEIGHTED_COUNT = 4; // Common, Uncommon, Rare, Epic
@@ -76,6 +96,16 @@ let luckLevel = 0;   // each level = +10% luck (Legendary and above)
 let donWins = 0;
 let unlocked = [];   // ids of unlocked achievements
 const MAX_LUCK = 50;
+// Upgrade effects (set by recomputeUpgrades)
+let ownedUp = [];        // ids of owned upgrades
+let upPointMult = 1;     // total points multiplier from upgrades
+let autoMult = 1;        // multiplier on auto rolls per second
+let rollsPerClick = 1;   // rolls per manual click
+let bonusLuck = 0;       // extra luck added
+let luckMulti = 1;       // luck multiplier
+let donChance = 0.5;     // Double Or Nothing win chance
+let achPct = 0.02;       // points bonus per achievement
+let autoCarry = 0;       // leftover fraction of auto rolls
 
 let lastAutoSaveTime = Date.now();
 let nextAutoRollTime = performance.now() + 1000;
@@ -313,13 +343,15 @@ function updateUI() {
     }
     setText(rarestEl, 'Rarest Roll: ' + (best >= 0 ? RARITIES[best].name : 'None'));
     setText(luckEl, 'Luck: x' + luckMult().toFixed(1));
-    setText(bonusEl, 'Achievement Bonus: +' + (unlocked.length * 2) + '% points');
+    setText(bonusEl, 'Points Multiplier: x' + pointMult().toFixed(2));
+    setText(rollInfoEl, 'Rolls per click: ' + rollsPerClick + ' | Cooldown: ' + cooldown.toFixed(1) + 's');
     setText(luckBtn, luckLevel >= MAX_LUCK
         ? 'Luck MAXED (x' + luckMult().toFixed(1) + ')'
         : 'Luck +10% (Level ' + luckLevel + '/' + MAX_LUCK + ') - ' + formatNumber(luckCost()) + ' points');
     for (const s of SHOP) greyOut(s.el, points < s.cost);
     greyOut(luckBtn, luckLevel >= MAX_LUCK || points < luckCost());
     greyOut(donBtn, points <= 0);
+    updateUpgradeButtons();
 }
 
 function greyOut(el, cant) {
@@ -330,15 +362,15 @@ function greyOut(el, cant) {
 }
 
 function updateCPS() {
-    setText(cps, 'Auto Rolls Per Second: ' + formatNumber(autoclick));
+    setText(cps, 'Auto Rolls Per Second: ' + formatNumber(Math.floor(autoclick * autoMult)));
 }
 
 // ===== Luck, bonuses, achievements =====
 // Luck multiplies the odds of Legendary and above (not Common..Epic).
-function luckMult() { return 1 + 0.1 * luckLevel; }
+function luckMult() { return (1 + 0.1 * luckLevel + bonusLuck) * luckMulti; }
 function luckCost() { return Math.floor(500 * Math.pow(1.6, luckLevel)); }
 // Every unlocked achievement gives +2% points.
-function pointMult() { return 1 + 0.02 * unlocked.length; }
+function pointMult() { return (1 + achPct * unlocked.length) * upPointMult; }
 
 function buyluck() {
     if (blocked) return;
@@ -361,7 +393,7 @@ function hardReset() {
     if (!confirm('Reset ALL progress? This cannot be undone.')) return;
     blocked = true; // stops the page from saving again before the reload
     try {
-        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements']
+        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades']
             .forEach((k) => localStorage.removeItem(k));
         RARITIES.forEach((r) => localStorage.removeItem(r.id + 'Rolled'));
     } catch (e) {}
@@ -429,6 +461,124 @@ function checkAchievements(silent) {
     setText(achTitleEl, 'Achievements (' + unlocked.length + '/' + ACHIEVEMENTS.length + ')');
 }
 
+// ===== Upgrades (50) =====
+// Built from a few chains. Each tier needs the one before it.
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+const UPGRADES = [];
+
+function addChain(prefix, title, count, baseCost, costMul, make) {
+    for (let k = 0; k < count; k++) {
+        const u = make(k);
+        u.id = prefix + (k + 1);
+        u.name = title + ' ' + ROMAN[k];
+        u.cost = Math.round(baseCost * Math.pow(costMul, k));
+        u.req = k > 0 ? prefix + k : null;
+        UPGRADES.push(u);
+    }
+}
+
+// 10: points x1.5 each
+addChain('pm', 'Point Boost', 10, 5e3, 8, () => ({ type: 'points', value: 1.5, desc: 'Points x1.5' }));
+// 8: auto rolls x1.5 each
+addChain('am', 'Auto Boost', 8, 2e4, 10, () => ({ type: 'auto', value: 1.5, desc: 'Auto rolls x1.5' }));
+// 8: roll cooldown 0.9s down to 0.2s
+addChain('cd', 'Quick Roll', 8, 1e3, 4, (k) => {
+    const v = +(0.9 - 0.1 * k).toFixed(1);
+    return { type: 'cooldown', value: v, desc: 'Roll cooldown ' + v + 's' };
+});
+// 6: more rolls per click
+addChain('mr', 'Multi-Roll', 6, 1e4, 10, (k) => {
+    const v = [2, 3, 5, 8, 12, 20][k];
+    return { type: 'multi', value: v, desc: 'Each click rolls ' + v + ' times' };
+});
+// 6: +0.5 luck each
+addChain('lb', 'Luck Boost', 6, 5e3, 6, () => ({ type: 'luck', value: 0.5, desc: '+0.5 luck' }));
+// 5: better Double Or Nothing odds
+addChain('dn', 'Better Odds', 5, 1e3, 5, (k) => {
+    const v = +(0.55 + 0.05 * k).toFixed(2);
+    return { type: 'odds', value: v, desc: 'Double Or Nothing wins ' + Math.round(v * 100) + '%' };
+});
+// 4: bigger achievement bonus
+addChain('ab', 'Trophy Case', 4, 1e5, 20, (k) => {
+    const v = [0.03, 0.04, 0.05, 0.06][k];
+    return { type: 'ach', value: v, desc: 'Achievements give +' + Math.round(v * 100) + '% points each' };
+});
+// 3: luck multipliers
+addChain('lm', 'Lucky Aura', 3, 1e7, 100, (k) => {
+    const v = [1.25, 1.5, 2][k];
+    return { type: 'luckmult', value: v, desc: 'Luck x' + v };
+});
+
+function recomputeUpgrades() {
+    let pm = 1, am = 1, cd = 1, mr = 1, bl = 0, dc = 0.5, ap = 0.02, lm = 1;
+    UPGRADES.forEach((u) => {
+        if (!ownedUp.includes(u.id)) return;
+        if (u.type === 'points') pm *= u.value;
+        else if (u.type === 'auto') am *= u.value;
+        else if (u.type === 'cooldown') cd = Math.min(cd, u.value);
+        else if (u.type === 'multi') mr = Math.max(mr, u.value);
+        else if (u.type === 'luck') bl += u.value;
+        else if (u.type === 'odds') dc = Math.max(dc, u.value);
+        else if (u.type === 'ach') ap = Math.max(ap, u.value);
+        else if (u.type === 'luckmult') lm *= u.value;
+    });
+    upPointMult = pm; autoMult = am; cooldown = cd; rollsPerClick = mr;
+    bonusLuck = bl; donChance = dc; achPct = ap; luckMulti = lm;
+}
+
+function upgradeState(u) {
+    if (ownedUp.includes(u.id)) return 'owned';
+    if (u.req && !ownedUp.includes(u.req)) return 'locked';
+    return points < u.cost ? 'cant' : 'ok';
+}
+
+function renderUpgrades() {
+    const box = document.getElementById('upgrades');
+    if (!box) return;
+    box.innerHTML = '';
+    UPGRADES.forEach((u) => {
+        const b = document.createElement('button');
+        b.className = 'upgrade';
+        b.addEventListener('click', () => buyUpgrade(u.id));
+        box.appendChild(b);
+        u.btn = b;
+        u._state = null; // forces a refresh in updateUpgradeButtons
+    });
+}
+
+function updateUpgradeButtons() {
+    for (const u of UPGRADES) {
+        if (!u.btn) continue;
+        const s = upgradeState(u);
+        if (u._state === s) continue;
+        u._state = s;
+        u.btn.classList.toggle('owned', s === 'owned');
+        u.btn.classList.toggle('cant', s === 'cant' || s === 'locked');
+        u.btn.textContent = u.name + ': ' + u.desc + (s === 'owned' ? ' (owned)' : ' (' + formatNumber(u.cost) + ' points)');
+    }
+}
+
+function buyUpgrade(id) {
+    if (blocked) return;
+    const u = UPGRADES.find((x) => x.id === id);
+    if (!u) return;
+    const s = upgradeState(u);
+    if (s === 'owned') { showNotification('You already own that'); return; }
+    if (s === 'locked') { showNotification('Buy ' + UPGRADES.find((x) => x.id === u.req).name + ' first'); return; }
+    if (s === 'cant') { showNotification('Not enough points!'); return; }
+    points -= u.cost;
+    const oldLuck = luckMult();
+    ownedUp.push(u.id);
+    recomputeUpgrades();
+    const f = oldLuck / luckMult(); // luck changes speed up the current countdowns
+    for (let i = WEIGHTED_COUNT; i < RARITIES.length; i++) next[i] *= f;
+    updateUI();
+    updateCPS();
+    saveState();
+}
+
+const rollInfoEl = document.getElementById('rollinfo');
+
 // ===== Manual roll =====
 function roll() {
     if (blocked) return;
@@ -446,15 +596,17 @@ function roll() {
 
     console.log("Rolled!");
 
-    const i = pickRarity(secureRandomFloat);
-    const r = RARITIES[i];
-
-    rollCount += 1;
-    r.rolled += 1;
-    points += r.points * pointMult();
+    let best = 0;
+    for (let k = 0; k < rollsPerClick; k++) {
+        const i = pickRarity(secureRandomFloat);
+        RARITIES[i].rolled += 1;
+        points += RARITIES[i].points * pointMult();
+        if (i > best) best = i;
+    }
+    rollCount += rollsPerClick;
 
     show(result);
-    result.innerHTML = 'You got: ' + r.name;
+    result.innerHTML = 'You got: ' + RARITIES[best].name + (rollsPerClick > 1 ? ' (best of ' + rollsPerClick + ')' : '');
     updateUI();
     saveState(); // persist immediately after each roll
 }
@@ -476,9 +628,10 @@ function autoRollTick() {
     if (!blocked) {
         // If the tab was throttled in the background, catch up in one batch
         const ticks = Math.max(1, Math.floor((performance.now() - nextAutoRollTime) / 1000) + 1);
-        if (autoclick > 0) {
-            simulateRolls(autoclick * ticks);
-        }
+        autoCarry += autoclick * autoMult * ticks;
+        const n = Math.floor(autoCarry);
+        autoCarry -= n;
+        if (n > 0) simulateRolls(n);
         nextAutoRollTime += 1000 * ticks;
 
         updateCPS();
@@ -512,8 +665,7 @@ function addauto(amount, cost) {
 function don() {
     if (blocked) return;
     if (points > 0) {
-        const gamble = secureRandomInt(1, 2);
-        if (gamble === 1) {
+        if (secureRandomFloat() < donChance) {
             points *= 2;
             donWins += 1;
             showNotification('You won! Your points have been doubled to ' + formatNumber(points));
@@ -537,6 +689,7 @@ function saveState() {
         localStorage.setItem('luckLevel', String(luckLevel));
         localStorage.setItem('donWins', String(donWins));
         localStorage.setItem('achievements', JSON.stringify(unlocked));
+        localStorage.setItem('upgrades', JSON.stringify(ownedUp));
         RARITIES.forEach((r) => {
             localStorage.setItem(r.id + 'Rolled', String(r.rolled));
         });
@@ -558,12 +711,17 @@ function loadState() {
         donWins = Number(localStorage.getItem('donWins')) || 0;
         const ach = JSON.parse(localStorage.getItem('achievements') || '[]');
         unlocked = Array.isArray(ach) ? ach : [];
+        const up = JSON.parse(localStorage.getItem('upgrades') || '[]');
+        ownedUp = Array.isArray(up) ? up : [];
         if (p !== null) points = Number(p) || 0;
         if (r !== null) rollCount = Number(r) || 0;
     } catch (e) {
         console.warn('Could not load state from localStorage', e);
     }
+    recomputeUpgrades();
+    for (let i = WEIGHTED_COUNT; i < RARITIES.length; i++) next[i] = newInterval(i); // use loaded luck
     renderAchievements();
+    renderUpgrades();
     checkAchievements(true); // silent: no popups for things you already earned
     updateUI();
     updateCPS();

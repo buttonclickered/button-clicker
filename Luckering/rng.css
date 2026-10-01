@@ -57,7 +57,9 @@ button:hover {
 
 #rolltitle,
 #amountrolleds,
-#achtitle {
+#achtitle,
+#upgradestitle,
+#shoptitle {
     margin-top: 30px;
 }
 
@@ -116,4 +118,13 @@ button:hover {
 #resetbtn {
     display: block;
     margin: 40px auto 20px;
+}
+
+/* Owned upgrades */
+.upgrade.owned,
+.upgrade.owned:hover {
+    color: #060;
+    background: #f4fff4;
+    border-color: #060;
+    cursor: default;
 }
