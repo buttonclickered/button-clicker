@@ -190,6 +190,12 @@ V10
 <button class="upgrade" id="as1073741824000000" onclick="addauto(1073741824000000, 536870912000000000)">1Qa CPS Autoclicker (512Qa points)</button>
 <button class="upgrade" id="as2147483648000000" onclick="addauto(2147483648000000, 1073741824000000000)">2Qa CPS Autoclicker (1Qa points)</button>
 
+<h1 id="lbtitle">Leaderboard</h1>
+<input id="playername" maxlength="16" placeholder="Nickname">
+<button onclick="submitScore()">Submit Score</button>
+<button onclick="loadLeaderboard()">Refresh</button>
+<ol id="leaderboard"></ol>
+
 <button id="resetbtn" onclick="hardReset()">Reset Save</button>
 
 <script src="rng.js"></script>

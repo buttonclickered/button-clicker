@@ -739,3 +739,79 @@ document.addEventListener('contextmenu', (event) => {
 });
 
 autoRollTick();
+
+// ===== Leaderboard (Supabase) =====
+const SUPABASE_URL = 'https://zwoosenbneiywhhopzrg.supabase.co'; // <-- put your Project URL here
+const SUPABASE_KEY = 'sb_publishable__TXkovSYBzRCrc9XKB72jA_4GDcZC1-'; // publishable key (safe to be public)
+
+function getPlayerId() {
+    let id = localStorage.getItem('playerId');
+    if (!id) {
+        id = (window.crypto && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+                const r = Math.random() * 16 | 0;
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        localStorage.setItem('playerId', id);
+    }
+    return id;
+}
+
+async function sbRpc(fn, body) {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY },
+        body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+}
+
+async function submitScore() {
+    const input = document.getElementById('playername');
+    const name = input.value.trim().slice(0, 16);
+    if (!name) { showNotification('Type a nickname first'); return; }
+    localStorage.setItem('playerName', name);
+
+    let best = 0;
+    RARITIES.forEach((r, i) => { if (r.rolled > 0) best = i; });
+
+    try {
+        await sbRpc('submit_score', {
+            p_id: getPlayerId(),
+            p_name: name,
+            p_rarest: best,
+            p_rolls: Math.min(rollCount, 1e300),
+            p_points: Math.min(points, 1e300),
+        });
+        showNotification('Score submitted!');
+        loadLeaderboard();
+    } catch (e) {
+        console.warn(e);
+        showNotification('Could not submit score');
+    }
+}
+
+async function loadLeaderboard() {
+    const list = document.getElementById('leaderboard');
+    if (!list) return;
+    try {
+        const rows = await sbRpc('get_leaderboard', {});
+        list.innerHTML = '';
+        rows.forEach((r) => {
+            const li = document.createElement('li');
+            // textContent (not innerHTML) so nobody can inject code through a name
+            li.textContent = r.name + ' - ' + RARITIES[r.rarest].name + ' - ' + formatNumber(r.points) + ' points';
+            list.appendChild(li);
+        });
+        if (!rows.length) list.textContent = 'No scores yet. Be the first!';
+    } catch (e) {
+        console.warn(e);
+        list.textContent = 'Could not load leaderboard';
+    }
+}
+
+document.getElementById('playername').value = localStorage.getItem('playerName') || '';
+loadLeaderboard();
