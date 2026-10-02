@@ -274,15 +274,21 @@ function consume(i, n) {
             const k = Math.floor(n / N);
             hits += k;
             n -= k * N;
+            // at astronomically big numbers the leftover is just rounding noise
+            if (!(n >= 0 && n < N)) n = 0;
         }
         next[i] = newInterval(i);
-        while (n >= next[i]) {
+        // n is now smaller than 3 intervals, so this can only loop a few times.
+        // The counter makes sure a bad number can never freeze the page.
+        for (let guard = 0; n >= next[i] && guard < 10; guard++) {
             n -= next[i];
             hits++;
             next[i] = newInterval(i);
         }
+        if (n >= next[i]) n = 0;
     }
     next[i] -= n;
+    if (!(next[i] > 0)) next[i] = newInterval(i); // never leave a broken countdown
     return hits;
 }
 
@@ -622,6 +628,8 @@ function simulateRolls(count) {
         points += delta[i] * RARITIES[i].points * pointMult();
     }
     rollCount += count;
+    if (!Number.isFinite(points)) points = 1e300;
+    if (!Number.isFinite(rollCount)) rollCount = 1e300;
     updateUI();
 }
 
