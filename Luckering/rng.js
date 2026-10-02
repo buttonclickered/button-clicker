@@ -105,7 +105,7 @@ let bonusLuck = 0;       // extra luck added
 let luckMulti = 1;       // luck multiplier
 let donChance = 0.5;     // Double Or Nothing win chance
 let achPct = 0.02;       // points bonus per achievement
-let extraTiers = 0;      // autoclicker tiers created after buying the top one
+const extraCosts = [];   // prices of the extra autoclicker tiers (a new one appears when you buy the top one)
 let autoCarry = 0;       // leftover fraction of auto rolls
 
 let lastAutoSaveTime = Date.now();
@@ -400,7 +400,7 @@ function hardReset() {
     if (!confirm('Reset ALL progress? This cannot be undone.')) return;
     blocked = true; // stops the page from saving again before the reload
     try {
-        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades', 'extraTiers', 'playerPassword']
+        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades', 'extraTiers', 'extraTierCosts']
             .forEach((k) => localStorage.removeItem(k));
         RARITIES.forEach((r) => localStorage.removeItem(r.id + 'Rolled'));
     } catch (e) {}
@@ -657,12 +657,45 @@ function autoRollTick() {
 }
 
 // ===== Upgrades =====
-// Adds a new top autoclicker: double the auto rolls for double the price.
-function addShopTier(silent) {
+// ===== Endless autoclickers =====
+// Buying the top autoclicker unlocks a new one with double the auto rolls.
+// Its price is double the old one OR about TIER_WAIT_SECONDS of your current
+// income, whichever is more, so you always have to earn it first.
+const MAX_EXTRA_TIERS = 900; // after this the shop ends (numbers get too big to hold)
+const TIER_WAIT_SECONDS = 300; // 5 minutes. Make it bigger for a bigger grind.
+
+// average points you get from one roll (with your current luck)
+function avgPointsPerRoll() {
+    let base = 0;
+    for (let j = 0; j < WEIGHTED_COUNT; j++) base += RARITIES[j].weight * RARITIES[j].points;
+    base /= WEIGHT_TOTAL;
+    let rare = 0, chance = 0;
+    for (let i = WEIGHTED_COUNT; i < RARITIES.length; i++) {
+        const p = Math.min(1, luckMult() / RARITIES[i].avg);
+        rare += p * RARITIES[i].points;
+        chance += p;
+    }
+    return base * Math.max(0, 1 - chance) + rare;
+}
+
+function incomePerSecond() {
+    return autoclick * autoMult * avgPointsPerRoll() * pointMult();
+}
+
+// savedCost is given when rebuilding tiers from a save; leave it out for a brand new tier
+function addShopTier(silent, savedCost) {
     const top = SHOP[SHOP.length - 1];
     if (!top) return;
+    if (extraCosts.length >= MAX_EXTRA_TIERS) {
+        if (savedCost === undefined) showNotification('That was the very last autoclicker!');
+        return;
+    }
     const amount = top.amount * 2;
-    const cost = top.cost * 2;
+    let cost = savedCost;
+    if (cost === undefined) {
+        cost = Math.max(top.cost * 2, incomePerSecond() * TIER_WAIT_SECONDS);
+        cost = Number(cost.toPrecision(4)); // short number, easy to save
+    }
     if (!Number.isFinite(amount) || !Number.isFinite(cost)) return;
     const b = document.createElement('button');
     b.className = 'upgrade';
@@ -670,8 +703,20 @@ function addShopTier(silent) {
     b.addEventListener('click', () => addauto(amount, cost));
     top.el.insertAdjacentElement('afterend', b);
     SHOP.push({ el: b, amount: amount, cost: cost });
-    extraTiers += 1;
+    extraCosts.push(cost);
     if (!silent) saveState();
+}
+
+function restoreTiers() {
+    let costs = [];
+    try { costs = JSON.parse(localStorage.getItem('extraTierCosts') || '[]'); } catch (e) {}
+    if (Array.isArray(costs) && costs.length) {
+        costs.slice(0, MAX_EXTRA_TIERS).forEach((c) => { if (Number(c) > 0) addShopTier(true, Number(c)); });
+    } else {
+        // older saves only remembered how many tiers there were (each double the last)
+        const n = Math.min(Math.floor(Number(localStorage.getItem('extraTiers')) || 0), MAX_EXTRA_TIERS);
+        for (let k = 0; k < n; k++) addShopTier(true, SHOP[SHOP.length - 1].cost * 2);
+    }
 }
 
 function addauto(amount, cost) {
@@ -679,9 +724,9 @@ function addauto(amount, cost) {
     if (points >= cost) {
         autoclick = autoclick + amount;
         points -= cost;
-        // Do not auto-create the next tier immediately after purchase.
-        // That makes the current top tier create a fresh one on the same click,
-        // which creates the runaway buy loop and exponential gains.
+        // bought the top one? unlock a new top one (double rolls, double price)
+        const top = SHOP[SHOP.length - 1];
+        if (top && top.amount === amount && top.cost === cost) addShopTier(true);
         updateUI();
         updateCPS();
         saveState();
@@ -709,139 +754,6 @@ function don() {
 
 // ===== Save and load state using localStorage =====
 // Same keys as before, so existing saves still load.
-function getAccountKey(name, password) {
-    return 'account:' + String(name || '').trim().toLowerCase() + ':' + String(password || '').trim();
-}
-
-function getSignedInAccount() {
-    const name = localStorage.getItem('playerName');
-    const password = localStorage.getItem('playerPassword');
-    if (!name || !password) return null;
-    return { name, password };
-}
-
-function updateAccountStatus() {
-    const statusEl = document.getElementById('accountstatus');
-    if (!statusEl) return;
-    const account = getSignedInAccount();
-    statusEl.textContent = account ? 'Signed in as ' + account.name : 'Not signed in.';
-}
-
-function buildAccountSave() {
-    return {
-        points: Number(points) || 0,
-        rollCount: Number(rollCount) || 0,
-        autoclick: Number(autoclick) || 0,
-        luckLevel: Number(luckLevel) || 0,
-        donWins: Number(donWins) || 0,
-        achievements: Array.isArray(unlocked) ? unlocked : [],
-        upgrades: Array.isArray(ownedUp) ? ownedUp : [],
-        extraTiers: Number(extraTiers) || 0,
-        rolled: Object.fromEntries(RARITIES.filter((r) => r.rolled > 0).map((r) => [r.id, Number(r.rolled) || 0])),
-    };
-}
-
-function applyAccountSave(data) {
-    if (!data || typeof data !== 'object') return false;
-    try {
-        const rolled = data.rolled || {};
-        RARITIES.forEach((r) => {
-            r.rolled = Number(rolled[r.id]) || 0;
-        });
-        points = Number(data.points) || 0;
-        rollCount = Number(data.rollCount) || 0;
-        autoclick = Number(data.autoclick) || 0;
-        luckLevel = Math.min(MAX_LUCK, Number(data.luckLevel) || 0);
-        donWins = Number(data.donWins) || 0;
-        unlocked = Array.isArray(data.achievements) ? data.achievements : [];
-        ownedUp = Array.isArray(data.upgrades) ? data.upgrades : [];
-        extraTiers = Math.min(Number(data.extraTiers) || 0, 2000);
-        return true;
-    } catch (e) {
-        console.warn('Could not apply account save', e);
-        return false;
-    }
-}
-
-function saveAccountProgress() {
-    const account = getSignedInAccount();
-    if (!account) return;
-    const saveData = buildAccountSave();
-    localStorage.setItem(getAccountKey(account.name, account.password), JSON.stringify(saveData));
-    localStorage.setItem('playerName', account.name);
-    localStorage.setItem('playerPassword', account.password);
-    updateAccountStatus();
-}
-
-function loadAccountProgress(name, password) {
-    if (!name || !password) return false;
-    try {
-        const raw = localStorage.getItem(getAccountKey(name, password));
-        if (!raw) return false;
-        const data = JSON.parse(raw);
-        const ok = applyAccountSave(data);
-        if (ok) {
-            localStorage.setItem('playerName', name);
-            localStorage.setItem('playerPassword', password);
-            updateAccountStatus();
-            return true;
-        }
-    } catch (e) {
-        console.warn('Could not load account progress', e);
-    }
-    return false;
-}
-
-function signInAccount() {
-    const accountName = document.getElementById('accountname');
-    const accountPass = document.getElementById('accountpass');
-    if (!accountName || !accountPass) return;
-    const name = (accountName.value || '').trim();
-    const password = (accountPass.value || '').trim();
-    if (!name || !password) {
-        showNotification('Enter both a username and password.');
-        return;
-    }
-    if (loadAccountProgress(name, password)) {
-        showNotification('Signed in as ' + name);
-        updateAccountStatus();
-        saveState();
-        loadLeaderboard();
-        return;
-    }
-    showNotification('No account found for that username and password. Create one first.');
-}
-
-function createAccount() {
-    const accountName = document.getElementById('accountname');
-    const accountPass = document.getElementById('accountpass');
-    if (!accountName || !accountPass) return;
-    const name = (accountName.value || '').trim();
-    const password = (accountPass.value || '').trim();
-    if (!name || !password) {
-        showNotification('Choose a username and password first.');
-        return;
-    }
-    const key = getAccountKey(name, password);
-    if (localStorage.getItem(key)) {
-        showNotification('That account already exists. Sign in instead.');
-        return;
-    }
-    localStorage.setItem('playerName', name);
-    localStorage.setItem('playerPassword', password);
-    saveAccountProgress();
-    showNotification('Account created for ' + name);
-    updateAccountStatus();
-    loadLeaderboard();
-}
-
-function signOutAccount() {
-    localStorage.removeItem('playerPassword');
-    const name = localStorage.getItem('playerName');
-    updateAccountStatus();
-    showNotification(name ? 'Signed out of ' + name : 'Signed out.');
-}
-
 function saveState() {
     if (blocked) return; // never overwrite the save from an inactive tab
     try {
@@ -852,11 +764,10 @@ function saveState() {
         localStorage.setItem('donWins', String(donWins));
         localStorage.setItem('achievements', JSON.stringify(unlocked));
         localStorage.setItem('upgrades', JSON.stringify(ownedUp));
-        localStorage.setItem('extraTiers', String(extraTiers));
+        localStorage.setItem('extraTierCosts', JSON.stringify(extraCosts));
         RARITIES.forEach((r) => {
             localStorage.setItem(r.id + 'Rolled', String(r.rolled));
         });
-        saveAccountProgress();
     } catch (e) {
         console.warn('Could not save state to localStorage', e);
     }
@@ -864,31 +775,25 @@ function saveState() {
 
 function loadState() {
     try {
-        const account = getSignedInAccount();
-        if (account && loadAccountProgress(account.name, account.password)) {
-            // loaded current account data successfully; keep the rest of the load flow going
-        } else {
-            const p = localStorage.getItem('points');
-            const r = localStorage.getItem('rollCount');
-            const a = localStorage.getItem('autoclick');
-            RARITIES.forEach((rar) => {
-                rar.rolled = Number(localStorage.getItem(rar.id + 'Rolled')) || 0;
-            });
-            if (a !== null) autoclick = Number(a) || 0;
-            luckLevel = Math.min(MAX_LUCK, Number(localStorage.getItem('luckLevel')) || 0);
-            donWins = Number(localStorage.getItem('donWins')) || 0;
-            const ach = JSON.parse(localStorage.getItem('achievements') || '[]');
-            unlocked = Array.isArray(ach) ? ach : [];
-            const up = JSON.parse(localStorage.getItem('upgrades') || '[]');
-            ownedUp = Array.isArray(up) ? up : [];
-            if (p !== null) points = Number(p) || 0;
-            if (r !== null) rollCount = Number(r) || 0;
-        }
+        const p = localStorage.getItem('points');
+        const r = localStorage.getItem('rollCount');
+        const a = localStorage.getItem('autoclick');
+        RARITIES.forEach((rar) => {
+            rar.rolled = Number(localStorage.getItem(rar.id + 'Rolled')) || 0;
+        });
+        if (a !== null) autoclick = Number(a) || 0;
+        luckLevel = Math.min(MAX_LUCK, Number(localStorage.getItem('luckLevel')) || 0);
+        donWins = Number(localStorage.getItem('donWins')) || 0;
+        const ach = JSON.parse(localStorage.getItem('achievements') || '[]');
+        unlocked = Array.isArray(ach) ? ach : [];
+        const up = JSON.parse(localStorage.getItem('upgrades') || '[]');
+        ownedUp = Array.isArray(up) ? up : [];
+        if (p !== null) points = Number(p) || 0;
+        if (r !== null) rollCount = Number(r) || 0;
     } catch (e) {
         console.warn('Could not load state from localStorage', e);
     }
-    const tiers = Math.min(Math.floor(Number(localStorage.getItem('extraTiers')) || 0), 2000);
-    for (let k = 0; k < tiers; k++) addShopTier(true); // rebuild the extra autoclickers
+    restoreTiers(); // rebuild the extra autoclickers
     recomputeUpgrades();
     for (let i = WEIGHTED_COUNT; i < RARITIES.length; i++) next[i] = newInterval(i); // use loaded luck
     renderAchievements();
@@ -896,7 +801,6 @@ function loadState() {
     checkAchievements(true); // silent: no popups for things you already earned
     updateUI();
     updateCPS();
-    updateAccountStatus();
 }
 
 // load saved state on script run
@@ -955,7 +859,7 @@ function buildSave() {
     RARITIES.forEach((r) => { if (r.rolled > 0) rolled[r.id] = safeNum(r.rolled); });
     return {
         points: safeNum(points), rollCount: safeNum(rollCount), autoclick: safeNum(autoclick),
-        luckLevel: luckLevel, donWins: donWins, achievements: unlocked, upgrades: ownedUp, extraTiers: extraTiers, rolled: rolled,
+        luckLevel: luckLevel, donWins: donWins, achievements: unlocked, upgrades: ownedUp, extraTierCosts: extraCosts.slice(), rolled: rolled,
     };
 }
 
@@ -1134,7 +1038,10 @@ function applyCloudSave(code, name, s) {
         localStorage.setItem('autoclick', String(Number(s.autoclick) || 0));
         localStorage.setItem('luckLevel', String(Number(s.luckLevel) || 0));
         localStorage.setItem('donWins', String(Number(s.donWins) || 0));
-        localStorage.setItem('extraTiers', String(Math.min(Number(s.extraTiers) || 0, 2000)));
+        const costs = Array.isArray(s.extraTierCosts)
+            ? s.extraTierCosts.map(Number).filter((c) => c > 0 && isFinite(c)).slice(0, MAX_EXTRA_TIERS) : [];
+        localStorage.setItem('extraTierCosts', JSON.stringify(costs));
+        localStorage.setItem('extraTiers', String(costs.length ? 0 : Math.min(Number(s.extraTiers) || 0, MAX_EXTRA_TIERS)));
         localStorage.setItem('achievements', JSON.stringify(Array.isArray(s.achievements) ? s.achievements : []));
         localStorage.setItem('upgrades', JSON.stringify(Array.isArray(s.upgrades) ? s.upgrades : []));
         const rolled = s.rolled || {};
@@ -1160,5 +1067,6 @@ async function loadFromCode() {
     }
 }
 
-updateAccountStatus();
+const saveCodeEl = document.getElementById('savecode');
+if (saveCodeEl) saveCodeEl.value = getPlayerId();
 loadLeaderboard();
