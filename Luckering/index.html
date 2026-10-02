@@ -139,10 +139,18 @@ V10
 <div id="achievements"></div>
 
 <h1 id="lbtitle">Leaderboard</h1>
-<input id="playername" maxlength="16" placeholder="Nickname">
-<button onclick="submitScore()">Submit Score</button>
+<p id="lbstatus">Your rolls are saved online every 90 seconds.</p>
 <button onclick="loadLeaderboard()">Refresh</button>
+<button onclick="changeName()">Change Username</button>
 <ol id="leaderboard"></ol>
+
+<h2 id="savetitle">Save Code</h2>
+<p id="saveinfo">Your progress is saved online. Keep this code private: it lets you restore your progress on another device or after clearing your browser.</p>
+<input id="savecode" readonly>
+<button onclick="copySaveCode()">Copy</button>
+<br>
+<input id="loadcode" placeholder="Paste a save code">
+<button onclick="loadFromCode()">Load</button>
 
 <button id="resetbtn" onclick="hardReset()">Reset Save</button>
 
@@ -204,7 +212,7 @@ V10
 <button class="upgrade" id="as268435456000000" onclick="addauto(268435456000000, 134217728000000000)">256T CPS Autoclicker (128Qa points)</button>
 <button class="upgrade" id="as536870912000000" onclick="addauto(536870912000000, 268435456000000000)">512T CPS Autoclicker (256Qa points)</button>
 <button class="upgrade" id="as1073741824000000" onclick="addauto(1073741824000000, 536870912000000000)">1Qa CPS Autoclicker (512Qa points)</button>
-<button class="upgrade" id="as2147483648000000" onclick="addauto(2147483648000000, 1073741824000000000)">2Qa CPS Autoclicker (1Qa points)</button>
+<button class="upgrade" id="as2147483648000000" onclick="addauto(2147483648000000, 1073741824000000000)">2Qa CPS Autoclicker (1.07Qi points)</button>
 
 </aside>
 </div>

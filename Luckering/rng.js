@@ -83,7 +83,7 @@ const donBtn = document.querySelector('button[onclick="don()"]');
 const SHOP = [];
 document.querySelectorAll('button.upgrade').forEach((b) => {
     const m = /addauto\(\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(b.getAttribute('onclick') || '');
-    if (m) SHOP.push({ el: b, cost: Number(m[2]) });
+    if (m) SHOP.push({ el: b, amount: Number(m[1]), cost: Number(m[2]) });
 });
 
 // ===== State =====
@@ -105,6 +105,7 @@ let bonusLuck = 0;       // extra luck added
 let luckMulti = 1;       // luck multiplier
 let donChance = 0.5;     // Double Or Nothing win chance
 let achPct = 0.02;       // points bonus per achievement
+let extraTiers = 0;      // autoclicker tiers created after buying the top one
 let autoCarry = 0;       // leftover fraction of auto rolls
 
 let lastAutoSaveTime = Date.now();
@@ -393,7 +394,7 @@ function hardReset() {
     if (!confirm('Reset ALL progress? This cannot be undone.')) return;
     blocked = true; // stops the page from saving again before the reload
     try {
-        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades']
+        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades', 'extraTiers']
             .forEach((k) => localStorage.removeItem(k));
         RARITIES.forEach((r) => localStorage.removeItem(r.id + 'Rolled'));
     } catch (e) {}
@@ -648,11 +649,31 @@ function autoRollTick() {
 }
 
 // ===== Upgrades =====
+// Adds a new top autoclicker: double the auto rolls for double the price.
+function addShopTier(silent) {
+    const top = SHOP[SHOP.length - 1];
+    if (!top) return;
+    const amount = top.amount * 2;
+    const cost = top.cost * 2;
+    if (!Number.isFinite(amount) || !Number.isFinite(cost)) return;
+    const b = document.createElement('button');
+    b.className = 'upgrade';
+    b.textContent = formatNumber(amount) + ' CPS Autoclicker (' + formatNumber(cost) + ' points)';
+    b.addEventListener('click', () => addauto(amount, cost));
+    top.el.insertAdjacentElement('afterend', b);
+    SHOP.push({ el: b, amount: amount, cost: cost });
+    extraTiers += 1;
+    if (!silent) saveState();
+}
+
 function addauto(amount, cost) {
     if (blocked) return;
     if (points >= cost) {
         autoclick = autoclick + amount;
         points -= cost;
+        // bought the top one? unlock a new top one (double rolls, double price)
+        const top = SHOP[SHOP.length - 1];
+        if (top && top.amount === amount && top.cost === cost) addShopTier(true);
         updateUI();
         updateCPS();
         saveState();
@@ -690,6 +711,7 @@ function saveState() {
         localStorage.setItem('donWins', String(donWins));
         localStorage.setItem('achievements', JSON.stringify(unlocked));
         localStorage.setItem('upgrades', JSON.stringify(ownedUp));
+        localStorage.setItem('extraTiers', String(extraTiers));
         RARITIES.forEach((r) => {
             localStorage.setItem(r.id + 'Rolled', String(r.rolled));
         });
@@ -718,6 +740,8 @@ function loadState() {
     } catch (e) {
         console.warn('Could not load state from localStorage', e);
     }
+    const tiers = Math.min(Math.floor(Number(localStorage.getItem('extraTiers')) || 0), 2000);
+    for (let k = 0; k < tiers; k++) addShopTier(true); // rebuild the extra autoclickers
     recomputeUpgrades();
     for (let i = WEIGHTED_COUNT; i < RARITIES.length; i++) next[i] = newInterval(i); // use loaded luck
     renderAchievements();
@@ -783,7 +807,7 @@ function buildSave() {
     RARITIES.forEach((r) => { if (r.rolled > 0) rolled[r.id] = safeNum(r.rolled); });
     return {
         points: safeNum(points), rollCount: safeNum(rollCount), autoclick: safeNum(autoclick),
-        luckLevel: luckLevel, donWins: donWins, achievements: unlocked, upgrades: ownedUp, rolled: rolled,
+        luckLevel: luckLevel, donWins: donWins, achievements: unlocked, upgrades: ownedUp, extraTiers: extraTiers, rolled: rolled,
     };
 }
 
@@ -962,6 +986,7 @@ function applyCloudSave(code, name, s) {
         localStorage.setItem('autoclick', String(Number(s.autoclick) || 0));
         localStorage.setItem('luckLevel', String(Number(s.luckLevel) || 0));
         localStorage.setItem('donWins', String(Number(s.donWins) || 0));
+        localStorage.setItem('extraTiers', String(Math.min(Number(s.extraTiers) || 0, 2000)));
         localStorage.setItem('achievements', JSON.stringify(Array.isArray(s.achievements) ? s.achievements : []));
         localStorage.setItem('upgrades', JSON.stringify(Array.isArray(s.upgrades) ? s.upgrades : []));
         const rolled = s.rolled || {};
