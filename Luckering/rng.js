@@ -400,7 +400,7 @@ function hardReset() {
     if (!confirm('Reset ALL progress? This cannot be undone.')) return;
     blocked = true; // stops the page from saving again before the reload
     try {
-        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades', 'extraTiers']
+        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades', 'extraTiers', 'playerPassword']
             .forEach((k) => localStorage.removeItem(k));
         RARITIES.forEach((r) => localStorage.removeItem(r.id + 'Rolled'));
     } catch (e) {}
@@ -679,9 +679,9 @@ function addauto(amount, cost) {
     if (points >= cost) {
         autoclick = autoclick + amount;
         points -= cost;
-        // bought the top one? unlock a new top one (double rolls, double price)
-        const top = SHOP[SHOP.length - 1];
-        if (top && top.amount === amount && top.cost === cost) addShopTier(true);
+        // Do not auto-create the next tier immediately after purchase.
+        // That makes the current top tier create a fresh one on the same click,
+        // which creates the runaway buy loop and exponential gains.
         updateUI();
         updateCPS();
         saveState();
@@ -709,6 +709,139 @@ function don() {
 
 // ===== Save and load state using localStorage =====
 // Same keys as before, so existing saves still load.
+function getAccountKey(name, password) {
+    return 'account:' + String(name || '').trim().toLowerCase() + ':' + String(password || '').trim();
+}
+
+function getSignedInAccount() {
+    const name = localStorage.getItem('playerName');
+    const password = localStorage.getItem('playerPassword');
+    if (!name || !password) return null;
+    return { name, password };
+}
+
+function updateAccountStatus() {
+    const statusEl = document.getElementById('accountstatus');
+    if (!statusEl) return;
+    const account = getSignedInAccount();
+    statusEl.textContent = account ? 'Signed in as ' + account.name : 'Not signed in.';
+}
+
+function buildAccountSave() {
+    return {
+        points: Number(points) || 0,
+        rollCount: Number(rollCount) || 0,
+        autoclick: Number(autoclick) || 0,
+        luckLevel: Number(luckLevel) || 0,
+        donWins: Number(donWins) || 0,
+        achievements: Array.isArray(unlocked) ? unlocked : [],
+        upgrades: Array.isArray(ownedUp) ? ownedUp : [],
+        extraTiers: Number(extraTiers) || 0,
+        rolled: Object.fromEntries(RARITIES.filter((r) => r.rolled > 0).map((r) => [r.id, Number(r.rolled) || 0])),
+    };
+}
+
+function applyAccountSave(data) {
+    if (!data || typeof data !== 'object') return false;
+    try {
+        const rolled = data.rolled || {};
+        RARITIES.forEach((r) => {
+            r.rolled = Number(rolled[r.id]) || 0;
+        });
+        points = Number(data.points) || 0;
+        rollCount = Number(data.rollCount) || 0;
+        autoclick = Number(data.autoclick) || 0;
+        luckLevel = Math.min(MAX_LUCK, Number(data.luckLevel) || 0);
+        donWins = Number(data.donWins) || 0;
+        unlocked = Array.isArray(data.achievements) ? data.achievements : [];
+        ownedUp = Array.isArray(data.upgrades) ? data.upgrades : [];
+        extraTiers = Math.min(Number(data.extraTiers) || 0, 2000);
+        return true;
+    } catch (e) {
+        console.warn('Could not apply account save', e);
+        return false;
+    }
+}
+
+function saveAccountProgress() {
+    const account = getSignedInAccount();
+    if (!account) return;
+    const saveData = buildAccountSave();
+    localStorage.setItem(getAccountKey(account.name, account.password), JSON.stringify(saveData));
+    localStorage.setItem('playerName', account.name);
+    localStorage.setItem('playerPassword', account.password);
+    updateAccountStatus();
+}
+
+function loadAccountProgress(name, password) {
+    if (!name || !password) return false;
+    try {
+        const raw = localStorage.getItem(getAccountKey(name, password));
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        const ok = applyAccountSave(data);
+        if (ok) {
+            localStorage.setItem('playerName', name);
+            localStorage.setItem('playerPassword', password);
+            updateAccountStatus();
+            return true;
+        }
+    } catch (e) {
+        console.warn('Could not load account progress', e);
+    }
+    return false;
+}
+
+function signInAccount() {
+    const accountName = document.getElementById('accountname');
+    const accountPass = document.getElementById('accountpass');
+    if (!accountName || !accountPass) return;
+    const name = (accountName.value || '').trim();
+    const password = (accountPass.value || '').trim();
+    if (!name || !password) {
+        showNotification('Enter both a username and password.');
+        return;
+    }
+    if (loadAccountProgress(name, password)) {
+        showNotification('Signed in as ' + name);
+        updateAccountStatus();
+        saveState();
+        loadLeaderboard();
+        return;
+    }
+    showNotification('No account found for that username and password. Create one first.');
+}
+
+function createAccount() {
+    const accountName = document.getElementById('accountname');
+    const accountPass = document.getElementById('accountpass');
+    if (!accountName || !accountPass) return;
+    const name = (accountName.value || '').trim();
+    const password = (accountPass.value || '').trim();
+    if (!name || !password) {
+        showNotification('Choose a username and password first.');
+        return;
+    }
+    const key = getAccountKey(name, password);
+    if (localStorage.getItem(key)) {
+        showNotification('That account already exists. Sign in instead.');
+        return;
+    }
+    localStorage.setItem('playerName', name);
+    localStorage.setItem('playerPassword', password);
+    saveAccountProgress();
+    showNotification('Account created for ' + name);
+    updateAccountStatus();
+    loadLeaderboard();
+}
+
+function signOutAccount() {
+    localStorage.removeItem('playerPassword');
+    const name = localStorage.getItem('playerName');
+    updateAccountStatus();
+    showNotification(name ? 'Signed out of ' + name : 'Signed out.');
+}
+
 function saveState() {
     if (blocked) return; // never overwrite the save from an inactive tab
     try {
@@ -723,6 +856,7 @@ function saveState() {
         RARITIES.forEach((r) => {
             localStorage.setItem(r.id + 'Rolled', String(r.rolled));
         });
+        saveAccountProgress();
     } catch (e) {
         console.warn('Could not save state to localStorage', e);
     }
@@ -730,21 +864,26 @@ function saveState() {
 
 function loadState() {
     try {
-        const p = localStorage.getItem('points');
-        const r = localStorage.getItem('rollCount');
-        const a = localStorage.getItem('autoclick');
-        RARITIES.forEach((rar) => {
-            rar.rolled = Number(localStorage.getItem(rar.id + 'Rolled')) || 0;
-        });
-        if (a !== null) autoclick = Number(a) || 0;
-        luckLevel = Math.min(MAX_LUCK, Number(localStorage.getItem('luckLevel')) || 0);
-        donWins = Number(localStorage.getItem('donWins')) || 0;
-        const ach = JSON.parse(localStorage.getItem('achievements') || '[]');
-        unlocked = Array.isArray(ach) ? ach : [];
-        const up = JSON.parse(localStorage.getItem('upgrades') || '[]');
-        ownedUp = Array.isArray(up) ? up : [];
-        if (p !== null) points = Number(p) || 0;
-        if (r !== null) rollCount = Number(r) || 0;
+        const account = getSignedInAccount();
+        if (account && loadAccountProgress(account.name, account.password)) {
+            // loaded current account data successfully; keep the rest of the load flow going
+        } else {
+            const p = localStorage.getItem('points');
+            const r = localStorage.getItem('rollCount');
+            const a = localStorage.getItem('autoclick');
+            RARITIES.forEach((rar) => {
+                rar.rolled = Number(localStorage.getItem(rar.id + 'Rolled')) || 0;
+            });
+            if (a !== null) autoclick = Number(a) || 0;
+            luckLevel = Math.min(MAX_LUCK, Number(localStorage.getItem('luckLevel')) || 0);
+            donWins = Number(localStorage.getItem('donWins')) || 0;
+            const ach = JSON.parse(localStorage.getItem('achievements') || '[]');
+            unlocked = Array.isArray(ach) ? ach : [];
+            const up = JSON.parse(localStorage.getItem('upgrades') || '[]');
+            ownedUp = Array.isArray(up) ? up : [];
+            if (p !== null) points = Number(p) || 0;
+            if (r !== null) rollCount = Number(r) || 0;
+        }
     } catch (e) {
         console.warn('Could not load state from localStorage', e);
     }
@@ -757,6 +896,7 @@ function loadState() {
     checkAchievements(true); // silent: no popups for things you already earned
     updateUI();
     updateCPS();
+    updateAccountStatus();
 }
 
 // load saved state on script run
@@ -1020,6 +1160,5 @@ async function loadFromCode() {
     }
 }
 
-const saveCodeEl = document.getElementById('savecode');
-if (saveCodeEl) saveCodeEl.value = getPlayerId();
+updateAccountStatus();
 loadLeaderboard();
