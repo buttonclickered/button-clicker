@@ -740,9 +740,14 @@ document.addEventListener('contextmenu', (event) => {
 
 autoRollTick();
 
-// ===== Leaderboard (Supabase) =====
-const SUPABASE_URL = 'https://zwoosenbneiywhhopzrg.supabase.co'; // <-- put your Project URL here
+// ===== Cloud save + leaderboard (Supabase) =====
+const SUPABASE_URL = 'https://zwoosenbneiywhhopzrg.supabase.co';
 const SUPABASE_KEY = 'sb_publishable__TXkovSYBzRCrc9XKB72jA_4GDcZC1-'; // publishable key (safe to be public)
+const CLOUD_EVERY_MS = 90 * 1000; // every 1 minute 30 seconds
+const NAME_RE = /^[A-Za-z0-9 _.-]{3,16}$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+let pushing = false;
+let nameModalOpen = false;
 
 function getPlayerId() {
     let id = localStorage.getItem('playerId');
@@ -758,52 +763,173 @@ function getPlayerId() {
     return id;
 }
 
-async function sbRpc(fn, body) {
+async function sbRpc(fn, body, keepalive) {
     const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY },
         body: JSON.stringify(body),
+        keepalive: !!keepalive, // lets the last save finish while the page closes
     });
     if (!res.ok) throw new Error(await res.text());
     const text = await res.text();
     return text ? JSON.parse(text) : null;
 }
 
-async function submitScore() {
-    const input = document.getElementById('playername');
-    const name = input.value.trim().slice(0, 16);
-    if (!name) { showNotification('Type a nickname first'); return; }
-    localStorage.setItem('playerName', name);
+function safeNum(x) { return Number.isFinite(x) ? Math.min(x, 1e300) : 1e300; }
 
+// Everything needed to restore the game
+function buildSave() {
+    const rolled = {};
+    RARITIES.forEach((r) => { if (r.rolled > 0) rolled[r.id] = safeNum(r.rolled); });
+    return {
+        points: safeNum(points), rollCount: safeNum(rollCount), autoclick: safeNum(autoclick),
+        luckLevel: luckLevel, donWins: donWins, achievements: unlocked, upgrades: ownedUp, rolled: rolled,
+    };
+}
+
+// Sends your save + leaderboard score. Returns 'ok', 'name_taken', 'bad_name',
+// 'too_fast', 'error', 'noname' or 'skip'.
+async function pushScore(keepalive) {
+    if (blocked || pushing) return 'skip';
+    const name = localStorage.getItem('playerName');
+    if (!name) return 'noname';
     let best = 0;
     RARITIES.forEach((r, i) => { if (r.rolled > 0) best = i; });
-
+    pushing = true;
     try {
-        await sbRpc('submit_score', {
+        return await sbRpc('submit_score', {
             p_id: getPlayerId(),
             p_name: name,
             p_rarest: best,
-            p_rolls: Math.min(rollCount, 1e300),
-            p_points: Math.min(points, 1e300),
-        });
-        showNotification('Score submitted!');
-        loadLeaderboard();
+            p_rolls: safeNum(rollCount),
+            p_points: safeNum(points),
+            p_save: buildSave(),
+        }, keepalive);
     } catch (e) {
         console.warn(e);
-        showNotification('Could not submit score');
+        return 'error';
+    } finally {
+        pushing = false;
     }
 }
 
+// ----- username popup -----
+function askName(message, allowCancel, prefill) {
+    return new Promise((resolve) => {
+        nameModalOpen = true;
+        const wrap = document.createElement('div');
+        wrap.id = 'namemodal';
+        const box = document.createElement('div');
+        box.className = 'box';
+        const title = document.createElement('h2');
+        title.textContent = 'Choose a username';
+        const info = document.createElement('p');
+        info.textContent = 'This is the name shown on the leaderboard. 3-16 letters, numbers, spaces, _ . or -';
+        const input = document.createElement('input');
+        input.maxLength = 16;
+        input.value = prefill || '';
+        const err = document.createElement('p');
+        err.className = 'err';
+        err.textContent = message || '';
+        const ok = document.createElement('button');
+        ok.textContent = 'Save';
+
+        function done(value) {
+            nameModalOpen = false;
+            wrap.remove();
+            resolve(value);
+        }
+        function submit() {
+            const v = input.value.trim();
+            if (!NAME_RE.test(v)) { err.textContent = 'Use 3-16 letters, numbers, spaces, _ . or -'; return; }
+            done(v);
+        }
+        ok.addEventListener('click', submit);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+
+        box.append(title, info, input, err, ok);
+        if (allowCancel) {
+            const cancel = document.createElement('button');
+            cancel.textContent = 'Cancel';
+            cancel.addEventListener('click', () => done(null));
+            box.append(cancel);
+        }
+        wrap.appendChild(box);
+        document.body.appendChild(wrap);
+        input.focus();
+    });
+}
+
+async function setNameOnServer(name) {
+    const old = localStorage.getItem('playerName');
+    localStorage.setItem('playerName', name);
+    const status = await pushScore(false);
+    if (status === 'name_taken' || status === 'bad_name') { // roll back
+        if (old) localStorage.setItem('playerName', old); else localStorage.removeItem('playerName');
+    }
+    return status;
+}
+
+// Asks until the server accepts a name. first = can't be cancelled.
+async function chooseName(first, message) {
+    let msg = message || '';
+    for (;;) {
+        const name = await askName(msg, !first, localStorage.getItem('playerName') || '');
+        if (!name) return false;
+        const status = await setNameOnServer(name);
+        if (status === 'name_taken') { msg = 'That username is taken. Try another one.'; continue; }
+        if (status === 'bad_name') { msg = 'That username is not allowed.'; continue; }
+        reportSync(status);
+        loadLeaderboard();
+        return true;
+    }
+}
+
+function changeName() {
+    if (!nameModalOpen) chooseName(false);
+}
+
+// ----- auto sync every 90 seconds -----
+function reportSync(status) {
+    const el = document.getElementById('lbstatus');
+    if (!el) return;
+    if (status === 'ok') el.textContent = 'Saved online at ' + new Date().toLocaleTimeString() + '. Auto-saves every 90 seconds.';
+    else if (status === 'error') el.textContent = 'Could not reach the server. Will try again in 90 seconds.';
+}
+
+async function cloudTick() {
+    if (blocked || nameModalOpen) return;
+    if (!localStorage.getItem('playerName')) {
+        await chooseName(true); // first time: ask for a username (also saves right away)
+        return;
+    }
+    const status = await pushScore(false);
+    if (status === 'name_taken') {
+        await chooseName(true, 'Your username was taken by someone else. Pick a new one.');
+        return;
+    }
+    reportSync(status);
+    loadLeaderboard();
+}
+
+setInterval(cloudTick, CLOUD_EVERY_MS);
+// one last save when you leave the page
+window.addEventListener('pagehide', () => { if (localStorage.getItem('playerName')) pushScore(true); });
+
+// ----- leaderboard (ranked by rolls) -----
 async function loadLeaderboard() {
     const list = document.getElementById('leaderboard');
     if (!list) return;
     try {
         const rows = await sbRpc('get_leaderboard', {});
+        const me = (localStorage.getItem('playerName') || '').toLowerCase();
         list.innerHTML = '';
         rows.forEach((r) => {
             const li = document.createElement('li');
+            const rare = RARITIES[r.rarest] ? RARITIES[r.rarest].name : '?';
             // textContent (not innerHTML) so nobody can inject code through a name
-            li.textContent = r.name + ' - ' + RARITIES[r.rarest].name + ' - ' + formatNumber(r.points) + ' points';
+            li.textContent = r.name + ' - ' + formatNumber(r.rolls) + ' rolls (rarest: ' + rare + ')';
+            if (me && r.name.toLowerCase() === me) li.className = 'me';
             list.appendChild(li);
         });
         if (!rows.length) list.textContent = 'No scores yet. Be the first!';
@@ -813,5 +939,54 @@ async function loadLeaderboard() {
     }
 }
 
-document.getElementById('playername').value = localStorage.getItem('playerName') || '';
+// ----- save code: restore your progress on another device -----
+function copySaveCode() {
+    const box = document.getElementById('savecode');
+    if (!box) return;
+    box.select();
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(box.value).then(() => showNotification('Save code copied'), () => {});
+    } else {
+        document.execCommand('copy');
+        showNotification('Save code copied');
+    }
+}
+
+function applyCloudSave(code, name, s) {
+    blocked = true; // stops this page from saving over the loaded data
+    try {
+        localStorage.setItem('playerId', code);
+        localStorage.setItem('playerName', name);
+        localStorage.setItem('points', String(Number(s.points) || 0));
+        localStorage.setItem('rollCount', String(Number(s.rollCount) || 0));
+        localStorage.setItem('autoclick', String(Number(s.autoclick) || 0));
+        localStorage.setItem('luckLevel', String(Number(s.luckLevel) || 0));
+        localStorage.setItem('donWins', String(Number(s.donWins) || 0));
+        localStorage.setItem('achievements', JSON.stringify(Array.isArray(s.achievements) ? s.achievements : []));
+        localStorage.setItem('upgrades', JSON.stringify(Array.isArray(s.upgrades) ? s.upgrades : []));
+        const rolled = s.rolled || {};
+        RARITIES.forEach((r) => localStorage.setItem(r.id + 'Rolled', String(Number(rolled[r.id]) || 0)));
+    } catch (e) {
+        console.warn(e);
+    }
+    location.reload();
+}
+
+async function loadFromCode() {
+    const input = document.getElementById('loadcode');
+    const code = (input ? input.value : '').trim().toLowerCase();
+    if (!UUID_RE.test(code)) { showNotification('That is not a valid save code'); return; }
+    try {
+        const rows = await sbRpc('get_save', { p_id: code });
+        if (!rows || !rows.length || !rows[0].save) { showNotification('No save found for that code'); return; }
+        if (!confirm('This replaces the progress in this browser with the online save. Continue?')) return;
+        applyCloudSave(code, rows[0].name, rows[0].save);
+    } catch (e) {
+        console.warn(e);
+        showNotification('Could not load that save');
+    }
+}
+
+const saveCodeEl = document.getElementById('savecode');
+if (saveCodeEl) saveCodeEl.value = getPlayerId();
 loadLeaderboard();
