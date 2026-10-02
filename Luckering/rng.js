@@ -658,9 +658,9 @@ function autoRollTick() {
 
 // ===== Upgrades =====
 // ===== Endless autoclickers =====
-// Buying the top autoclicker unlocks a new one with double the auto rolls.
-// Its price is double the old one OR about TIER_WAIT_SECONDS of your current
-// income, whichever is more, so you always have to earn it first.
+// Buying the top autoclicker unlocks a new one with a gentler late-game scale.
+// Lower tiers still grow quickly, but once you're in the 1q+ range the jump is
+// controlled so the next tier stays near the same scale instead of dropping backward.
 const MAX_EXTRA_TIERS = 900; // after this the shop ends (numbers get too big to hold)
 const TIER_WAIT_SECONDS = 300; // 5 minutes. Make it bigger for a bigger grind.
 
@@ -690,10 +690,14 @@ function addShopTier(silent, savedCost) {
         if (savedCost === undefined) showNotification('That was the very last autoclicker!');
         return;
     }
-    const amount = top.amount * 2;
+
+    // Keep early tiers growing fast, but make the very late-game step feel sane.
+    // Example: 1qi -> 150qi instead of suddenly dropping to a smaller tier.
+    const multiplier = top.amount >= 1e24 ? 150 : 2;
+    const amount = top.amount * multiplier;
     let cost = savedCost;
     if (cost === undefined) {
-        cost = Math.max(top.cost * 2, incomePerSecond() * TIER_WAIT_SECONDS);
+        cost = Math.max(top.cost * multiplier, incomePerSecond() * TIER_WAIT_SECONDS);
         cost = Number(cost.toPrecision(4)); // short number, easy to save
     }
     if (!Number.isFinite(amount) || !Number.isFinite(cost)) return;
