@@ -22,7 +22,8 @@ V10
 <h2 id="CPS">Auto Rolls Per Second: 0</h2>
 <h2 id="rarest">Rarest Roll: None</h2>
 <h2 id="luck">Luck: x1.0</h2>
-<h2 id="bonus">Achievement Bonus: +0% points</h2>
+<h2 id="bonus">Points Multiplier: x1.00</h2>
+<h2 id="rollinfo">Rolls per click: 1 | Cooldown: 1.0s</h2>
 <button class="upgrade" id="luckbtn" onclick="buyluck()">Luck +10%</button>
 
 <h1 id="rolltitle">Possible Rolls</h1>
@@ -56,6 +57,26 @@ V10
 <p class="rolls">Omnipotent - 1 in 10Sp (500,000,000 points)</p>
 <p class="rolls">Multiversal - 1 in 100Sp (1,000,000,000 points)</p>
 <p class="rolls">Ultimate - 1 in 1Oc (2,500,000,000 points)</p>
+<p class="rolls">Eldritch - 1 in 10Oc (5,000,000,000 points)</p>
+<p class="rolls">Abyssal - 1 in 100Oc (10,000,000,000 points)</p>
+<p class="rolls">Sovereign - 1 in 1No (25,000,000,000 points)</p>
+<p class="rolls">Empyrean - 1 in 10No (50,000,000,000 points)</p>
+<p class="rolls">Seraphic - 1 in 100No (100,000,000,000 points)</p>
+<p class="rolls">Primeval - 1 in 1Dc (250,000,000,000 points)</p>
+<p class="rolls">Axiom - 1 in 10Dc (500,000,000,000 points)</p>
+<p class="rolls">Nexus - 1 in 100Dc (1,000,000,000,000 points)</p>
+<p class="rolls">Zenith - 1 in 1UDc (2,500,000,000,000 points)</p>
+<p class="rolls">Apex - 1 in 10UDc (5,000,000,000,000 points)</p>
+<p class="rolls">Infinitum - 1 in 100UDc (10,000,000,000,000 points)</p>
+<p class="rolls">Omega - 1 in 1DDc (25,000,000,000,000 points)</p>
+<p class="rolls">Alpha - 1 in 10DDc (50,000,000,000,000 points)</p>
+<p class="rolls">Paragon - 1 in 100DDc (100,000,000,000,000 points)</p>
+<p class="rolls">Ascendant - 1 in 1TDc (250,000,000,000,000 points)</p>
+<p class="rolls">Cataclysm - 1 in 10TDc (500,000,000,000,000 points)</p>
+<p class="rolls">Oblivion - 1 in 100TDc (1,000,000,000,000,000 points)</p>
+<p class="rolls">Everlasting - 1 in 1QaDc (2,500,000,000,000,000 points)</p>
+<p class="rolls">Beyond - 1 in 10QaDc (5,000,000,000,000,000 points)</p>
+<p class="rolls">Finality - 1 in 100QaDc (10,000,000,000,000,000 points)</p>
 
 <h1 id="amountrolleds"> All Time Rolled: </h1>
 <h2 class="amountrolled" id="commonrolled">Common: 0</h2>
@@ -88,10 +109,34 @@ V10
 <h2 class="amountrolled" id="omnipotentrolled">Omnipotent: 0</h2>
 <h2 class="amountrolled" id="multiversalrolled">Multiversal: 0</h2>
 <h2 class="amountrolled" id="ultimaterolled">Ultimate: 0</h2>
+<h2 class="amountrolled" id="eldritchrolled">Eldritch: 0</h2>
+<h2 class="amountrolled" id="abyssalrolled">Abyssal: 0</h2>
+<h2 class="amountrolled" id="sovereignrolled">Sovereign: 0</h2>
+<h2 class="amountrolled" id="empyreanrolled">Empyrean: 0</h2>
+<h2 class="amountrolled" id="seraphicrolled">Seraphic: 0</h2>
+<h2 class="amountrolled" id="primevalrolled">Primeval: 0</h2>
+<h2 class="amountrolled" id="axiomrolled">Axiom: 0</h2>
+<h2 class="amountrolled" id="nexusrolled">Nexus: 0</h2>
+<h2 class="amountrolled" id="zenithrolled">Zenith: 0</h2>
+<h2 class="amountrolled" id="apexrolled">Apex: 0</h2>
+<h2 class="amountrolled" id="infinitumrolled">Infinitum: 0</h2>
+<h2 class="amountrolled" id="omegarolled">Omega: 0</h2>
+<h2 class="amountrolled" id="alpharolled">Alpha: 0</h2>
+<h2 class="amountrolled" id="paragonrolled">Paragon: 0</h2>
+<h2 class="amountrolled" id="ascendantrolled">Ascendant: 0</h2>
+<h2 class="amountrolled" id="cataclysmrolled">Cataclysm: 0</h2>
+<h2 class="amountrolled" id="oblivionrolled">Oblivion: 0</h2>
+<h2 class="amountrolled" id="everlastingrolled">Everlasting: 0</h2>
+<h2 class="amountrolled" id="beyondrolled">Beyond: 0</h2>
+<h2 class="amountrolled" id="finalityrolled">Finality: 0</h2>
 
 <h1 id="achtitle">Achievements</h1>
 <div id="achievements"></div>
 
+<h1 id="upgradestitle">Upgrades</h1>
+<div id="upgrades"></div>
+
+<h1 id="shoptitle">Autoclickers</h1>
 <!-- Upgrades Shop -->
 <button class="upgrade" id="as1" onclick="addauto(1, 45)">1 CPS Autoclicker (45 points)</button>
 <button class="upgrade" id="as2" onclick="addauto(2, 100)">2 CPS Autoclicker (100 points)</button>
@@ -143,14 +188,7 @@ V10
 <button class="upgrade" id="as268435456000000" onclick="addauto(268435456000000, 134217728000000000)">256T CPS Autoclicker (128Qa points)</button>
 <button class="upgrade" id="as536870912000000" onclick="addauto(536870912000000, 268435456000000000)">512T CPS Autoclicker (256Qa points)</button>
 <button class="upgrade" id="as1073741824000000" onclick="addauto(1073741824000000, 536870912000000000)">1Qa CPS Autoclicker (512Qa points)</button>
-<button class="upgrade" id="as2147483648000000" onclick="addauto(2147483648000000, 1073741824000000000)">2Qa CPS Autoclicker (1Qi points)</button>
-<button class="upgrade" id="as4294967296000000" onclick="addauto(4294967296000000, 2147483648000000000)">4Qa CPS Autoclicker (2Qi points)</button>
-<button class="upgrade" id="as8589934592000000" onclick="addauto(8589934592000000, 4294967296000000000)">8Qa CPS Autoclicker (4Qi points)</button>
-<button class="upgrade" id="as17179869184000000" onclick="addauto(17179869184000000, 8589934592000000000)">16Qa CPS Autoclicker (8Qi points)</button>
-<button class="upgrade" id="as34359738368000000" onclick="addauto(34359738368000000, 17179869184000000000)">32Qa CPS Autoclicker (16Qi points)</button>
-<button class="upgrade" id="as68719476736000000" onclick="addauto(68719476736000000, 34359738368000000000)">64Qa CPS Autoclicker (32Qi points)</button>
-
-
+<button class="upgrade" id="as2147483648000000" onclick="addauto(2147483648000000, 1073741824000000000)">2Qa CPS Autoclicker (1Qa points)</button>
 
 <button id="resetbtn" onclick="hardReset()">Reset Save</button>
 
