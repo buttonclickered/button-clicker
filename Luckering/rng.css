@@ -440,3 +440,20 @@ input:focus {
 #namemodal button {
     margin: 6px 4px 0;
 }
+
+/* ===== Popup extras ===== */
+#namemodal .link {
+    margin-top: 12px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    color: var(--blue);
+    background: transparent;
+    border: none;
+    text-decoration: underline;
+}
+
+#namemodal .link:hover {
+    background: transparent;
+    box-shadow: none;
+    color: #fff;
+}

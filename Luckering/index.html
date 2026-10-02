@@ -144,13 +144,11 @@ V10
 <button onclick="changeName()">Change Username</button>
 <ol id="leaderboard"></ol>
 
-<h2 id="savetitle">Save Code</h2>
-<p id="saveinfo">Your progress is saved online. Keep this code private: it lets you restore your progress on another device or after clearing your browser.</p>
-<input id="savecode" readonly>
-<button onclick="copySaveCode()">Copy</button>
-<br>
-<input id="loadcode" placeholder="Paste a save code">
-<button onclick="loadFromCode()">Load</button>
+<h2 id="savetitle">Account</h2>
+<p id="saveinfo">Log in with your username and password to load your progress on another device or after clearing your browser. Already have a username but no password? Click Change Password to set one.</p>
+<button onclick="openAccount()">Log In / Create Account</button>
+<button onclick="changePassword()">Change Password</button>
+<button onclick="logout()">Log Out</button>
 
 <button id="resetbtn" onclick="hardReset()">Reset Save</button>
 

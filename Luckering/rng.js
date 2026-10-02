@@ -816,14 +816,14 @@ document.addEventListener('contextmenu', (event) => {
 
 autoRollTick();
 
-// ===== Cloud save + leaderboard (Supabase) =====
+// ===== Cloud save, accounts + leaderboard (Supabase) =====
 const SUPABASE_URL = 'https://zwoosenbneiywhhopzrg.supabase.co';
 const SUPABASE_KEY = 'sb_publishable__TXkovSYBzRCrc9XKB72jA_4GDcZC1-'; // publishable key (safe to be public)
 const CLOUD_EVERY_MS = 90 * 1000; // every 1 minute 30 seconds
 const NAME_RE = /^[A-Za-z0-9 _.-]{3,16}$/;
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 let pushing = false;
 let nameModalOpen = false;
+let askedThisSession = false; // if you press "Not now", we don't nag again until you reload
 
 function getPlayerId() {
     let id = localStorage.getItem('playerId');
@@ -859,13 +859,14 @@ function buildSave() {
     RARITIES.forEach((r) => { if (r.rolled > 0) rolled[r.id] = safeNum(r.rolled); });
     return {
         points: safeNum(points), rollCount: safeNum(rollCount), autoclick: safeNum(autoclick),
-        luckLevel: luckLevel, donWins: donWins, achievements: unlocked, upgrades: ownedUp, extraTierCosts: extraCosts.slice(), rolled: rolled,
+        luckLevel: luckLevel, donWins: donWins, achievements: unlocked, upgrades: ownedUp,
+        extraTierCosts: extraCosts.slice(), rolled: rolled,
     };
 }
 
-// Sends your save + leaderboard score. Returns 'ok', 'name_taken', 'bad_name',
-// 'too_fast', 'error', 'noname' or 'skip'.
-async function pushScore(keepalive) {
+// Sends your save + leaderboard score. Returns 'ok', 'name_taken', 'bad_name', 'bad_password',
+// 'too_fast', 'bad_data', 'error', 'noname' or 'skip'.
+async function pushScore(keepalive, password) {
     if (blocked || pushing) return 'skip';
     const name = localStorage.getItem('playerName');
     if (!name) return 'noname';
@@ -880,6 +881,7 @@ async function pushScore(keepalive) {
             p_rolls: safeNum(rollCount),
             p_points: safeNum(points),
             p_save: buildSave(),
+            p_password: password || null,
         }, keepalive);
     } catch (e) {
         console.warn(e);
@@ -889,8 +891,12 @@ async function pushScore(keepalive) {
     }
 }
 
-// ----- username popup -----
-function askName(message, allowCancel, prefill) {
+// ----- popup form (used for username, account and password screens) -----
+// cfg: { title, info, fields:[{key,type,placeholder,maxLength,value,autocomplete}], submitText,
+//        extra (text of a second button), allowCancel, cancelText, message, validate(values) -> error text }
+// check(values) is optional: async, returns an error text (popup stays open) or '' (popup closes).
+// Resolves with the values, { __extra: true, ...values }, or null when cancelled.
+function askForm(cfg) {
     return new Promise((resolve) => {
         nameModalOpen = true;
         const wrap = document.createElement('div');
@@ -898,71 +904,268 @@ function askName(message, allowCancel, prefill) {
         const box = document.createElement('div');
         box.className = 'box';
         const title = document.createElement('h2');
-        title.textContent = 'Choose a username';
+        title.textContent = cfg.title;
         const info = document.createElement('p');
-        info.textContent = 'This is the name shown on the leaderboard. 3-16 letters, numbers, spaces, _ . or -';
-        const input = document.createElement('input');
-        input.maxLength = 16;
-        input.value = prefill || '';
+        info.textContent = cfg.info || '';
+        box.append(title, info);
+
+        const inputs = {};
+        cfg.fields.forEach((f) => {
+            const input = document.createElement('input');
+            input.type = f.type || 'text';
+            input.placeholder = f.placeholder || '';
+            input.maxLength = f.maxLength || 72;
+            input.value = f.value || '';
+            if (f.autocomplete) input.autocomplete = f.autocomplete;
+            inputs[f.key] = input;
+            box.appendChild(input);
+        });
         const err = document.createElement('p');
         err.className = 'err';
-        err.textContent = message || '';
-        const ok = document.createElement('button');
-        ok.textContent = 'Save';
+        err.textContent = cfg.message || '';
+        box.appendChild(err);
 
-        function done(value) {
+        function done(result) {
             nameModalOpen = false;
             wrap.remove();
-            resolve(value);
+            resolve(result);
         }
-        function submit() {
-            const v = input.value.trim();
-            if (!NAME_RE.test(v)) { err.textContent = 'Use 3-16 letters, numbers, spaces, _ . or -'; return; }
+        function values() {
+            const v = {};
+            Object.keys(inputs).forEach((k) => { v[k] = inputs[k].value; });
+            return v;
+        }
+        let busy = false;
+        async function submit() {
+            if (busy) return;
+            const v = values();
+            const problem = cfg.validate ? cfg.validate(v) : '';
+            if (problem) { err.textContent = problem; return; }
+            if (cfg.check) { // talks to the server; the popup stays open if it returns an error text
+                busy = true;
+                err.textContent = 'Please wait...';
+                let p = '';
+                try { p = await cfg.check(v); } catch (e) { console.warn(e); p = 'Something went wrong. Try again.'; }
+                busy = false;
+                if (p) { err.textContent = p; return; }
+            }
             done(v);
         }
-        ok.addEventListener('click', submit);
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+        Object.keys(inputs).forEach((k) => {
+            inputs[k].addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+        });
 
-        box.append(title, info, input, err, ok);
-        if (allowCancel) {
+        const ok = document.createElement('button');
+        ok.textContent = cfg.submitText || 'Save';
+        ok.addEventListener('click', submit);
+        box.appendChild(ok);
+        if (cfg.allowCancel) {
             const cancel = document.createElement('button');
-            cancel.textContent = 'Cancel';
+            cancel.textContent = cfg.cancelText || 'Cancel';
             cancel.addEventListener('click', () => done(null));
-            box.append(cancel);
+            box.appendChild(cancel);
+        }
+        if (cfg.extra) {
+            const extra = document.createElement('button');
+            extra.className = 'link';
+            extra.textContent = cfg.extra;
+            extra.addEventListener('click', () => done(Object.assign({ __extra: true }, values())));
+            box.appendChild(document.createElement('br'));
+            box.appendChild(extra);
         }
         wrap.appendChild(box);
         document.body.appendChild(wrap);
-        input.focus();
+        inputs[cfg.fields[0].key].focus();
     });
 }
 
-async function setNameOnServer(name) {
+function checkName(v) { return NAME_RE.test(v.trim()) ? '' : 'Username: 3-16 letters, numbers, spaces, _ . or -'; }
+function checkNewPassword(p, p2) {
+    if (p.length < 6 || p.length > 72) return 'Password must be 6-72 characters.';
+    if (p !== p2) return 'The two passwords do not match.';
+    return '';
+}
+
+// ----- username -----
+async function setNameOnServer(name, password) {
     const old = localStorage.getItem('playerName');
     localStorage.setItem('playerName', name);
-    const status = await pushScore(false);
-    if (status === 'name_taken' || status === 'bad_name') { // roll back
+    const status = await pushScore(false, password);
+    if (status !== 'ok' && status !== 'too_fast') { // not saved online: undo
         if (old) localStorage.setItem('playerName', old); else localStorage.removeItem('playerName');
     }
     return status;
 }
 
-// Asks until the server accepts a name. first = can't be cancelled.
-async function chooseName(first, message) {
-    let msg = message || '';
+// Change your username (also used if yours gets taken)
+async function renameFlow(message, allowCancel) {
+    const v = await askForm({
+        title: 'Choose a username',
+        info: 'This is the name shown on the leaderboard and used to log in.',
+        fields: [{ key: 'name', placeholder: 'Username', maxLength: 16, value: localStorage.getItem('playerName') || '', autocomplete: 'username' }],
+        submitText: 'Save', allowCancel: allowCancel, message: message || '',
+        validate: (x) => checkName(x.name),
+        check: async (x) => {
+            const status = await setNameOnServer(x.name.trim(), null);
+            if (status === 'name_taken') return 'That username is taken. Try another one.';
+            if (status === 'bad_name') return 'That username is not allowed.';
+            reportSync(status);
+            return '';
+        },
+    });
+    if (!v) return false;
+    loadLeaderboard();
+    return true;
+}
+
+function changeName() {
+    if (nameModalOpen) return;
+    if (!localStorage.getItem('playerName')) { openAccount(); return; }
+    renameFlow('', true);
+}
+
+// ----- accounts: create one or log in -----
+async function doLogin(name, password) {
+    try {
+        const rows = await sbRpc('login', { p_name: name, p_password: password });
+        const r = rows && rows[0];
+        if (!r) return 'error';
+        if (r.status !== 'ok') return r.status; // 'bad_login' or 'locked'
+        if (rollCount > 0 && !confirm('This replaces the progress in this browser with the saved progress of ' + r.uname + '. Continue?')) return 'declined';
+        applyCloudSave(r.pid, r.uname, r.usave || {}); // reloads the page
+        return 'ok';
+    } catch (e) {
+        console.warn(e);
+        return 'error';
+    }
+}
+
+async function accountFlow(mode, message) {
+    let keepName = ''; // so switching screens or a wrong try doesn't make you retype your username
+    mode = mode || 'create';
     for (;;) {
-        const name = await askName(msg, !first, localStorage.getItem('playerName') || '');
-        if (!name) return false;
-        const status = await setNameOnServer(name);
-        if (status === 'name_taken') { msg = 'That username is taken. Try another one.'; continue; }
-        if (status === 'bad_name') { msg = 'That username is not allowed.'; continue; }
-        reportSync(status);
-        loadLeaderboard();
+        const creating = mode === 'create';
+        const nameField = { key: 'name', placeholder: 'Username', maxLength: 16, autocomplete: 'username', value: keepName };
+        const v = await askForm({
+            title: creating ? 'Create your account' : 'Log in',
+            info: creating
+                ? 'Pick a username for the leaderboard (3-16 letters, numbers, spaces, _ . -) and a password (6+ characters) so you can log in on other devices.'
+                : 'Enter your username and password to load your saved progress.',
+            fields: creating
+                ? [nameField,
+                   { key: 'pw', type: 'password', placeholder: 'Password', autocomplete: 'new-password' },
+                   { key: 'pw2', type: 'password', placeholder: 'Confirm password', autocomplete: 'new-password' }]
+                : [nameField, { key: 'pw', type: 'password', placeholder: 'Password', autocomplete: 'current-password' }],
+            submitText: creating ? 'Create Account' : 'Log In',
+            extra: creating ? 'I already have an account' : 'Create a new account instead',
+            allowCancel: true, cancelText: 'Not now', message: message || '',
+            validate: (x) => creating
+                ? (checkName(x.name) || checkNewPassword(x.pw, x.pw2))
+                : (x.name.trim() && x.pw ? '' : 'Enter your username and password.'),
+            check: async (x) => {
+                if (creating) {
+                    const status = await setNameOnServer(x.name.trim(), x.pw);
+                    if (status === 'ok') { localStorage.setItem('hasPw', '1'); reportSync(status); return ''; }
+                    return status === 'name_taken' ? 'That username is taken. Try another one (or log in if it is yours).'
+                        : status === 'bad_name' ? 'That username is not allowed.'
+                        : status === 'bad_password' ? 'Password must be 6-72 characters.'
+                        : status === 'too_fast' ? 'Please wait a few seconds and try again.'
+                        : 'Could not reach the server. Try again.';
+                }
+                const res = await doLogin(x.name.trim(), x.pw); // on success this reloads the page
+                if (res === 'ok') return '';
+                return res === 'locked' ? 'Too many wrong tries. Try again in 15 minutes.'
+                    : res === 'declined' ? 'Cancelled. The progress in this browser was not changed.'
+                    : res === 'error' ? 'Could not reach the server. Try again.'
+                    : 'Wrong username or password.';
+            },
+        });
+        if (!v) return false;
+        if (v.__extra) { keepName = v.name || ''; mode = creating ? 'login' : 'create'; message = ''; continue; }
+        if (creating) loadLeaderboard();
         return true;
     }
 }
 
-function changeName() {
-    if (!nameModalOpen) chooseName(false);
+function openAccount() {
+    if (nameModalOpen) return;
+    accountFlow(localStorage.getItem('playerName') ? 'login' : 'create');
+}
+
+async function changePassword() {
+    if (nameModalOpen) return;
+    if (!localStorage.getItem('playerName')) { showNotification('Create an account first (Log In / Create Account)'); return; }
+    const v = await askForm({
+        title: 'Set a password',
+        info: 'Leave "current password" empty if you have never set a password.',
+        fields: [
+            { key: 'old', type: 'password', placeholder: 'Current password (if you have one)', autocomplete: 'current-password' },
+            { key: 'pw', type: 'password', placeholder: 'New password', autocomplete: 'new-password' },
+            { key: 'pw2', type: 'password', placeholder: 'Confirm new password', autocomplete: 'new-password' },
+        ],
+        submitText: 'Save', allowCancel: true,
+        validate: (x) => checkNewPassword(x.pw, x.pw2),
+        check: async (x) => {
+            let status;
+            try {
+                status = await sbRpc('set_password', { p_id: getPlayerId(), p_new: x.pw, p_old: x.old || null });
+            } catch (e) {
+                console.warn(e);
+                return 'Could not reach the server. Try again.';
+            }
+            if (status === 'ok') return '';
+            if (status === 'wrong_password') return 'Your current password is wrong.';
+            if (status === 'no_account') return 'Your account is not saved online yet. Cancel and try again after the next auto save.';
+            return 'Password must be 6-72 characters.';
+        },
+    });
+    if (!v) return;
+    localStorage.setItem('hasPw', '1');
+    showNotification('Password saved');
+}
+
+async function logout() {
+    if (!localStorage.getItem('playerName')) { showNotification('You are not logged in'); return; }
+    if (localStorage.getItem('hasPw') !== '1') {
+        showNotification('Set a password first, or you could not get this progress back');
+        return;
+    }
+    if (!confirm('Log out? Your progress stays saved online and you can log back in with your password.')) return;
+    await pushScore(false); // one last save
+    blocked = true;
+    try {
+        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades',
+         'extraTiers', 'extraTierCosts', 'playerId', 'playerName', 'hasPw']
+            .forEach((k) => localStorage.removeItem(k));
+        RARITIES.forEach((r) => localStorage.removeItem(r.id + 'Rolled'));
+    } catch (e) {}
+    location.reload();
+}
+
+// Loads a saved game into this browser (after logging in), then reloads
+function applyCloudSave(id, name, s) {
+    blocked = true; // stops this page from saving over the loaded data
+    try {
+        localStorage.setItem('playerId', id);
+        localStorage.setItem('playerName', name);
+        localStorage.setItem('hasPw', '1');
+        localStorage.setItem('points', String(Number(s.points) || 0));
+        localStorage.setItem('rollCount', String(Number(s.rollCount) || 0));
+        localStorage.setItem('autoclick', String(Number(s.autoclick) || 0));
+        localStorage.setItem('luckLevel', String(Number(s.luckLevel) || 0));
+        localStorage.setItem('donWins', String(Number(s.donWins) || 0));
+        localStorage.setItem('achievements', JSON.stringify(Array.isArray(s.achievements) ? s.achievements : []));
+        localStorage.setItem('upgrades', JSON.stringify(Array.isArray(s.upgrades) ? s.upgrades : []));
+        const costs = Array.isArray(s.extraTierCosts)
+            ? s.extraTierCosts.map(Number).filter((c) => c > 0 && isFinite(c)).slice(0, MAX_EXTRA_TIERS) : [];
+        localStorage.setItem('extraTierCosts', JSON.stringify(costs));
+        localStorage.setItem('extraTiers', String(costs.length ? 0 : Math.min(Number(s.extraTiers) || 0, MAX_EXTRA_TIERS)));
+        const rolled = s.rolled || {};
+        RARITIES.forEach((r) => localStorage.setItem(r.id + 'Rolled', String(Number(rolled[r.id]) || 0)));
+    } catch (e) {
+        console.warn(e);
+    }
+    location.reload();
 }
 
 // ----- auto sync every 90 seconds -----
@@ -976,12 +1179,14 @@ function reportSync(status) {
 async function cloudTick() {
     if (blocked || nameModalOpen) return;
     if (!localStorage.getItem('playerName')) {
-        await chooseName(true); // first time: ask for a username (also saves right away)
+        if (askedThisSession) return;
+        askedThisSession = true;
+        await accountFlow('create'); // first time: create an account (or log in)
         return;
     }
     const status = await pushScore(false);
     if (status === 'name_taken') {
-        await chooseName(true, 'Your username was taken by someone else. Pick a new one.');
+        await renameFlow('Your username was taken by someone else. Pick a new one.', false);
         return;
     }
     reportSync(status);
@@ -1015,58 +1220,4 @@ async function loadLeaderboard() {
     }
 }
 
-// ----- save code: restore your progress on another device -----
-function copySaveCode() {
-    const box = document.getElementById('savecode');
-    if (!box) return;
-    box.select();
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(box.value).then(() => showNotification('Save code copied'), () => {});
-    } else {
-        document.execCommand('copy');
-        showNotification('Save code copied');
-    }
-}
-
-function applyCloudSave(code, name, s) {
-    blocked = true; // stops this page from saving over the loaded data
-    try {
-        localStorage.setItem('playerId', code);
-        localStorage.setItem('playerName', name);
-        localStorage.setItem('points', String(Number(s.points) || 0));
-        localStorage.setItem('rollCount', String(Number(s.rollCount) || 0));
-        localStorage.setItem('autoclick', String(Number(s.autoclick) || 0));
-        localStorage.setItem('luckLevel', String(Number(s.luckLevel) || 0));
-        localStorage.setItem('donWins', String(Number(s.donWins) || 0));
-        const costs = Array.isArray(s.extraTierCosts)
-            ? s.extraTierCosts.map(Number).filter((c) => c > 0 && isFinite(c)).slice(0, MAX_EXTRA_TIERS) : [];
-        localStorage.setItem('extraTierCosts', JSON.stringify(costs));
-        localStorage.setItem('extraTiers', String(costs.length ? 0 : Math.min(Number(s.extraTiers) || 0, MAX_EXTRA_TIERS)));
-        localStorage.setItem('achievements', JSON.stringify(Array.isArray(s.achievements) ? s.achievements : []));
-        localStorage.setItem('upgrades', JSON.stringify(Array.isArray(s.upgrades) ? s.upgrades : []));
-        const rolled = s.rolled || {};
-        RARITIES.forEach((r) => localStorage.setItem(r.id + 'Rolled', String(Number(rolled[r.id]) || 0)));
-    } catch (e) {
-        console.warn(e);
-    }
-    location.reload();
-}
-
-async function loadFromCode() {
-    const input = document.getElementById('loadcode');
-    const code = (input ? input.value : '').trim().toLowerCase();
-    if (!UUID_RE.test(code)) { showNotification('That is not a valid save code'); return; }
-    try {
-        const rows = await sbRpc('get_save', { p_id: code });
-        if (!rows || !rows.length || !rows[0].save) { showNotification('No save found for that code'); return; }
-        if (!confirm('This replaces the progress in this browser with the online save. Continue?')) return;
-        applyCloudSave(code, rows[0].name, rows[0].save);
-    } catch (e) {
-        console.warn(e);
-        showNotification('Could not load that save');
-    }
-}
-
-const saveCodeEl = document.getElementById('savecode');
-if (saveCodeEl) saveCodeEl.value = getPlayerId();
 loadLeaderboard();
