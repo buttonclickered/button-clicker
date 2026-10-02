@@ -1,9 +1,24 @@
-/* Simple white page */
+/* ===== Black theme with a little red / blue / green glow ===== */
+:root {
+    --bg: #07070b;
+    --panel: #0e0e15;
+    --line: #23232f;
+    --text: #e6e6ee;
+    --dim: #8a8a99;
+    --red: #ff3b4e;
+    --blue: #3b9bff;
+    --green: #3bff8a;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    margin: 20px;
-    padding: 0;
-    background: #fff;
-    color: #000;
+    margin: 0;
+    padding: 14px;
+    background: var(--bg);
+    color: var(--text);
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
 }
@@ -13,93 +28,262 @@ h1, h2, p {
 }
 
 h2 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: normal;
 }
 
-/* Buttons */
-button {
-    font-family: inherit;
-    font-size: 1rem;
-    padding: 8px 14px;
-    color: #000;
-    background: #fff;
-    border: 1px solid #000;
-    cursor: pointer;
+/* ===== Layout: left menu | game | right upgrades ===== */
+#layout {
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr) 380px;
+    gap: 16px;
+    align-items: start;
+    max-width: 1700px;
+    margin: 0 auto;
 }
 
-button:hover {
-    background: #eee;
+#leftbar,
+#rightbar {
+    position: sticky;
+    top: 14px;
+    max-height: calc(100vh - 28px);
+    overflow-y: auto;
+    padding: 12px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
 }
 
-#roll {
-    display: block;
-    margin: 15px auto 8px;
-    padding: 14px 40px;
-    font-size: 1.5rem;
+#leftbar {
+    border-color: #1d3557;
+    box-shadow: 0 0 16px rgba(59, 155, 255, 0.22);
 }
 
-#result {
-    display: block;
-    margin: 8px auto 15px;
-    min-width: 240px;
-    border-style: dashed;
-    cursor: default;
+#rightbar {
+    border-color: #1b4a31;
+    box-shadow: 0 0 16px rgba(59, 255, 138, 0.18);
 }
 
-#result:hover {
-    background: #fff;
+#center {
+    min-width: 0;
+    padding: 12px;
 }
 
-#money {
-    font-size: 1.8rem;
+/* Slim dark scrollbars */
+#leftbar, #rightbar {
+    scrollbar-width: thin;
+    scrollbar-color: #2a2a38 transparent;
+}
+
+#leftbar::-webkit-scrollbar,
+#rightbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+#leftbar::-webkit-scrollbar-thumb,
+#rightbar::-webkit-scrollbar-thumb {
+    background: #2a2a38;
+    border-radius: 4px;
+}
+
+/* ===== Headings ===== */
+#title {
+    margin: 10px 0;
+    font-size: 3rem;
+    letter-spacing: 3px;
+    color: #fff;
+    text-shadow: 0 0 10px var(--blue), 0 0 26px rgba(255, 59, 78, 0.45);
 }
 
 #rolltitle,
 #amountrolleds,
 #achtitle,
 #upgradestitle,
-#shoptitle {
-    margin-top: 30px;
+#shoptitle,
+#lbtitle {
+    margin: 18px 0 8px;
+    font-size: 1.3rem;
+    color: #fff;
 }
 
+#rolltitle, #upgradestitle {
+    margin-top: 2px;
+}
+
+#leftbar h1 {
+    text-shadow: 0 0 8px rgba(59, 155, 255, 0.6);
+}
+
+#rightbar h1 {
+    text-shadow: 0 0 8px rgba(59, 255, 138, 0.5);
+}
+
+#achtitle,
+#lbtitle {
+    text-shadow: 0 0 8px rgba(255, 59, 78, 0.5);
+}
+
+/* ===== Buttons ===== */
+button {
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 8px 14px;
+    color: var(--text);
+    background: #12121b;
+    border: 1px solid #34344a;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s, background 0.15s;
+}
+
+button:hover {
+    background: #181826;
+    border-color: var(--blue);
+    box-shadow: 0 0 10px rgba(59, 155, 255, 0.45);
+}
+
+#roll {
+    display: block;
+    margin: 14px auto 8px;
+    padding: 16px 52px;
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #fff;
+    background: #0d1a30;
+    border: 2px solid var(--blue);
+    box-shadow: 0 0 16px rgba(59, 155, 255, 0.5);
+}
+
+#roll:hover {
+    background: #11224a;
+    box-shadow: 0 0 26px rgba(59, 155, 255, 0.8);
+}
+
+#roll:active {
+    transform: scale(0.97);
+}
+
+#roll:disabled {
+    cursor: wait;
+}
+
+#result {
+    display: block;
+    margin: 8px auto 14px;
+    min-width: 250px;
+    color: var(--green);
+    background: transparent;
+    border: 1px dashed #1b6b3f;
+    text-shadow: 0 0 8px rgba(59, 255, 138, 0.55);
+    cursor: default;
+}
+
+#result:hover {
+    background: transparent;
+    border-color: #1b6b3f;
+    box-shadow: none;
+}
+
+/* Double Or Nothing: red */
+button[onclick="don()"] {
+    border-color: #6b1b25;
+    color: #ff8a96;
+}
+
+button[onclick="don()"]:hover {
+    border-color: var(--red);
+    box-shadow: 0 0 12px rgba(255, 59, 78, 0.55);
+}
+
+/* ===== Stats ===== */
+#money {
+    font-size: 2rem;
+    color: var(--green);
+    text-shadow: 0 0 10px rgba(59, 255, 138, 0.6);
+}
+
+#rolleds, #CPS, #rarest, #luck, #bonus, #rollinfo {
+    color: var(--dim);
+}
+
+#luckbtn {
+    border-color: #1b6b3f;
+}
+
+#luckbtn:hover {
+    border-color: var(--green);
+    box-shadow: 0 0 12px rgba(59, 255, 138, 0.5);
+}
+
+/* ===== Lists in the left menu ===== */
 .rolls,
 .amountrolled {
     margin: 3px 0;
-    font-size: 1rem;
+    padding: 4px 8px;
+    font-size: 0.9rem;
     font-weight: normal;
+    text-align: left;
+    color: #cfcfdc;
+    background: #12121b;
+    border-radius: 6px;
 }
 
-/* Upgrade shop */
+.rolls {
+    border-left: 2px solid var(--blue);
+}
+
+.amountrolled {
+    border-left: 2px solid var(--green);
+}
+
+/* ===== Upgrades in the right menu ===== */
 .upgrade {
     display: block;
     width: 100%;
-    max-width: 420px;
-    margin: 6px auto;
+    margin: 6px 0;
+    font-size: 0.9rem;
+    text-align: left;
 }
 
-/* Can't afford it: greyed out */
+#rightbar .upgrade:hover {
+    border-color: var(--green);
+    box-shadow: 0 0 10px rgba(59, 255, 138, 0.45);
+}
+
+/* Can't afford it (or locked): greyed out */
 .upgrade.cant,
 .upgrade.cant:hover {
-    color: #999;
-    background: #efefef;
-    border-color: #ccc;
+    color: #5c5c6b;
+    background: #0d0d13;
+    border-color: #1e1e28;
+    box-shadow: none;
     cursor: not-allowed;
 }
 
-/* Achievements */
+/* Owned upgrades */
+.upgrade.owned,
+.upgrade.owned:hover {
+    color: var(--green);
+    background: #0b1a12;
+    border-color: #1b6b3f;
+    box-shadow: 0 0 8px rgba(59, 255, 138, 0.3);
+    cursor: default;
+}
+
+/* ===== Achievements ===== */
 #achievements {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 6px;
-    max-width: 900px;
+    gap: 8px;
     margin: 10px auto;
 }
 
 .ach {
     padding: 8px;
-    border: 1px solid #ccc;
-    color: #aaa;
+    color: #555566;
+    background: #0e0e15;
+    border: 1px solid var(--line);
+    border-radius: 8px;
 }
 
 .ach b {
@@ -111,37 +295,81 @@ button:hover {
 }
 
 .ach.done {
-    border-color: #000;
-    color: #000;
+    color: var(--text);
+    border-color: var(--red);
+    box-shadow: 0 0 10px rgba(255, 59, 78, 0.35);
 }
 
-#resetbtn {
-    display: block;
-    margin: 40px auto 20px;
+.ach.done b {
+    color: #fff;
 }
 
-/* Owned upgrades */
-.upgrade.owned,
-.upgrade.owned:hover {
-    color: #060;
-    background: #f4fff4;
-    border-color: #060;
-    cursor: default;
-}
-
-/* Leaderboard */
-#lbtitle {
-    margin-top: 30px;
-}
-
+/* ===== Leaderboard ===== */
 input {
     font: inherit;
-    padding: 7px;
-    border: 1px solid #000;
+    padding: 8px;
+    color: var(--text);
+    background: #12121b;
+    border: 1px solid #34344a;
+    border-radius: 8px;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 10px rgba(59, 155, 255, 0.45);
 }
 
 #leaderboard {
-    max-width: 420px;
-    margin: 10px auto;
+    max-width: 440px;
+    margin: 12px auto;
+    padding-left: 28px;
     text-align: left;
+    color: #cfcfdc;
+}
+
+#leaderboard li {
+    margin: 4px 0;
+}
+
+/* ===== Reset ===== */
+#resetbtn {
+    display: block;
+    margin: 36px auto 10px;
+    color: #ff8a96;
+    border-color: #6b1b25;
+}
+
+#resetbtn:hover {
+    border-color: var(--red);
+    box-shadow: 0 0 12px rgba(255, 59, 78, 0.55);
+}
+
+/* ===== Popups made by the script ===== */
+#notification {
+    background: #0e0e15 !important;
+    color: var(--text) !important;
+    border: 1px solid var(--green);
+    box-shadow: 0 0 14px rgba(59, 255, 138, 0.5);
+}
+
+/* ===== Smaller screens: stack everything ===== */
+@media (max-width: 1100px) {
+    #layout {
+        grid-template-columns: 1fr;
+    }
+
+    #leftbar,
+    #rightbar {
+        position: static;
+        max-height: 60vh;
+    }
+}
+
+/* Buttons in the middle column (Double Or Nothing, Luck) stay normal size */
+#center .upgrade {
+    width: auto;
+    max-width: 440px;
+    margin: 8px auto;
+    text-align: center;
 }

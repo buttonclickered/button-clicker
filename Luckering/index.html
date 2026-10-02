@@ -8,24 +8,8 @@
     <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
-
-V10
-<button class="upgrade" style="transform: translateX(0);" onclick="don()"> Double Or Nothing (ALL)</button>
-
-<h1 id="title">Luckering</h1>
-
-<button id="roll" onclick="roll()">Roll</button>
-<button id="result">You got:</button>
-
-<h1 id="money">Points:</h1>
-<h2 id="rolleds">Rolls: 0</h2>
-<h2 id="CPS">Auto Rolls Per Second: 0</h2>
-<h2 id="rarest">Rarest Roll: None</h2>
-<h2 id="luck">Luck: x1.0</h2>
-<h2 id="bonus">Points Multiplier: x1.00</h2>
-<h2 id="rollinfo">Rolls per click: 1 | Cooldown: 1.0s</h2>
-<button class="upgrade" id="luckbtn" onclick="buyluck()">Luck +10%</button>
-
+<div id="layout">
+<aside id="leftbar">
 <h1 id="rolltitle">Possible Rolls</h1>
 <p class="rolls">Common - 1 in 2 (1 point)</p>
 <p class="rolls">Uncommon - 1 in 4 (2 points)</p>
@@ -130,9 +114,41 @@ V10
 <h2 class="amountrolled" id="beyondrolled">Beyond: 0</h2>
 <h2 class="amountrolled" id="finalityrolled">Finality: 0</h2>
 
+</aside>
+
+<main id="center">
+
+V10
+<button class="upgrade" style="transform: translateX(0);" onclick="don()"> Double Or Nothing (ALL)</button>
+
+<h1 id="title">Luckering</h1>
+
+<button id="roll" onclick="roll()">Roll</button>
+<button id="result">You got:</button>
+
+<h1 id="money">Points:</h1>
+<h2 id="rolleds">Rolls: 0</h2>
+<h2 id="CPS">Auto Rolls Per Second: 0</h2>
+<h2 id="rarest">Rarest Roll: None</h2>
+<h2 id="luck">Luck: x1.0</h2>
+<h2 id="bonus">Points Multiplier: x1.00</h2>
+<h2 id="rollinfo">Rolls per click: 1 | Cooldown: 1.0s</h2>
+<button class="upgrade" id="luckbtn" onclick="buyluck()">Luck +10%</button>
+
 <h1 id="achtitle">Achievements</h1>
 <div id="achievements"></div>
 
+<h1 id="lbtitle">Leaderboard</h1>
+<input id="playername" maxlength="16" placeholder="Nickname">
+<button onclick="submitScore()">Submit Score</button>
+<button onclick="loadLeaderboard()">Refresh</button>
+<ol id="leaderboard"></ol>
+
+<button id="resetbtn" onclick="hardReset()">Reset Save</button>
+
+</main>
+
+<aside id="rightbar">
 <h1 id="upgradestitle">Upgrades</h1>
 <div id="upgrades"></div>
 
@@ -190,13 +206,8 @@ V10
 <button class="upgrade" id="as1073741824000000" onclick="addauto(1073741824000000, 536870912000000000)">1Qa CPS Autoclicker (512Qa points)</button>
 <button class="upgrade" id="as2147483648000000" onclick="addauto(2147483648000000, 1073741824000000000)">2Qa CPS Autoclicker (1Qa points)</button>
 
-<h1 id="lbtitle">Leaderboard</h1>
-<input id="playername" maxlength="16" placeholder="Nickname">
-<button onclick="submitScore()">Submit Score</button>
-<button onclick="loadLeaderboard()">Refresh</button>
-<ol id="leaderboard"></ol>
-
-<button id="resetbtn" onclick="hardReset()">Reset Save</button>
+</aside>
+</div>
 
 <script src="rng.js"></script>
 
