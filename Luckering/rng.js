@@ -693,7 +693,7 @@ function addShopTier(silent, savedCost) {
 
     // Keep early tiers growing fast, but make the very late-game step feel sane.
     // Example: 1qi -> 150qi instead of suddenly dropping to a smaller tier.
-    const multiplier = top.amount >= 1e24 ? 1.6 : 2;
+    const multiplier = top.amount >= 1e24 ? 1.1 : 2;
     const amount = top.amount * multiplier;
     let cost = savedCost;
     if (cost === undefined) {
