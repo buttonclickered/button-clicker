@@ -105,7 +105,7 @@ let bonusLuck = 0;       // extra luck added
 let luckMulti = 1;       // luck multiplier
 let donChance = 0.5;     // Double Or Nothing win chance
 let achPct = 0.02;       // points bonus per achievement
-const extraCosts = [];   // prices of the extra autoclicker tiers (a new one appears when you buy the top one)
+const extraList = [];    // [rolls per second, price] of the extra autoclicker tiers (a new one appears when you buy the top one)
 let autoCarry = 0;       // leftover fraction of auto rolls
 
 let lastAutoSaveTime = Date.now();
@@ -400,7 +400,7 @@ function hardReset() {
     if (!confirm('Reset ALL progress? This cannot be undone.')) return;
     blocked = true; // stops the page from saving again before the reload
     try {
-        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades', 'extraTiers', 'extraTierCosts']
+        ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades', 'extraTiers', 'extraTierCosts', 'extraTierList']
             .forEach((k) => localStorage.removeItem(k));
         RARITIES.forEach((r) => localStorage.removeItem(r.id + 'Rolled'));
     } catch (e) {}
@@ -658,9 +658,10 @@ function autoRollTick() {
 
 // ===== Upgrades =====
 // ===== Endless autoclickers =====
-// Buying the top autoclicker unlocks a new one with a gentler late-game scale.
-// Lower tiers still grow quickly, but once you're in the 1q+ range the jump is
-// controlled so the next tier stays near the same scale instead of dropping backward.
+// Buying the top autoclicker unlocks a new one that DOUBLES your total auto rolls
+// (at least double the old top one) for about TIER_WAIT_SECONDS of your current
+// income. So every new tier takes a few minutes to earn and is worth it, like the
+// first autoclickers were.
 const MAX_EXTRA_TIERS = 900; // after this the shop ends (numbers get too big to hold)
 const TIER_WAIT_SECONDS = 300; // 5 minutes. Make it bigger for a bigger grind.
 
@@ -682,23 +683,24 @@ function incomePerSecond() {
     return autoclick * autoMult * avgPointsPerRoll() * pointMult();
 }
 
-// savedCost is given when rebuilding tiers from a save; leave it out for a brand new tier
-function addShopTier(silent, savedCost) {
+// saved = [amount, cost] when rebuilding tiers from a save; leave it out for a brand new tier
+function addShopTier(silent, saved) {
     const top = SHOP[SHOP.length - 1];
     if (!top) return;
-    if (extraCosts.length >= MAX_EXTRA_TIERS) {
-        if (savedCost === undefined) showNotification('That was the very last autoclicker!');
+    if (extraList.length >= MAX_EXTRA_TIERS) {
+        if (!saved) showNotification('That was the very last autoclicker!');
         return;
     }
-
-    // Keep early tiers growing fast, but make the very late-game step feel sane.
-    // Example: 1qi -> 150qi instead of suddenly dropping to a smaller tier.
-    const multiplier = top.amount >= 1e24 ? 1.1 : 2;
-    const amount = top.amount * multiplier;
-    let cost = savedCost;
-    if (cost === undefined) {
-        cost = Math.max(top.cost * multiplier, incomePerSecond() * TIER_WAIT_SECONDS);
-        cost = Number(cost.toPrecision(4)); // short number, easy to save
+    let amount, cost;
+    if (saved) {
+        amount = saved[0];
+        cost = saved[1];
+    } else {
+        // doubles your total auto rolls, for about 5 minutes of income (never less than double the old top one)
+        amount = Math.max(top.amount * 2, autoclick);
+        cost = Math.max(top.cost * 2, incomePerSecond() * TIER_WAIT_SECONDS);
+        amount = Number(amount.toPrecision(4)); // short numbers, easy to save
+        cost = Number(cost.toPrecision(4));
     }
     if (!Number.isFinite(amount) || !Number.isFinite(cost)) return;
     const b = document.createElement('button');
@@ -707,20 +709,30 @@ function addShopTier(silent, savedCost) {
     b.addEventListener('click', () => addauto(amount, cost));
     top.el.insertAdjacentElement('afterend', b);
     SHOP.push({ el: b, amount: amount, cost: cost });
-    extraCosts.push(cost);
+    extraList.push([amount, cost]);
     if (!silent) saveState();
 }
 
 function restoreTiers() {
+    const top = () => SHOP[SHOP.length - 1];
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem('extraTierList') || '[]'); } catch (e) {}
+    if (Array.isArray(list) && list.length) {
+        list.slice(0, MAX_EXTRA_TIERS).forEach((p) => {
+            if (Array.isArray(p) && Number(p[0]) > 0 && Number(p[1]) > 0) addShopTier(true, [Number(p[0]), Number(p[1])]);
+        });
+        return;
+    }
+    // older saves: only the prices were saved (each one rolled double the one before)
     let costs = [];
     try { costs = JSON.parse(localStorage.getItem('extraTierCosts') || '[]'); } catch (e) {}
     if (Array.isArray(costs) && costs.length) {
-        costs.slice(0, MAX_EXTRA_TIERS).forEach((c) => { if (Number(c) > 0) addShopTier(true, Number(c)); });
-    } else {
-        // older saves only remembered how many tiers there were (each double the last)
-        const n = Math.min(Math.floor(Number(localStorage.getItem('extraTiers')) || 0), MAX_EXTRA_TIERS);
-        for (let k = 0; k < n; k++) addShopTier(true, SHOP[SHOP.length - 1].cost * 2);
+        costs.slice(0, MAX_EXTRA_TIERS).forEach((c) => { if (Number(c) > 0) addShopTier(true, [top().amount * 2, Number(c)]); });
+        return;
     }
+    // even older saves: only a number of tiers (each double the last)
+    const n = Math.min(Math.floor(Number(localStorage.getItem('extraTiers')) || 0), MAX_EXTRA_TIERS);
+    for (let k = 0; k < n; k++) addShopTier(true, [top().amount * 2, top().cost * 2]);
 }
 
 function addauto(amount, cost) {
@@ -768,7 +780,9 @@ function saveState() {
         localStorage.setItem('donWins', String(donWins));
         localStorage.setItem('achievements', JSON.stringify(unlocked));
         localStorage.setItem('upgrades', JSON.stringify(ownedUp));
-        localStorage.setItem('extraTierCosts', JSON.stringify(extraCosts));
+        localStorage.setItem('extraTierList', JSON.stringify(extraList));
+        localStorage.removeItem('extraTierCosts');
+        localStorage.removeItem('extraTiers');
         RARITIES.forEach((r) => {
             localStorage.setItem(r.id + 'Rolled', String(r.rolled));
         });
@@ -864,7 +878,7 @@ function buildSave() {
     return {
         points: safeNum(points), rollCount: safeNum(rollCount), autoclick: safeNum(autoclick),
         luckLevel: luckLevel, donWins: donWins, achievements: unlocked, upgrades: ownedUp,
-        extraTierCosts: extraCosts.slice(), rolled: rolled,
+        extraTierList: extraList.slice(), rolled: rolled,
     };
 }
 
@@ -1139,7 +1153,7 @@ async function logout() {
     blocked = true;
     try {
         ['points', 'rollCount', 'autoclick', 'luckLevel', 'donWins', 'achievements', 'upgrades',
-         'extraTiers', 'extraTierCosts', 'playerId', 'playerName', 'hasPw']
+         'extraTiers', 'extraTierCosts', 'extraTierList', 'playerId', 'playerName', 'hasPw']
             .forEach((k) => localStorage.removeItem(k));
         RARITIES.forEach((r) => localStorage.removeItem(r.id + 'Rolled'));
     } catch (e) {}
@@ -1160,10 +1174,14 @@ function applyCloudSave(id, name, s) {
         localStorage.setItem('donWins', String(Number(s.donWins) || 0));
         localStorage.setItem('achievements', JSON.stringify(Array.isArray(s.achievements) ? s.achievements : []));
         localStorage.setItem('upgrades', JSON.stringify(Array.isArray(s.upgrades) ? s.upgrades : []));
-        const costs = Array.isArray(s.extraTierCosts)
+        const list = Array.isArray(s.extraTierList)
+            ? s.extraTierList.filter((p) => Array.isArray(p) && p[0] > 0 && p[1] > 0 && isFinite(p[0]) && isFinite(p[1]))
+                .map((p) => [Number(p[0]), Number(p[1])]).slice(0, MAX_EXTRA_TIERS) : [];
+        const costs = (!list.length && Array.isArray(s.extraTierCosts))
             ? s.extraTierCosts.map(Number).filter((c) => c > 0 && isFinite(c)).slice(0, MAX_EXTRA_TIERS) : [];
+        localStorage.setItem('extraTierList', JSON.stringify(list));
         localStorage.setItem('extraTierCosts', JSON.stringify(costs));
-        localStorage.setItem('extraTiers', String(costs.length ? 0 : Math.min(Number(s.extraTiers) || 0, MAX_EXTRA_TIERS)));
+        localStorage.setItem('extraTiers', String((list.length || costs.length) ? 0 : Math.min(Number(s.extraTiers) || 0, MAX_EXTRA_TIERS)));
         const rolled = s.rolled || {};
         RARITIES.forEach((r) => localStorage.setItem(r.id + 'Rolled', String(Number(rolled[r.id]) || 0)));
     } catch (e) {
