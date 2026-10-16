@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Missing work checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1ec;
+    --panel: #ffffff;
+    --ink: #1d2a2e;
+    --muted: #5d6b6f;
+    --line: #d5dcd6;
+    --accent: #0f5c5c;
+    --accent-ink: #ffffff;
+    --bad: #b3261e;
+    --good: #2e7d32;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 18px 64px; }
+  h1 { font-size: clamp(2rem, 6vw, 3rem); font-weight: 800; line-height: 1.05; margin: 0 0 8px; letter-spacing: -0.02em; }
+  h2 { font-size: 1.25rem; margin: 40px 0 12px; }
+  p.lead { color: var(--muted); margin: 0 0 20px; max-width: 56ch; }
+  button, select {
+    font: inherit; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink); padding: 9px 14px; cursor: pointer;
+  }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid #f2b705; outline-offset: 2px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; margin: 18px 0 0; }
+  .controls label { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: .95rem; }
+  .course { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+  .course-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .course-name { font-weight: 600; }
+  .pct { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; }
+  .bar { position: relative; height: 10px; background: #e3e8e4; border-radius: 5px; margin: 10px 0 8px; overflow: hidden; }
+  .bar .potential { position: absolute; inset: 0 auto 0 0; background: #9cc9c4; }
+  .bar .current { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+  .meta { color: var(--muted); font-size: .9rem; }
+  .item { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; background: var(--panel);
+          border: 1px solid var(--line); border-left: 5px solid var(--bad); border-radius: 10px; padding: 13px 16px; margin-bottom: 10px; }
+  .item.nopoints { border-left-color: var(--line); }
+  .item a { color: var(--ink); font-weight: 600; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .gain { font-weight: 800; color: var(--good); font-size: 1.25rem; text-align: right; }
+  .sub { color: var(--muted); font-size: .9rem; grid-column: 1 / -1; }
+  .msg { padding: 14px 16px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
+  .msg.error { border-color: var(--bad); color: var(--bad); }
+  .hidden { display: none; }
+  .note { color: var(--muted); font-size: .85rem; margin-top: 32px; max-width: 62ch; }
+  @media (prefers-reduced-motion: no-preference) { .bar span { transition: width .4s ease; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Missing work checker</h1>
+  <p class="lead">Connect Google Classroom to see which missing assignments are pulling your grades down, ranked by how much each one would raise your average.</p>
+
+  <button id="connect" class="primary">Connect Google Classroom</button>
+
+  <div id="controls" class="controls hidden">
+    <label>If I score
+      <select id="target">
+        <option value="1">100%</option>
+        <option value="0.9">90%</option>
+        <option value="0.8">80%</option>
+        <option value="0.7">70%</option>
+      </select>
+      on a missing assignment
+    </label>
+    <label><input type="checkbox" id="countMissing" checked> Count missing work as 0 in my average</label>
+    <button id="refresh">Refresh</button>
+  </div>
+
+  <div id="status" class="msg hidden" role="status"></div>
+  <div id="results" class="hidden">
+    <h2>Your classes</h2>
+    <div id="courses"></div>
+    <h2>Missing work, biggest impact first</h2>
+    <div id="missing"></div>
+  </div>
+
+  <p class="note">Everything runs in your browser. Your Classroom data goes straight from Google to this page and is never sent to any other server. Averages are calculated from points only, so if a teacher uses weighted categories, the number here can differ from what Classroom shows.</p>
+</main>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+// ====== SETUP: paste your OAuth Client ID here (Google Cloud Console > Credentials) ======
+const CLIENT_ID = "PASTE_YOUR_CLIENT_ID.apps.googleusercontent.com";
+// =========================================================================================
+
+const SCOPES = [
+  "https://www.googleapis.com/auth/classroom.courses.readonly",
+  "https://www.googleapis.com/auth/classroom.coursework.me.readonly",
+  "https://www.googleapis.com/auth/classroom.student-submissions.me.readonly"
+].join(" ");
+const API = "https://classroom.googleapis.com/v1";
+
+let tokenClient = null;
+let accessToken = null;
+let data = null; // { courses: [{course, work:[...]}] }
+
+const $ = id => document.getElementById(id);
+
+function setStatus(text, isError) {
+  const el = $("status");
+  el.textContent = text;
+  el.className = "msg" + (isError ? " error" : "");
+  if (!text) el.className = "msg hidden";
+}
+
+function initAuth() {
+  if (!window.google || !google.accounts) { setTimeout(initAuth, 200); return; }
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: resp => {
+      if (resp.error) {
+        setStatus("Google sign-in failed: " + resp.error + ". If you see an 'app blocked' screen, your school may restrict third-party apps.", true);
+        return;
+      }
+      accessToken = resp.access_token;
+      $("connect").classList.add("hidden");
+      $("controls").classList.remove("hidden");
+      load();
+    }
+  });
+}
+
+async function api(path, params = {}) {
+  const items = [];
+  let pageToken;
+  do {
+    const qs = new URLSearchParams({ ...params, ...(pageToken ? { pageToken } : {}) });
+    const res = await fetch(`${API}${path}?${qs}`, { headers: { Authorization: "Bearer " + accessToken } });
+    if (!res.ok) {
+      let detail = "";
+      try { detail = (await res.json()).error.message; } catch (e) {}
+      const err = new Error(detail || res.statusText); err.status = res.status; throw err;
+    }
+    const json = await res.json();
+    const key = Object.keys(json).find(k => Array.isArray(json[k]));
+    if (key) items.push(...json[key]);
+    pageToken = json.nextPageToken;
+  } while (pageToken);
+  return items;
+}
+
+function dueMs(w) {
+  if (!w.dueDate) return null;
+  const t = w.dueTime || {};
+  return Date.UTC(w.dueDate.year, w.dueDate.month - 1, w.dueDate.day, t.hours ?? 23, t.minutes ?? 59);
+}
+
+async function load() {
+  setStatus("Loading your classes…");
+  $("results").classList.add("hidden");
+  try {
+    const courses = await api("/courses", { studentId: "me", courseStates: "ACTIVE" });
+    if (!courses.length) { setStatus("No active classes found on this account."); return; }
+
+    const perCourse = await Promise.all(courses.map(async course => {
+      const [work, subs] = await Promise.all([
+        api(`/courses/${course.id}/courseWork`),
+        api(`/courses/${course.id}/courseWork/-/studentSubmissions`, { userId: "me" })
+      ]);
+      const subByWork = new Map(subs.map(s => [s.courseWorkId, s]));
+      const items = work
+        .filter(w => w.workType !== "MATERIAL")
+        .map(w => {
+          const s = subByWork.get(w.id) || {};
+          const state = s.state || "NEW";
+          const graded = typeof s.assignedGrade === "number";
+          const submitted = state === "TURNED_IN" || state === "RETURNED";
+          const due = dueMs(w);
+          const pastDue = due !== null && due < Date.now();
+          const missing = !graded && !submitted && pastDue;
+          return {
+            id: w.id, title: w.title, link: w.alternateLink,
+            max: typeof w.maxPoints === "number" ? w.maxPoints : 0,
+            grade: graded ? s.assignedGrade : null,
+            graded, submitted, missing, due
+          };
+        });
+      return { course, items };
+    }));
+
+    data = perCourse;
+    setStatus("");
+    render();
+  } catch (e) {
+    if (e.status === 401) {
+      setStatus("Your Google session expired. Press Connect again.", true);
+      $("connect").classList.remove("hidden");
+    } else if (e.status === 403) {
+      setStatus("Google denied access: " + e.message + ". Make sure the Classroom API is enabled in your Cloud project and that your school allows this app.", true);
+    } else {
+      setStatus("Something went wrong: " + e.message, true);
+    }
+  }
+}
+
+function render() {
+  if (!data) return;
+  const t = parseFloat($("target").value);
+  const countMissing = $("countMissing").checked;
+  const coursesEl = $("courses"), missingEl = $("missing");
+  coursesEl.textContent = ""; missingEl.textContent = "";
+  const ranked = [];
+
+  data.forEach(({ course, items }) => {
+    const gradedItems = items.filter(i => i.graded && i.max > 0);
+    const missingItems = items.filter(i => i.missing);
+    const missingPts = missingItems.filter(i => i.max > 0);
+
+    const earned = gradedItems.reduce((a, i) => a + i.grade, 0);
+    const possibleGraded = gradedItems.reduce((a, i) => a + i.max, 0);
+    const missingTotal = missingPts.reduce((a, i) => a + i.max, 0);
+    const possible = possibleGraded + (countMissing ? missingTotal : 0);
+    const avg = possible ? earned / possible * 100 : null;
+
+    // Best case: every missing assignment scored at target %
+    const bestEarned = earned + missingTotal * t;
+    const bestPossible = possibleGraded + missingTotal;
+    const best = bestPossible ? bestEarned / bestPossible * 100 : null;
+
+    missingItems.forEach(i => {
+      let gain = null;
+      if (i.max > 0 && avg !== null) {
+        const newAvg = countMissing
+          ? (earned + i.max * t) / possible * 100
+          : (earned + i.max * t) / (possible + i.max) * 100;
+        gain = newAvg - avg;
+      }
+      ranked.push({ ...i, courseName: course.name, gain });
+    });
+
+    const card = document.createElement("div");
+    card.className = "course";
+    const head = document.createElement("div"); head.className = "course-head";
+    const name = document.createElement("span"); name.className = "course-name"; name.textContent = course.name;
+    const pct = document.createElement("span"); pct.className = "pct";
+    pct.textContent = avg === null ? "No grades yet" : avg.toFixed(1) + "%";
+    head.append(name, pct);
+    const bar = document.createElement("div"); bar.className = "bar";
+    bar.innerHTML = '<span class="potential"></span><span class="current"></span>';
+    bar.children[0].style.width = Math.min(100, best ?? 0) + "%";
+    bar.children[1].style.width = Math.min(100, avg ?? 0) + "%";
+    const meta = document.createElement("div"); meta.className = "meta";
+    meta.textContent = missingItems.length
+      ? `${missingItems.length} missing. Turning them all in at ${Math.round(t * 100)}% would bring this to about ${best === null ? "?" : best.toFixed(1)}%.`
+      : "Nothing missing.";
+    card.append(head, bar, meta);
+    coursesEl.append(card);
+  });
+
+  ranked.sort((a, b) => (b.gain ?? -1) - (a.gain ?? -1));
+  if (!ranked.length) {
+    const ok = document.createElement("div"); ok.className = "msg";
+    ok.textContent = "No missing work found. Nice.";
+    missingEl.append(ok);
+  }
+  ranked.forEach(i => {
+    const row = document.createElement("div");
+    row.className = "item" + (i.max > 0 ? "" : " nopoints");
+    const a = document.createElement("a"); a.href = i.link; a.target = "_blank"; a.rel = "noopener"; a.textContent = i.title;
+    const gain = document.createElement("span"); gain.className = "gain";
+    gain.textContent = i.gain === null ? "—" : "+" + i.gain.toFixed(1) + "%";
+    const sub = document.createElement("span"); sub.className = "sub";
+    const due = i.due ? "due " + new Date(i.due).toLocaleDateString() : "";
+    sub.textContent = [i.courseName, i.max > 0 ? i.max + " points" : "no points, doesn't affect your average", due].filter(Boolean).join(" · ");
+    row.append(a, gain, sub);
+    missingEl.append(row);
+  });
+
+  $("results").classList.remove("hidden");
+}
+
+$("connect").addEventListener("click", () => tokenClient && tokenClient.requestAccessToken());
+$("refresh").addEventListener("click", load);
+$("target").addEventListener("change", render);
+$("countMissing").addEventListener("change", render);
+initAuth();
+</script>
+</body>
+</html>
