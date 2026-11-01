@@ -5,6 +5,36 @@ const jsonFilePath = 'JSONS/levels.json';
 
 const container = document.getElementById('level-detail');
 
+async function loadLevelThumbnail(img, id) {
+    const encodedId = encodeURIComponent(id);
+    for (const extension of ['png', 'jpg']) {
+        try {
+            const response = await fetch(`thumbnails/${encodedId}.${extension}`);
+            if (!response.ok) continue;
+
+            const imageBlob = await response.blob();
+            const header = new Uint8Array(await imageBlob.slice(0, 8).arrayBuffer());
+            const mimeType = header[0] === 0xff && header[1] === 0xd8
+                ? 'image/jpeg'
+                : header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4e && header[3] === 0x47
+                    ? 'image/png'
+                    : imageBlob.type;
+            const objectUrl = URL.createObjectURL(new Blob([imageBlob], { type: mimeType }));
+
+            img.onload = () => URL.revokeObjectURL(objectUrl);
+            img.onerror = () => {
+                URL.revokeObjectURL(objectUrl);
+                img.remove();
+            };
+            img.src = objectUrl;
+            return;
+        } catch {
+            // Try the next supported image extension.
+        }
+    }
+    img.remove();
+}
+
 function createProfileLink(name) {
     if (!name) return document.createTextNode('—');
     const link = document.createElement('a');
@@ -33,19 +63,10 @@ if (!id) {
             title.textContent = item.level;
             title.style.textAlign = 'center';
 
-            // try to show thumbnail if available
+            // Load either image extension and correct mislabeled image MIME types.
             const thumb = document.createElement('img');
             thumb.className = 'level-thumb';
-            let tried = 0;
-            thumb.onerror = () => {
-                if (tried === 0) {
-                    tried = 1;
-                    thumb.src = `thumbnails/${encodeURIComponent(item.id)}.jpg`;
-                } else {
-                    thumb.remove();
-                }
-            };
-            thumb.src = `thumbnails/${encodeURIComponent(item.id)}.png`;
+            loadLevelThumbnail(thumb, item.id);
             thumb.style.display = 'block';
             thumb.style.margin = '0 auto 0.7rem auto';
 

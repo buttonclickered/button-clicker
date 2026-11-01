@@ -1,5 +1,36 @@
 // Path to your JSON file
 const jsonFilePath = 'JSONS/levels.json';
+
+async function loadLevelThumbnail(img, id) {
+    const encodedId = encodeURIComponent(id);
+    for (const extension of ['png', 'jpg']) {
+        try {
+            const response = await fetch(`thumbnails/${encodedId}.${extension}`);
+            if (!response.ok) continue;
+
+            const imageBlob = await response.blob();
+            const header = new Uint8Array(await imageBlob.slice(0, 8).arrayBuffer());
+            const mimeType = header[0] === 0xff && header[1] === 0xd8
+                ? 'image/jpeg'
+                : header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4e && header[3] === 0x47
+                    ? 'image/png'
+                    : imageBlob.type;
+            const objectUrl = URL.createObjectURL(new Blob([imageBlob], { type: mimeType }));
+
+            img.onload = () => URL.revokeObjectURL(objectUrl);
+            img.onerror = () => {
+                URL.revokeObjectURL(objectUrl);
+                img.remove();
+            };
+            img.src = objectUrl;
+            return;
+        } catch {
+            // Try the next supported image extension.
+        }
+    }
+    img.remove();
+}
+
 function createProfileLink(name) {
     const link = document.createElement('a');
     link.href = `profile.html?name=${encodeURIComponent(name)}`;
@@ -78,19 +109,10 @@ fetch(jsonFilePath)
             const link = document.createElement('a');
             link.href = `level.html?id=${encodeURIComponent(item.id)}`;
             link.className = 'level-link';
-            // thumbnail (png -> jpg fallback). images are in project root /Thumbnails
+            // Load either image extension and correct mislabeled image MIME types.
             const img = document.createElement('img');
             img.className = 'level-thumb';
-            let thumbTried = 0;
-            img.onerror = () => {
-                if (thumbTried === 0) {
-                    thumbTried = 1;
-                    img.src = `thumbnails/${encodeURIComponent(item.id)}.jpg`;
-                } else {
-                    img.remove();
-                }
-            };
-            img.src = `thumbnails/${encodeURIComponent(item.id)}.png`;
+            loadLevelThumbnail(img, item.id);
 
             const title = document.createElement('h2');
             const rank = idx + 1;
