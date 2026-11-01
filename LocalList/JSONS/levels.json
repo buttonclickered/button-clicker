@@ -44,7 +44,7 @@
       {
     "level": "Hell",            
     "id": "25706351",
-    "points": "897",
+    "points": "897",  
     "verifier": "wsp",          
     "victors": []                                            
   },            
@@ -309,7 +309,7 @@
                  {      
     "level": "Extinction",
     "id": "38427291",
-    "points": "895 ",
+    "points":  "790",
     "verifier": "wsp",
     "victors": [] 
       }  
